@@ -16,6 +16,11 @@ import {
   normalizeDashboardName,
 } from "./dashboardCollection";
 import { createDefaultDashboard } from "./defaultDashboard";
+import {
+  createDashboardFromTemplate,
+  DEFAULT_DASHBOARD_TEMPLATE_ID,
+  type DashboardTemplateId,
+} from "./dashboardTemplates";
 
 export class DashboardManager {
   private readonly listeners = new Set<() => void>();
@@ -59,15 +64,15 @@ export class DashboardManager {
     return true;
   }
 
-  async createDashboard(name: string): Promise<DashboardDefinition | null> {
+  async createDashboard(
+    name: string,
+    templateId: DashboardTemplateId = DEFAULT_DASHBOARD_TEMPLATE_ID,
+  ): Promise<DashboardDefinition | null> {
     const normalizedName = normalizeDashboardName(name);
     if (!normalizedName) return null;
     const id = nextDashboardId(normalizedName, this.plugin.data.dashboards.map((item) => item.id));
-    const dashboard = cloneDashboardDefinition(
-      createDefaultDashboard(this.registry),
-      id,
-      normalizedName,
-    );
+    const template = createDashboardFromTemplate(this.registry, templateId);
+    const dashboard = cloneDashboardDefinition(template, id, normalizedName);
     this.plugin.data.dashboards.push(dashboard);
     this.plugin.data.activeDashboardId = dashboard.id;
     await this.plugin.savePluginData();

@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "minAppVersion": "1.7.2",
-  "description": "A modular multi-dashboard workspace for tasks, projects, habits, calendar planning and weekly review inside your vault.",
+  "description": "A modular personal dashboard for tasks, projects, habits, calendar planning, weekly review, templates and mobile focus inside your vault.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }

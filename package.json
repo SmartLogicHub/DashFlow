@@ -1,7 +1,7 @@
 {
   "name": "dashflow",
-  "version": "0.1.9",
-  "description": "A modular multi-dashboard workspace for tasks, projects, habits, calendar planning and weekly review inside Obsidian.",
+  "version": "0.2.0",
+  "description": "A modular personal dashboard for tasks, projects, habits, calendar planning, weekly review, templates and mobile focus inside Obsidian.",
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "node tests/run-layout-tests.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
-  "keywords": ["obsidian", "dashboard", "multi-dashboard", "tasks", "projects", "habits", "calendar", "agenda", "activity", "heatmap", "weekly-review", "mobile"],
+  "keywords": ["obsidian", "dashboard", "templates", "tasks", "projects", "habits", "calendar", "agenda", "activity", "heatmap", "weekly-review", "mobile"],
   "devDependencies": {
     "@types/node": "^22.15.17",
     "esbuild": "0.25.5",
