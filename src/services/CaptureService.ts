@@ -1,9 +1,11 @@
 import { Notice, TFile, normalizePath, type App } from "obsidian";
+import type { ActivityService } from "./ActivityService";
 
 export class CaptureService {
   constructor(
     private readonly app: App,
     private readonly getInboxPath: () => string,
+    private readonly activity: ActivityService,
   ) {}
 
   async capture(text: string): Promise<boolean> {
@@ -24,6 +26,7 @@ export class CaptureService {
       await this.app.vault.create(path, `# Inbox\n\n${line}`);
     }
 
+    this.activity.recordTaskCreated(trimmed, path);
     new Notice("已捕捉到 DashFlow Inbox");
     return true;
   }

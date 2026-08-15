@@ -1,6 +1,7 @@
 export type TaskPriority = "low" | "normal" | "high" | "urgent";
 export type ProjectStatus = "planned" | "active" | "paused" | "completed" | "archived";
 export type ProjectProgressMode = "tasks" | "manual";
+export type ActivityMetric = "score" | "tasks" | "notes";
 
 export interface SourceLocation {
   path: string;
@@ -41,6 +42,23 @@ export interface Project {
   progressMode: ProjectProgressMode;
   manualProgress?: number;
   source: SourceLocation;
+}
+
+export interface DailyActivity {
+  date: string;
+  notesCreated: number;
+  notesModified: number;
+  tasksCreated: number;
+  tasksCompleted: number;
+  createdNoteKeys: string[];
+  modifiedNoteKeys: string[];
+  createdTaskKeys: string[];
+  completedTaskKeys: string[];
+}
+
+export interface ActivityStore {
+  startedAt: string;
+  days: Record<string, DailyActivity>;
 }
 
 export interface WidgetLayout {
@@ -128,10 +146,11 @@ export interface DashFlowSettings {
 }
 
 export interface DashFlowData {
-  schemaVersion: 1;
+  schemaVersion: 2;
   settings: DashFlowSettings;
   dashboards: DashboardDefinition[];
   activeDashboardId: string;
+  activity: ActivityStore;
 }
 
 export interface VaultSnapshot {
@@ -166,4 +185,10 @@ export interface UpcomingWidgetConfig extends Record<string, unknown> {
 export interface CountdownWidgetConfig extends Record<string, unknown> {
   title: string;
   targetDate: string;
+}
+
+export interface HeatmapWidgetConfig extends Record<string, unknown> {
+  days: number;
+  metric: ActivityMetric;
+  showLegend: boolean;
 }

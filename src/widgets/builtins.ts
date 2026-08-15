@@ -1,5 +1,6 @@
 import type {
   CountdownWidgetConfig,
+  HeatmapWidgetConfig,
   ProgressWidgetConfig,
   ProjectsWidgetConfig,
   QuickCaptureWidgetConfig,
@@ -120,6 +121,47 @@ export function registerBuiltins(registry: WidgetRegistry): void {
         },
       ],
       defaultConfig: (): UpcomingWidgetConfig => ({ days: 7, limit: 12 }),
+    },
+    {
+      type: "heatmap",
+      name: "活跃度",
+      description: "基于任务完成与笔记活动生成的每日 Heatmap。",
+      icon: "▦",
+      defaultSize: { w: 8, h: 4 },
+      minSize: { w: 5, h: 3 },
+      settings: [
+        {
+          key: "days",
+          type: "number",
+          label: "显示天数",
+          description: "Heatmap 展示最近多少天的活动，最多 365 天。",
+          min: 28,
+          max: 365,
+          step: 7,
+        },
+        {
+          key: "metric",
+          type: "select",
+          label: "统计维度",
+          description: "综合活跃度会对完成任务和新建笔记给予更高权重。",
+          options: [
+            { label: "综合活跃度", value: "score" },
+            { label: "任务", value: "tasks" },
+            { label: "笔记", value: "notes" },
+          ],
+        },
+        {
+          key: "showLegend",
+          type: "toggle",
+          label: "显示图例",
+          description: "在卡片底部显示强度图例。",
+        },
+      ],
+      defaultConfig: (): HeatmapWidgetConfig => ({
+        days: 180,
+        metric: "score",
+        showLegend: true,
+      }),
     },
     {
       type: "countdown",
