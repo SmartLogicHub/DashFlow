@@ -1,6 +1,45 @@
-# DashFlow v0.1.6
+# DashFlow v0.1.7
 
 DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 继续以 Markdown / frontmatter 为真实数据源，Widget 和 Dashboard 负责查询、展示和操作。
+
+## v0.1.7：Weekly Review
+
+这一版把 Task / Project / Habit / Activity / Calendar 汇总成一个真正的周复盘层，重点回答三个问题：**这周做了什么、现在卡在哪里、下周要看什么**。
+
+Weekly Review Widget 支持：
+
+- 本周完成任务数、Activity Score、活跃天数和笔记活动
+- 本周 Habit 总完成率与各 Habit 完成情况
+- Activity Score 与上周对比
+- 汇总逾期与本周仍需处理的任务
+- 活动项目当前进度与 deadline
+- 自动读取下周 Task due / scheduled 与 Project deadline
+- 点击任务直接打开 Task Editor
+- 点击 Habit 直接打开 Habit Editor
+- 点击项目直接打开项目原文
+- 一键复制 Markdown 格式 Weekly Review
+- 周一起始 / 周日起始可配置
+- 待处理、项目、下周关注数量可配置
+- Habit 与 Activity 对比模块可独立开关
+- 多个 Weekly Review Widget 可使用不同配置
+
+Weekly Review 不保存第二份 Task / Project / Habit 数据。它由现有 Domain 与 Activity 派生：
+
+```text
+Task / Project / Habit
+        ↓
+   VaultIndexService
+        ↓
+Project / Calendar / Activity Services
+        ↓
+    WeeklyReviewService
+        ↓
+     Weekly Review
+```
+
+其中 Activity 只从 DashFlow 开始记录后累计；如果本周中途才开始使用 Activity Tracker，Widget 会明确提示本周 Activity 为部分统计。任务、项目和 Habit 本身仍直接读取当前 Vault。
+
+现有用户升级后可以在 **编辑布局 → 添加卡片 → Weekly Review** 中加入；新安装默认 Dashboard 会直接包含一张全宽 Weekly Review。
 
 ## v0.1.6：Calendar + Agenda
 
@@ -11,34 +50,9 @@ DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Pro
 - Project `deadline`
 - Habit `daily / weekdays` 节奏
 
-Calendar Widget 支持：
-
-- 6 周月视图，周一 / 周日起始可配置
-- 上一月 / 下一月 / 回到今天
-- 每日事件标记和选中日期
-- 右侧当日 Agenda
-- Agenda 直接打开 Task Editor / Habit Editor / Project 原文
-- 在选中日期直接新建 Task，自动预填 due date
-- Habit 支持当天与历史日期补打卡 / 取消打卡；未来日期不会提前打卡
-- 可配置是否显示 Task、已完成 Task、Project deadline、Habit
-- Agenda 显示数量可配置
-- 同一种 Calendar Widget 支持多实例独立配置
+Calendar Widget 支持 6 周月视图、周一 / 周日起始、月份导航、每日事件标记、选中日期 Agenda、Task / Habit / Project 快捷操作，以及在选中日期直接创建任务。
 
 Calendar 本身不保存第二份业务数据。它只读取 VaultIndexService 中已有的 Task / Project / Habit，然后通过 CalendarService 生成临时 `CalendarEvent`。
-
-```text
-Task / Project / Habit
-        ↓
-   VaultIndexService
-        ↓
-    CalendarService
-        ↓
- CalendarEvent[]
-        ↓
- Month Grid + Agenda
-```
-
-现有用户升级后可以在 **编辑布局 → 添加卡片 → 日历** 中加入；新安装的默认 Dashboard 会直接带一张全宽 Calendar。
 
 ## v0.1.5：Habit / 长周期任务
 
@@ -68,7 +82,7 @@ Activity Tracker 从启用后开始累计新建/修改笔记、任务创建/完�
 
 ## v0.1.3：Task Editor
 
-Dashboard 中可直接创建和编辑任务，修改会写回原始 Markdown。支持标题、完成状态、due date、优先级和项目归属；v0.1.6 起 Calendar 新建任务可以预填选中日期。
+Dashboard 中可直接创建和编辑任务，修改会写回原始 Markdown。支持标题、完成状态、due date、优先级和项目归属；Calendar 新建任务可以预填选中日期。
 
 ## v0.1.2：Widget 配置系统
 
@@ -83,6 +97,7 @@ Dashboard 中可直接创建和编辑任务，修改会写回原始 Markdown。�
 | 今日进度 | 中央标签 |
 | 项目 | 显示数量 |
 | 即将到期 | 未来天数、显示数量 |
+| Weekly Review | 周起始日、待处理/项目/下周数量、Habit、Activity 对比 |
 | 日历 | 周起始日、数据类型、已完成任务、Agenda 数量 |
 | 长期习惯 | 历史天数、显示数量、进度、暂停状态 |
 | 活跃度 | 天数、统计维度、图例 |
@@ -112,6 +127,7 @@ Dashboard 中可直接创建和编辑任务，修改会写回原始 Markdown。�
 - Markdown Task 解析、勾选、创建和编辑
 - Project frontmatter + 自动项目进度
 - Habit frontmatter + 每日打卡 / streak / 长期目标
+- Weekly Review + Markdown 复制
 - Calendar + Agenda 时间视图
 - Quick Capture → Inbox
 - Today Tasks / Progress
@@ -161,7 +177,7 @@ npm run dev
 - [ ] 完成 Widget Registry #project/dashflow
 ```
 
-Calendar 会把 `📅` 视为 due，把 `⏳` 视为 scheduled；如果两者日期不同，会显示为两个时间事件。
+Calendar 与 Weekly Review 会读取 `📅` due 和 `⏳` scheduled。
 
 ## Project 格式
 
@@ -176,7 +192,7 @@ progress_mode: tasks
 ---
 ```
 
-`project_id` 与任务里的 `#project/dashflow` 对应，`deadline` 会进入 Calendar。
+`project_id` 与任务里的 `#project/dashflow` 对应，`deadline` 会进入 Calendar 和 Weekly Review。
 
 ## Habit 格式
 
@@ -195,7 +211,7 @@ habit_log:
 ---
 ```
 
-`frequency` 当前支持 `daily` 和 `weekdays`。Calendar 会根据节奏生成日程，真实完成记录仍由 `habit_log` 保存。
+`frequency` 当前支持 `daily` 和 `weekdays`。真实完成记录始终由 `habit_log` 保存。
 
 ## 数据边界
 
@@ -206,6 +222,7 @@ habit_log:
 | Habit | Markdown / frontmatter |
 | Habit check-in | `habit_log` frontmatter |
 | CalendarEvent | 运行时由 Domain 派生，不持久化 |
+| Weekly Review | 运行时由 Domain + Activity 派生，不持久化 |
 | WidgetDefinition | 插件代码 |
 | WidgetInstance | 插件 `data.json` |
 | Dashboard | 插件 `data.json` |
@@ -227,6 +244,7 @@ Services
   ├── ProjectService
   ├── HabitService
   ├── CalendarService
+  ├── WeeklyReviewService
   ├── CaptureService
   └── ActivityService
   ↓
@@ -239,11 +257,11 @@ Dashboard View
 
 ## 下一阶段
 
-1. Weekly Review
-2. 移动端排序模式
-3. 多 Dashboard UI
-4. Habit 自定义周期 / 提醒
-5. Calendar 周视图 / 更完整 scheduled 编辑
+1. 移动端排序模式
+2. 多 Dashboard UI
+3. Habit 自定义周期 / 提醒
+4. Calendar 周视图 / 更完整 scheduled 编辑
+5. Weekly Review 历史快照 / 保存到笔记
 
 ## CI
 

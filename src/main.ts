@@ -15,6 +15,8 @@ import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
 import { VaultIndexService } from "./services/VaultIndexService";
+import { WeeklyReviewService } from "./services/WeeklyReviewService";
+import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
 import { localDate } from "./utils/date";
 import { registerBuiltins } from "./widgets/builtins";
@@ -29,6 +31,8 @@ export default class DashFlowPlugin extends Plugin {
   activityWidgets!: ActivityWidgetInteractionService;
   calendarService!: CalendarService;
   calendarWidgets!: CalendarWidgetInteractionService;
+  weeklyReviewService!: WeeklyReviewService;
+  weeklyReviewWidgets!: WeeklyReviewWidgetInteractionService;
   habitService!: HabitService;
   habitWidgets!: HabitWidgetInteractionService;
   taskService!: TaskService;
@@ -58,6 +62,12 @@ export default class DashFlowPlugin extends Plugin {
     this.taskService = new TaskService(this.app, this.vaultIndex, this.activityService);
     this.projectService = new ProjectService(this.vaultIndex);
     this.calendarService = new CalendarService(this.vaultIndex);
+    this.weeklyReviewService = new WeeklyReviewService(
+      this.vaultIndex,
+      this.activityService,
+      this.projectService,
+      this.calendarService,
+    );
     this.captureService = new CaptureService(
       this.app,
       () => this.data.settings.inboxPath,
@@ -74,6 +84,7 @@ export default class DashFlowPlugin extends Plugin {
     this.activityWidgets = new ActivityWidgetInteractionService(this);
     this.habitWidgets = new HabitWidgetInteractionService(this);
     this.calendarWidgets = new CalendarWidgetInteractionService(this);
+    this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -103,9 +114,11 @@ export default class DashFlowPlugin extends Plugin {
     this.activityWidgets.start();
     this.habitWidgets.start();
     this.calendarWidgets.start();
+    this.weeklyReviewWidgets.start();
   }
 
   onunload(): void {
+    this.weeklyReviewWidgets?.stop();
     this.calendarWidgets?.stop();
     this.habitWidgets?.stop();
     this.activityWidgets?.stop();

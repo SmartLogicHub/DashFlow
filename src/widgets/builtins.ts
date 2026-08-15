@@ -8,6 +8,7 @@ import type {
   QuickCaptureWidgetConfig,
   TasksWidgetConfig,
   UpcomingWidgetConfig,
+  WeeklyReviewWidgetConfig,
   WidgetDefinition,
 } from "../models";
 import type { WidgetRegistry } from "./WidgetRegistry";
@@ -75,6 +76,36 @@ export function registerBuiltins(registry: WidgetRegistry): void {
         { key: "limit", type: "number", label: "最多显示", description: "限制卡片内显示的任务数量。", min: 1, max: 100, step: 1 },
       ],
       defaultConfig: (): UpcomingWidgetConfig => ({ days: 7, limit: 12 }),
+    },
+    {
+      type: "weekly-review",
+      name: "Weekly Review",
+      description: "汇总本周任务、项目、Habit 与 Activity，并给出下周关注事项。",
+      icon: "↻",
+      defaultSize: { w: 12, h: 7 },
+      minSize: { w: 8, h: 6 },
+      settings: [
+        {
+          key: "weekStart", type: "select", label: "每周起始日", description: "决定 Weekly Review 的周区间。",
+          options: [
+            { label: "周一", value: "monday" },
+            { label: "周日", value: "sunday" },
+          ],
+        },
+        { key: "carryoverLimit", type: "number", label: "待处理最多显示", description: "限制逾期与本周未完成任务的显示数量。", min: 1, max: 50, step: 1 },
+        { key: "projectLimit", type: "number", label: "项目最多显示", description: "限制活动项目数量。", min: 1, max: 30, step: 1 },
+        { key: "nextWeekLimit", type: "number", label: "下周最多显示", description: "限制下周任务与项目截止日数量。", min: 1, max: 50, step: 1 },
+        { key: "showHabits", type: "toggle", label: "显示 Habit", description: "显示本周 Habit 完成率和需要关注的习惯。" },
+        { key: "showActivityComparison", type: "toggle", label: "对比上周 Activity", description: "显示本周 Activity Score 相比上周的变化。" },
+      ],
+      defaultConfig: (): WeeklyReviewWidgetConfig => ({
+        weekStart: "monday",
+        carryoverLimit: 8,
+        projectLimit: 6,
+        nextWeekLimit: 8,
+        showHabits: true,
+        showActivityComparison: true,
+      }),
     },
     {
       type: "calendar",
