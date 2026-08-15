@@ -1,0 +1,504 @@
+import type DashFlowPlugin from "../main";
+import type {
+  CountdownWidgetConfig,
+  DashboardDefinition,
+  ProgressWidgetConfig,
+  ProjectsWidgetConfig,
+  QuickCaptureWidgetConfig,
+  Task,
+  TasksWidgetConfig,
+  UpcomingWidgetConfig,
+  VaultSnapshot,
+  WidgetDefinition,
+  WidgetInstance,
+  WidgetLayout,
+} from "../models";
+import { moveLayout, resizeLayout } from "../layout/grid";
+import { createElement } from "../ui/dom";
+import { localDate } from "../utils/date";
+import { PLUGIN_VERSION } from "../constants";
+
+export class DashboardRenderer {
+  private editing = false;
+  private readonly unsubscribe: () => void;
+
+  constructor(
+    private readonly plugin: DashFlowPlugin,
+    private readonly container: HTMLElement,
+  ) {
+    this.unsubscribe = this.plugin.vaultIndex.subscribe(() => this.render());
+  }
+
+  destroy(): void {
+    this.unsubscribe();
+  }
+
+  render(): void {
+    const dashboard = this.plugin.dashboardManager.active();
+    const snapshot = this.plugin.vaultIndex.getSnapshot();
+    this.container.innerHTML = "";
+
+    const shell = createElement("div", "dashflow-shell");
+    this.container.appendChild(shell);
+
+    shell.appendChild(this.renderHero(dashboard));
+    shell.appendChild(this.renderPulse(snapshot));
+
+    const sectionTitle = createElement("div", "dashflow-section-title");
+    sectionTitle.appendChild(createElement("span", "", "MY DASHBOARD"));
+    sectionTitle.appendChild(createElement(
+      "small",
+      "",
+      new Intl.DateTimeFormat("zh-CN", {
+        month: "long",
+        day: "numeric",
+        weekday: "short",
+      }).format(new Date()),
+    ));
+    shell.appendChild(sectionTitle);
+
+    const grid = createElement("div", `dashflow-grid${this.editing ? " is-editing" : ""}`);
+    grid.style.gridTemplateColumns = `repeat(${dashboard.settings.columns}, minmax(0, 1fr))`;
+    grid.style.gridAutoRows = `${dashboard.settings.rowHeight}px`;
+    grid.style.gap = `${dashboard.settings.gap}px`;
+    shell.appendChild(grid);
+
+    for (const widget of dashboard.widgets.filter((item) => !item.hidden)) {
+      const definition = this.plugin.widgetRegistry.get(widget.type);
+      if (!definition) continue;
+      grid.appendChild(this.renderWidget(dashboard, widget, definition, grid));
+    }
+
+    if (this.editing) shell.appendChild(this.renderEditBar(dashboard));
+  }
+
+  private renderHero(dashboard: DashboardDefinition): HTMLElement {
+    const hero = createElement("header", "dashflow-hero");
+    const copy = createElement("div");
+    copy.appendChild(createElement("div", "dashflow-eyebrow", `OBSIDIAN · PERSONAL DASHBOARD · v${PLUGIN_VERSION}`));
+    copy.appendChild(createElement("h1", "", dashboard.name));
+    copy.appendChild(createElement("p", "", "把 Vault 里的任务、项目和当下行动放到同一个工作台。"));
+
+    const button = createElement(
+      "button",
+      `dashflow-edit-button${this.editing ? " is-active" : ""}`,
+      this.editing ? "完成布局" : "编辑布局",
+    );
+    button.addEventListener("click", () => {
+      this.editing = !this.editing;
+      this.render();
+    });
+
+    hero.append(copy, button);
+    return hero;
+  }
+
+  private renderPulse(snapshot: VaultSnapshot): HTMLElement {
+    const pulse = createElement("div", "dashflow-pulse");
+    const pending = snapshot.tasks.filter((task) => !task.completed).length;
+    const activeProjects = snapshot.projects.filter((project) => project.status === "active").length;
+    const overdue = this.plugin.taskService.overdue(snapshot.tasks).length;
+    const items: Array<[string, number | null]> = [
+      ["VAULT PULSE", null],
+      ["NOTES", snapshot.notes],
+      ["PENDING", pending],
+      ["PROJECTS", activeProjects],
+      ["OVERDUE", overdue],
+    ];
+
+    items.forEach(([label, value], index) => {
+      const span = createElement("span", index === 0 ? "dashflow-pulse-label" : "");
+      if (value !== null) span.appendChild(createElement("strong", "", String(value)));
+      span.appendChild(document.createTextNode(label));
+      pulse.appendChild(span);
+    });
+
+    return pulse;
+  }
+
+  private renderWidget(
+    dashboard: DashboardDefinition,
+    widget: WidgetInstance,
+    definition: WidgetDefinition,
+    grid: HTMLElement,
+  ): HTMLElement {
+    const card = createElement("section", "dashflow-widget");
+    card.dataset.widgetId = widget.id;
+    this.applyGridStyle(card, widget.layout);
+
+    const header = createElement("div", "dashflow-widget-header");
+    const title = createElement("div");
+    title.appendChild(createElement("span", "dashflow-widget-icon", definition.icon));
+    title.appendChild(createElement("strong", "", widget.title ?? definition.name));
+    header.appendChild(title);
+
+    if (this.editing) {
+      const controls = createElement("div", "dashflow-widget-controls");
+      const drag = createElement("button", "", "⠿");
+      drag.type = "button";
+      drag.title = "拖动";
+      drag.addEventListener("pointerdown", (event) => {
+        this.startPointerAction(event, dashboard, widget, definition, grid, card, "move");
+      });
+
+      const remove = createElement("button", "", "×");
+      remove.type = "button";
+      remove.title = "移除";
+      remove.addEventListener("click", async () => {
+        await this.plugin.dashboardManager.removeWidget(dashboard.id, widget.id);
+        this.render();
+      });
+      controls.append(drag, remove);
+      header.appendChild(controls);
+    }
+
+    card.appendChild(header);
+
+    const body = createElement("div", "dashflow-widget-body");
+    card.appendChild(body);
+    this.renderWidgetBody(body, dashboard, widget);
+
+    if (this.editing) {
+      const resize = createElement("button", "dashflow-resize-handle");
+      resize.type = "button";
+      resize.title = "调整大小";
+      resize.setAttribute("aria-label", "调整大小");
+      resize.addEventListener("pointerdown", (event) => {
+        this.startPointerAction(event, dashboard, widget, definition, grid, card, "resize");
+      });
+      card.appendChild(resize);
+    }
+
+    return card;
+  }
+
+  private renderWidgetBody(
+    body: HTMLElement,
+    dashboard: DashboardDefinition,
+    widget: WidgetInstance,
+  ): void {
+    switch (widget.type) {
+      case "quick-capture":
+        this.renderQuickCapture(body, widget);
+        break;
+      case "tasks":
+        this.renderTasks(body, widget);
+        break;
+      case "progress":
+        this.renderProgress(body, widget);
+        break;
+      case "projects":
+        this.renderProjects(body, widget);
+        break;
+      case "upcoming":
+        this.renderUpcoming(body, widget);
+        break;
+      case "countdown":
+        this.renderCountdown(body, dashboard, widget);
+        break;
+      case "vault-stats":
+        this.renderVaultStats(body);
+        break;
+      default:
+        body.appendChild(createElement("div", "dashflow-empty", "未知 Widget"));
+        break;
+    }
+  }
+
+  private renderQuickCapture(body: HTMLElement, widget: WidgetInstance): void {
+    const config = widget.config as QuickCaptureWidgetConfig;
+    const wrap = createElement("div", "dashflow-capture");
+    const textarea = createElement("textarea");
+    textarea.placeholder = config.placeholder ?? "现在脑子里在想什么？";
+    const footer = createElement("div", "dashflow-capture-footer");
+    footer.appendChild(createElement("span", "", "⌘/Ctrl + Enter"));
+    const button = createElement("button", "", "捕捉");
+    button.type = "button";
+
+    const submit = async (): Promise<void> => {
+      if (!textarea.value.trim()) return;
+      button.disabled = true;
+      const ok = await this.plugin.captureService.capture(textarea.value);
+      if (ok) textarea.value = "";
+      button.disabled = false;
+    };
+
+    button.addEventListener("click", () => void submit());
+    textarea.addEventListener("keydown", (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key === "Enter") {
+        event.preventDefault();
+        void submit();
+      }
+    });
+
+    footer.appendChild(button);
+    wrap.append(textarea, footer);
+    body.appendChild(wrap);
+  }
+
+  private renderTaskList(body: HTMLElement, tasks: Task[], emptyText: string): void {
+    if (tasks.length === 0) {
+      body.appendChild(createElement("div", "dashflow-empty", emptyText));
+      return;
+    }
+
+    const list = createElement("div", "dashflow-task-list");
+    for (const task of tasks) {
+      const row = createElement("label", "dashflow-task");
+      const checkbox = createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = task.completed;
+      checkbox.addEventListener("change", () => void this.plugin.taskService.toggle(task));
+
+      const text = createElement("span", task.completed ? "is-completed" : "", task.text);
+      row.append(checkbox, text);
+      if (task.due) row.appendChild(createElement("time", "", task.due.slice(5)));
+      list.appendChild(row);
+    }
+    body.appendChild(list);
+  }
+
+  private renderTasks(body: HTMLElement, widget: WidgetInstance): void {
+    const config = widget.config as TasksWidgetConfig;
+    const snapshot = this.plugin.vaultIndex.getSnapshot();
+    const today = this.plugin.taskService.today(snapshot.tasks);
+    const overdue = config.includeOverdue
+      ? this.plugin.taskService.overdue(snapshot.tasks)
+      : [];
+    const tasks = [
+      ...overdue,
+      ...today.filter((task) => !overdue.some((item) => item.id === task.id)),
+    ].slice(0, config.limit ?? 10);
+
+    const kicker = createElement("div", "dashflow-widget-kicker");
+    kicker.appendChild(document.createTextNode("TODAY"));
+    kicker.appendChild(createElement("span", "", `${tasks.filter((task) => !task.completed).length} pending`));
+    body.appendChild(kicker);
+    this.renderTaskList(body, tasks, "今天没有到期任务");
+  }
+
+  private renderProgress(body: HTMLElement, widget: WidgetInstance): void {
+    const config = widget.config as ProgressWidgetConfig;
+    const today = this.plugin.taskService.today();
+    const completed = today.filter((task) => task.completed).length;
+    const progress = today.length === 0 ? 0 : Math.round((completed / today.length) * 100);
+
+    const wrap = createElement("div", "dashflow-progress-wrap");
+    const ring = createElement("div", "dashflow-progress-ring");
+    ring.style.setProperty("--dashflow-progress", `${progress * 3.6}deg`);
+    const center = createElement("div");
+    center.appendChild(createElement("strong", "", `${progress}%`));
+    center.appendChild(createElement("span", "", config.label ?? "TODAY"));
+    ring.appendChild(center);
+
+    wrap.append(
+      ring,
+      createElement("div", "dashflow-progress-meta", `${completed} / ${today.length} completed`),
+    );
+    body.appendChild(wrap);
+  }
+
+  private renderProjects(body: HTMLElement, widget: WidgetInstance): void {
+    const config = widget.config as ProjectsWidgetConfig;
+    const projects = this.plugin.projectService.active().slice(0, config.limit ?? 6);
+    if (projects.length === 0) {
+      const empty = createElement("div", "dashflow-empty");
+      empty.innerHTML = '创建带有 <code>type: project</code> 的笔记即可在这里出现。';
+      body.appendChild(empty);
+      return;
+    }
+
+    const list = createElement("div", "dashflow-project-list");
+    for (const project of projects) {
+      const progress = this.plugin.projectService.progress(project);
+      const tasks = this.plugin.projectService.tasks(project);
+      const row = createElement("button", "dashflow-project-row");
+      row.type = "button";
+      row.addEventListener("click", () => {
+        void this.plugin.app.workspace.openLinkText(project.source.path, "", false);
+      });
+
+      const main = createElement("div", "dashflow-project-main");
+      main.appendChild(createElement("div", "dashflow-project-name", project.name));
+      const bar = createElement("div", "dashflow-project-bar");
+      const fill = createElement("span");
+      fill.style.width = `${progress}%`;
+      bar.appendChild(fill);
+      main.appendChild(bar);
+
+      const stat = createElement("div", "dashflow-project-stat");
+      stat.appendChild(createElement("strong", "", `${progress}%`));
+      stat.appendChild(createElement(
+        "span",
+        "",
+        `${tasks.filter((task) => task.completed).length}/${tasks.length}`,
+      ));
+
+      row.append(main, stat);
+      list.appendChild(row);
+    }
+    body.appendChild(list);
+  }
+
+  private renderUpcoming(body: HTMLElement, widget: WidgetInstance): void {
+    const config = widget.config as UpcomingWidgetConfig;
+    const days = config.days ?? 7;
+    const tasks = this.plugin.taskService.upcoming(days).slice(0, config.limit ?? 12);
+    const kicker = createElement("div", "dashflow-widget-kicker");
+    kicker.appendChild(document.createTextNode(`NEXT ${days} DAYS`));
+    kicker.appendChild(createElement("span", "", `${tasks.length} tasks`));
+    body.appendChild(kicker);
+    this.renderTaskList(body, tasks, "未来几天没有到期任务");
+  }
+
+  private renderCountdown(
+    body: HTMLElement,
+    dashboard: DashboardDefinition,
+    widget: WidgetInstance,
+  ): void {
+    const config = widget.config as CountdownWidgetConfig;
+    const today = new Date(`${localDate()}T12:00:00`);
+    const target = new Date(`${config.targetDate}T12:00:00`);
+    const days = Number.isFinite(target.getTime())
+      ? Math.max(0, Math.ceil((target.getTime() - today.getTime()) / 86_400_000))
+      : 0;
+
+    const wrap = createElement("div", "dashflow-countdown");
+    wrap.append(
+      createElement("span", "", config.title ?? "COUNTDOWN"),
+      createElement("strong", "", String(days)),
+      createElement("small", "", "DAYS"),
+    );
+
+    if (this.editing) {
+      const input = createElement("input", "dashflow-date-input");
+      input.type = "date";
+      input.value = config.targetDate ?? "";
+      input.addEventListener("change", async () => {
+        await this.plugin.dashboardManager.updateWidget(
+          dashboard.id,
+          widget.id,
+          (current) => ({
+            ...current,
+            config: { ...current.config, targetDate: input.value },
+          }),
+        );
+        this.render();
+      });
+      wrap.appendChild(input);
+    }
+
+    body.appendChild(wrap);
+  }
+
+  private renderVaultStats(body: HTMLElement): void {
+    const snapshot = this.plugin.vaultIndex.getSnapshot();
+    const stats: Array<[string, number]> = [
+      ["NOTES", snapshot.notes],
+      ["PENDING", snapshot.tasks.filter((task) => !task.completed).length],
+      ["PROJECTS", snapshot.projects.filter((project) => project.status === "active").length],
+      ["DONE", snapshot.tasks.filter((task) => task.completed).length],
+    ];
+
+    const grid = createElement("div", "dashflow-stats-grid");
+    for (const [label, value] of stats) {
+      const item = createElement("div", "dashflow-stat");
+      item.append(createElement("strong", "", String(value)), createElement("span", "", label));
+      grid.appendChild(item);
+    }
+    body.appendChild(grid);
+  }
+
+  private renderEditBar(dashboard: DashboardDefinition): HTMLElement {
+    const bar = createElement("div", "dashflow-edit-bar");
+    const select = createElement("select");
+    for (const definition of this.plugin.widgetRegistry.list()) {
+      const option = createElement("option", "", definition.name);
+      option.value = definition.type;
+      select.appendChild(option);
+    }
+
+    const add = createElement("button", "", "＋ 添加卡片");
+    add.type = "button";
+    add.addEventListener("click", async () => {
+      await this.plugin.dashboardManager.addWidget(dashboard.id, select.value);
+      this.render();
+    });
+
+    const reset = createElement("button", "", "重置布局");
+    reset.type = "button";
+    reset.addEventListener("click", async () => {
+      await this.plugin.dashboardManager.resetLayout(dashboard.id);
+      this.render();
+    });
+
+    bar.append(
+      select,
+      add,
+      reset,
+      createElement("span", "", "拖动卡片右上角 ⠿，右下角调整大小"),
+    );
+    return bar;
+  }
+
+  private startPointerAction(
+    event: PointerEvent,
+    dashboard: DashboardDefinition,
+    widget: WidgetInstance,
+    definition: WidgetDefinition,
+    grid: HTMLElement,
+    card: HTMLElement,
+    mode: "move" | "resize",
+  ): void {
+    if (!this.editing || window.matchMedia("(max-width: 900px)").matches) return;
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const initial = { ...widget.layout };
+    const width = grid.getBoundingClientRect().width;
+    let preview: WidgetInstance = { ...widget, layout: { ...initial } };
+
+    const onMove = (moveEvent: PointerEvent): void => {
+      const metrics = {
+        columns: dashboard.settings.columns,
+        gap: dashboard.settings.gap,
+        rowHeight: dashboard.settings.rowHeight,
+        containerWidth: width,
+      };
+
+      const layout = mode === "move"
+        ? moveLayout(initial, moveEvent.clientX - startX, moveEvent.clientY - startY, metrics)
+        : resizeLayout(
+          initial,
+          moveEvent.clientX - startX,
+          moveEvent.clientY - startY,
+          metrics,
+          definition.minSize,
+          definition.maxSize,
+        );
+
+      preview = { ...widget, layout };
+      this.applyGridStyle(card, layout);
+    };
+
+    const onUp = (): void => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      void this.plugin.dashboardManager.updateWidget(
+        dashboard.id,
+        widget.id,
+        () => preview,
+      ).then(() => this.render());
+    };
+
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp, { once: true });
+  }
+
+  private applyGridStyle(card: HTMLElement, layout: WidgetLayout): void {
+    card.style.gridColumn = `${layout.x + 1} / span ${layout.w}`;
+    card.style.gridRow = `${layout.y + 1} / span ${layout.h}`;
+  }
+}
