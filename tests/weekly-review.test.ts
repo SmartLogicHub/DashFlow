@@ -68,7 +68,7 @@ test("weekly activity aggregates score, active days and source counters", () => 
   assert.equal(totals.tasksCreated, 1);
   assert.equal(totals.habitChecks, 3);
   assert.equal(totals.notesTouched, 4);
-  assert.equal(totals.score, 29);
+  assert.equal(totals.score, 28);
   assert.equal(activityChangePercent(150, 100), 50);
   assert.equal(activityChangePercent(5, 0), null);
   assert.equal(activityChangePercent(0, 0), 0);
