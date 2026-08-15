@@ -10,6 +10,7 @@ import { CalendarService } from "./services/CalendarService";
 import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInteractionService";
 import { CaptureService } from "./services/CaptureService";
 import { DashboardSwitcherInteractionService } from "./services/DashboardSwitcherInteractionService";
+import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
 import { MobileDashboardInteractionService } from "./services/MobileDashboardInteractionService";
@@ -29,6 +30,7 @@ export default class DashFlowPlugin extends Plugin {
   widgetRegistry!: WidgetRegistry;
   dashboardManager!: DashboardManager;
   dashboardSwitcher!: DashboardSwitcherInteractionService;
+  dashboardTransfer!: DashboardTransferInteractionService;
   vaultIndex!: VaultIndexService;
   activityService!: ActivityService;
   activityWidgets!: ActivityWidgetInteractionService;
@@ -91,6 +93,7 @@ export default class DashFlowPlugin extends Plugin {
     this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
     this.mobileDashboard = new MobileDashboardInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
+    this.dashboardTransfer = new DashboardTransferInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -102,6 +105,18 @@ export default class DashFlowPlugin extends Plugin {
       id: "open-dashboard",
       name: "打开 Dashboard",
       callback: () => void this.activateDashboard(),
+    });
+
+    this.addCommand({
+      id: "export-active-dashboard",
+      name: "导出当前 Dashboard JSON",
+      callback: () => this.dashboardTransfer.openExportModal(),
+    });
+
+    this.addCommand({
+      id: "import-dashboard-json",
+      name: "导入 Dashboard JSON",
+      callback: () => this.dashboardTransfer.openImportModal(),
     });
 
     this.addCommand({
@@ -123,9 +138,11 @@ export default class DashFlowPlugin extends Plugin {
     this.weeklyReviewWidgets.start();
     this.mobileDashboard.start();
     this.dashboardSwitcher.start();
+    this.dashboardTransfer.start();
   }
 
   onunload(): void {
+    this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
     this.mobileDashboard?.stop();
     this.weeklyReviewWidgets?.stop();
