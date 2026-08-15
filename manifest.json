@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.2.4",
+  "version": "0.2.5",
   "minAppVersion": "1.7.2",
-  "description": "A modular personal dashboard for Obsidian with polished theme-aware surfaces, tasks, projects, habits, calendar planning, templates and mobile focus.",
+  "description": "A modular personal dashboard for Obsidian with Aurora UI, task focus, projects, habits, calendar planning, templates and mobile focus.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }

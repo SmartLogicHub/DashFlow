@@ -7,6 +7,8 @@ import { upgradeLegacyHomeLayout } from "./dashboard/defaultLayoutMigration";
 import type { ActivityStore, DashFlowData } from "./models";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
+import { AuroraDesignService } from "./services/AuroraDesignService";
+import { AuroraInteractionService } from "./services/AuroraInteractionService";
 import { CalendarService } from "./services/CalendarService";
 import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInteractionService";
 import { CaptureService } from "./services/CaptureService";
@@ -19,7 +21,6 @@ import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
 import { VaultIndexService } from "./services/VaultIndexService";
-import { VisualPolishService } from "./services/VisualPolishService";
 import { WeeklyReviewService } from "./services/WeeklyReviewService";
 import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
@@ -47,7 +48,8 @@ export default class DashFlowPlugin extends Plugin {
   projectService!: ProjectService;
   captureService!: CaptureService;
   taskInteractions!: TaskInteractionService;
-  visualPolish!: VisualPolishService;
+  auroraDesign!: AuroraDesignService;
+  auroraInteractions!: AuroraInteractionService;
 
   async onload(): Promise<void> {
     this.widgetRegistry = new WidgetRegistry();
@@ -97,7 +99,8 @@ export default class DashFlowPlugin extends Plugin {
     this.mobileDashboard = new MobileDashboardInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
-    this.visualPolish = new VisualPolishService();
+    this.auroraDesign = new AuroraDesignService();
+    this.auroraInteractions = new AuroraInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -133,6 +136,7 @@ export default class DashFlowPlugin extends Plugin {
     });
 
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
+    this.auroraDesign.start();
     this.activityService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
@@ -143,11 +147,11 @@ export default class DashFlowPlugin extends Plugin {
     this.mobileDashboard.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
-    this.visualPolish.start();
+    this.auroraInteractions.start();
   }
 
   onunload(): void {
-    this.visualPolish?.stop();
+    this.auroraInteractions?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
     this.mobileDashboard?.stop();
@@ -157,6 +161,7 @@ export default class DashFlowPlugin extends Plugin {
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
     this.activityService?.stop();
+    this.auroraDesign?.stop();
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
   }
 
