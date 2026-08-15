@@ -1,4 +1,4 @@
-import type { Task, TaskPriority } from "../models";
+import type { Task, TaskEditInput, TaskPriority } from "../models";
 import { stableHash } from "../utils/hash";
 
 const DUE_RE = /📅\s*(\d{4}-\d{2}-\d{2})/;
@@ -9,6 +9,13 @@ const PROJECT_RE = /#project\/([^\s#]+)/i;
 const TAG_RE = /(^|\s)#([\p{L}\p{N}_\-/.]+)/gu;
 const TASK_RE = /^\s*[-*+]\s+\[([ xX])\]\s+(.*)$/;
 
+const PRIORITY_MARKER: Record<TaskPriority, string> = {
+  urgent: "⏫",
+  high: "🔼",
+  normal: "",
+  low: "🔽",
+};
+
 function priorityFromText(text: string): TaskPriority {
   if (text.includes("⏫") || text.includes("🔺")) return "urgent";
   if (text.includes("🔼")) return "high";
@@ -16,15 +23,52 @@ function priorityFromText(text: string): TaskPriority {
   return "normal";
 }
 
-function cleanTaskText(text: string): string {
+export function cleanTaskText(text: string): string {
   return text
     .replace(DUE_RE, "")
     .replace(SCHEDULED_RE, "")
     .replace(START_RE, "")
     .replace(COMPLETED_RE, "")
+    .replace(PROJECT_RE, "")
     .replace(/[⏫🔺🔼🔽]/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
+}
+
+interface TaskBodyInput {
+  text: string;
+  due?: string;
+  scheduled?: string;
+  start?: string;
+  completedAt?: string;
+  priority: TaskPriority;
+  projectId?: string;
+}
+
+export function formatTaskBody(input: TaskBodyInput): string {
+  const parts = [cleanTaskText(input.text)];
+  if (input.projectId?.trim()) parts.push(`#project/${input.projectId.trim()}`);
+  const priority = PRIORITY_MARKER[input.priority];
+  if (priority) parts.push(priority);
+  if (input.start) parts.push(`🛫 ${input.start}`);
+  if (input.scheduled) parts.push(`⏳ ${input.scheduled}`);
+  if (input.due) parts.push(`📅 ${input.due}`);
+  if (input.completedAt) parts.push(`✅ ${input.completedAt}`);
+  return parts.filter(Boolean).join(" ").trim();
+}
+
+export function serializeTaskLine(task: Task, input: TaskEditInput): string {
+  const prefix = task.source.raw?.match(/^(\s*[-*+]\s+)/)?.[1] ?? "- ";
+  const body = formatTaskBody({
+    text: input.text,
+    completedAt: task.completedAt,
+    scheduled: task.scheduled,
+    start: task.start,
+    due: input.due,
+    priority: input.priority,
+    projectId: input.projectId,
+  });
+  return `${prefix}[${input.completed ? "x" : " "}] ${body}`;
 }
 
 export function parseTasks(path: string, content: string): Task[] {

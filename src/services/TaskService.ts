@@ -1,5 +1,6 @@
 import { Notice, TFile, type App } from "obsidian";
-import type { Task } from "../models";
+import type { Task, TaskEditInput } from "../models";
+import { serializeTaskLine } from "../parsers/taskParser";
 import { addDays, localDate } from "../utils/date";
 import type { VaultIndexService } from "./VaultIndexService";
 
@@ -26,11 +27,7 @@ export class TaskService {
 
     await this.app.vault.process(file, (content) => {
       const lines = content.split(/\r?\n/);
-      let target = task.source.line ?? -1;
-
-      if (target < 0 || lines[target] !== task.source.raw) {
-        target = lines.findIndex((line) => line === task.source.raw);
-      }
+      const target = this.findTaskLine(lines, task);
 
       if (target < 0) {
         new Notice("DashFlow: 任务内容已变化，请刷新后再试。");
@@ -44,6 +41,44 @@ export class TaskService {
 
       return lines.join("\n");
     });
+  }
+
+  async update(task: Task, input: TaskEditInput): Promise<boolean> {
+    if (!input.text.trim()) {
+      new Notice("DashFlow: 任务标题不能为空。");
+      return false;
+    }
+
+    const file = this.app.vault.getAbstractFileByPath(task.source.path);
+    if (!(file instanceof TFile)) {
+      new Notice("DashFlow: 找不到任务所在笔记。");
+      return false;
+    }
+
+    let updated = false;
+    await this.app.vault.process(file, (content) => {
+      const lines = content.split(/\r?\n/);
+      const target = this.findTaskLine(lines, task);
+
+      if (target < 0) {
+        new Notice("DashFlow: 任务内容已变化，请刷新后再试。");
+        return content;
+      }
+
+      lines[target] = serializeTaskLine(task, {
+        ...input,
+        text: input.text.trim(),
+        projectId: input.projectId?.trim() || undefined,
+        due: input.due || undefined,
+      });
+      updated = true;
+      return lines.join("\n");
+    });
+
+    if (!updated) return false;
+    await this.index.indexFile(file);
+    new Notice("DashFlow: 任务已更新");
+    return true;
   }
 
   today(tasks = this.index.getSnapshot().tasks): Task[] {
@@ -64,5 +99,13 @@ export class TaskService {
     return tasks
       .filter((task) => !task.completed && Boolean(task.due) && (task.due as string) >= start && (task.due as string) <= end)
       .sort(sortTasks);
+  }
+
+  private findTaskLine(lines: string[], task: Task): number {
+    let target = task.source.line ?? -1;
+    if (target >= 0 && lines[target] === task.source.raw) return target;
+    if (!task.source.raw) return -1;
+    target = lines.findIndex((line) => line === task.source.raw);
+    return target;
   }
 }
