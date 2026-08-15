@@ -13,7 +13,7 @@ import type {
   WidgetInstance,
   WidgetLayout,
 } from "../models";
-import { moveLayout, resizeLayout } from "../layout/grid";
+import { moveLayout, resizeLayout, resolveWidgetLayout } from "../layout/grid";
 import { createElement } from "../ui/dom";
 import { localDate } from "../utils/date";
 import { PLUGIN_VERSION } from "../constants";
@@ -436,7 +436,7 @@ export class DashboardRenderer {
       select,
       add,
       reset,
-      createElement("span", "", "拖动卡片右上角 ⠿，右下角调整大小"),
+      createElement("span", "", "拖动会自动让位并压缩空白；右下角可调整大小"),
     );
     return bar;
   }
@@ -458,7 +458,12 @@ export class DashboardRenderer {
     const startY = event.clientY;
     const initial = { ...widget.layout };
     const width = grid.getBoundingClientRect().width;
-    let preview: WidgetInstance = { ...widget, layout: { ...initial } };
+    let previewWidgets = dashboard.widgets.map((item) => ({
+      ...item,
+      layout: { ...item.layout },
+    }));
+
+    card.classList.add("is-dragging");
 
     const onMove = (moveEvent: PointerEvent): void => {
       const metrics = {
@@ -468,7 +473,7 @@ export class DashboardRenderer {
         containerWidth: width,
       };
 
-      const layout = mode === "move"
+      const activeLayout = mode === "move"
         ? moveLayout(initial, moveEvent.clientX - startX, moveEvent.clientY - startY, metrics)
         : resizeLayout(
           initial,
@@ -479,22 +484,45 @@ export class DashboardRenderer {
           definition.maxSize,
         );
 
-      preview = { ...widget, layout };
-      this.applyGridStyle(card, layout);
+      previewWidgets = resolveWidgetLayout(
+        dashboard.widgets,
+        widget.id,
+        activeLayout,
+        dashboard.settings.columns,
+      );
+      this.applyGridLayouts(grid, previewWidgets);
+    };
+
+    const cleanup = (): void => {
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onCancel);
+      card.classList.remove("is-dragging");
     };
 
     const onUp = (): void => {
-      window.removeEventListener("pointermove", onMove);
-      window.removeEventListener("pointerup", onUp);
-      void this.plugin.dashboardManager.updateWidget(
-        dashboard.id,
-        widget.id,
-        () => preview,
-      ).then(() => this.render());
+      cleanup();
+      void this.plugin.dashboardManager.replaceWidgets(dashboard.id, previewWidgets)
+        .then(() => this.render());
+    };
+
+    const onCancel = (): void => {
+      cleanup();
+      this.render();
     };
 
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp, { once: true });
+    window.addEventListener("pointercancel", onCancel, { once: true });
+  }
+
+  private applyGridLayouts(grid: HTMLElement, widgets: WidgetInstance[]): void {
+    const byId = new Map(widgets.map((widget) => [widget.id, widget.layout]));
+    for (const element of grid.querySelectorAll<HTMLElement>("[data-widget-id]")) {
+      const id = element.dataset.widgetId;
+      const layout = id ? byId.get(id) : undefined;
+      if (layout) this.applyGridStyle(element, layout);
+    }
   }
 
   private applyGridStyle(card: HTMLElement, layout: WidgetLayout): void {

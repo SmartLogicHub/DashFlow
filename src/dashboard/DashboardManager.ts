@@ -1,6 +1,7 @@
 import type DashFlowPlugin from "../main";
 import type { DashboardDefinition, WidgetInstance } from "../models";
 import type { WidgetRegistry } from "../widgets/WidgetRegistry";
+import { compactWidgetLayout, findFirstAvailableLayout } from "../layout/grid";
 import { createDefaultDashboard } from "./defaultDashboard";
 
 export class DashboardManager {
@@ -43,12 +44,19 @@ export class DashboardManager {
     await this.updateDashboard({ ...dashboard, widgets });
   }
 
+  async replaceWidgets(dashboardId: string, widgets: WidgetInstance[]): Promise<void> {
+    const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
+    if (!dashboard) return;
+    await this.updateDashboard({ ...dashboard, widgets });
+  }
+
   async removeWidget(dashboardId: string, widgetId: string): Promise<void> {
     const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
     if (!dashboard) return;
+    const remaining = dashboard.widgets.filter((widget) => widget.id !== widgetId);
     await this.updateDashboard({
       ...dashboard,
-      widgets: dashboard.widgets.filter((widget) => widget.id !== widgetId),
+      widgets: compactWidgetLayout(remaining, dashboard.settings.columns),
     });
   }
 
@@ -57,25 +65,24 @@ export class DashboardManager {
     const definition = this.registry.get(type);
     if (!dashboard || !definition) return;
 
-    const bottom = dashboard.widgets.reduce(
-      (max, widget) => Math.max(max, widget.layout.y + widget.layout.h),
-      0,
+    const layout = findFirstAvailableLayout(
+      dashboard.widgets,
+      definition.defaultSize,
+      dashboard.settings.columns,
     );
 
     const widget: WidgetInstance = {
       id: `${type}-${Date.now().toString(36)}`,
       type,
-      layout: {
-        x: 0,
-        y: bottom,
-        w: Math.min(dashboard.settings.columns, definition.defaultSize.w),
-        h: definition.defaultSize.h,
-      },
+      layout,
       config: definition.defaultConfig(),
       hidden: false,
     };
 
-    await this.updateDashboard({ ...dashboard, widgets: [...dashboard.widgets, widget] });
+    await this.updateDashboard({
+      ...dashboard,
+      widgets: compactWidgetLayout([...dashboard.widgets, widget], dashboard.settings.columns),
+    });
   }
 
   async resetLayout(dashboardId: string): Promise<void> {

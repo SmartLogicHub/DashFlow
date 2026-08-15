@@ -1,11 +1,12 @@
 {
   "name": "dashflow",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A modular personal dashboard for tasks, projects and daily focus inside Obsidian.",
   "main": "main.js",
   "type": "module",
   "scripts": {
     "dev": "node esbuild.config.mjs",
+    "test": "node tests/run-layout-tests.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
   "keywords": ["obsidian", "dashboard", "tasks", "projects"],
