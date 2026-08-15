@@ -16,19 +16,42 @@ const LEGACY_LAYOUT: Record<string, WidgetLayout> = {
   "vault-stats": { x: 0, y: 33, w: 8, h: 3 },
 };
 
+const POLISHED_024_LAYOUT: Record<string, WidgetLayout> = {
+  "quick-capture": { x: 0, y: 0, w: 4, h: 3 },
+  "today-tasks": { x: 4, y: 0, w: 5, h: 4 },
+  progress: { x: 9, y: 0, w: 3, h: 3 },
+  projects: { x: 0, y: 4, w: 9, h: 4 },
+  upcoming: { x: 9, y: 3, w: 3, h: 5 },
+  activity: { x: 0, y: 8, w: 8, h: 4 },
+  countdown: { x: 8, y: 8, w: 4, h: 4 },
+  habits: { x: 0, y: 12, w: 12, h: 4 },
+  "weekly-review": { x: 0, y: 16, w: 12, h: 6 },
+  calendar: { x: 0, y: 22, w: 12, h: 7 },
+  "vault-stats": { x: 0, y: 29, w: 12, h: 2 },
+};
+
 function sameLayout(a: WidgetLayout, b: WidgetLayout): boolean {
   return a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
 }
 
-export function usesLegacyHomeLayout(dashboard: DashboardDefinition): boolean {
+function matchesPreset(
+  dashboard: DashboardDefinition,
+  preset: Record<string, WidgetLayout>,
+  gap: number,
+  rowHeight: number,
+): boolean {
   if (dashboard.id !== "home") return false;
-  if (dashboard.settings.columns !== 12 || dashboard.settings.gap !== 14 || dashboard.settings.rowHeight !== 58) return false;
-  if (dashboard.widgets.length !== Object.keys(LEGACY_LAYOUT).length) return false;
-
+  if (dashboard.settings.columns !== 12 || dashboard.settings.gap !== gap || dashboard.settings.rowHeight !== rowHeight) return false;
+  if (dashboard.widgets.length !== Object.keys(preset).length) return false;
   return dashboard.widgets.every((widget) => {
-    const legacy = LEGACY_LAYOUT[widget.id];
-    return legacy ? sameLayout(widget.layout, legacy) : false;
+    const expected = preset[widget.id];
+    return expected ? sameLayout(widget.layout, expected) : false;
   });
+}
+
+export function usesLegacyHomeLayout(dashboard: DashboardDefinition): boolean {
+  return matchesPreset(dashboard, LEGACY_LAYOUT, 14, 58)
+    || matchesPreset(dashboard, POLISHED_024_LAYOUT, 12, 56);
 }
 
 export function upgradeLegacyHomeLayout(

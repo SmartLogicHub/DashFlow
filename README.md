@@ -1,41 +1,70 @@
-# DashFlow v0.2.4
+# DashFlow v0.2.5
 
 DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源，Dashboard 负责查询、展示和直接操作。
 
-## v0.2.4：Visual Polish
+## v0.2.5：Aurora UI
 
-这一版根据真实 Obsidian 截图做视觉与布局复盘，不继续堆业务功能。
+这一版根据真实 Obsidian 使用截图重新定义 DashFlow 的视觉语言与默认工作流布局，不是对旧白卡片主题做小修小补。
 
-重点：
+### Aurora 视觉系统
 
-- Home 主标题回归中性主文字色，不再被第三方主题的 Heading Color 染成 Danger / 粉红语义
-- 保留 Obsidian Accent Color，并把 Accent 用在光感、焦点、进度和交互上
-- Canvas / Card / Inner Surface 三层表面更加明确，Light / Dark 都继续跟随 Obsidian 主题
-- 页面背景增加克制的 Accent / Purple 环境光，不使用固定品牌皮肤
-- Widget 增加非常轻的顶缘高光、hover 抬升和语义色边缘，不做大面积霓虹
-- Vault Pulse / Dashboard Switcher 使用轻量 glass surface
-- 提升 muted / faint 文本可读性
-- Project 与 Weekly Review 内部行去掉“按钮/卡片套卡片”观感
-- Calendar 日期格变平，Selected / Today / Event 才承担视觉强调；Agenda 成为独立 Inner Surface
-- Heatmap 格子更大、间距更清晰，高强度格子使用轻微 Accent glow
-- Habit / Weekly Review / Calendar 继续遵守 Success / Warning / Danger / Info 语义色
-- 默认 Home 网格从约 36 行压缩到 31 行，Today Tasks 更宽、Progress 更轻、Projects 成为主区域
-- 只自动迁移完全保持 v0.2.3 默认位置的 Home；用户手工移动过的 Dashboard 不会被覆盖
-- 保持 `prefers-reduced-motion` 与移动端独立单列体验
+- 独立的 Violet / Cyan / Green / Gold / Rose Aurora 色系，并继续吸收 Obsidian Accent 作为动态主色
+- Light 使用冷白蓝灰 Canvas；Dark 使用深海军蓝 Canvas，不再让所有层级都落在同一种背景亮度
+- 页面使用大尺度 Aurora 环境光，Card 使用克制的 glass / blur / edge highlight，而不是所有内容都玻璃化
+- Today Tasks 成为首屏视觉焦点，拥有更强的 Accent / Cyan 空间光和边缘层级
+- Widget 按角色分色：Capture=Cyan、Progress/Habit=Green、Project=Violet、Countdown=Gold、Calendar=Cyan、Review=Purple
+- Quick Capture CTA 使用 Violet → Cyan 渐变；Progress 使用 Green；Countdown 使用 Gold → Rose 数字渐变
+- Heatmap 从单 Accent 改成 Violet / Cyan 强度梯度，高强度数据才出现轻微 glow
+- Calendar 普通日期保持安静，Today / Selected / Event 承担颜色；Agenda 成为独立内层 surface
+- Project / Weekly Review 内部继续使用扁平信息行，避免“卡片套卡片”
+- `prefers-reduced-motion` 仍然生效
+
+### Command Center 顶部
+
+Hero 不再只是一个大标题，而是一个工作台状态面板：
 
 ```text
-Obsidian Theme / Accent
-        ↓
-DashFlow semantic tokens
-        ↓
-Canvas → Card → Inner Surface
-        ↓
-Accent + Success / Info / Warning / Danger
-        ↓
-Dashboard / Calendar / Habit / Review / Heatmap
+Dashboard Name
+今天日期 · 今日待办 · 活动项目
+                                  编辑布局
 ```
 
-设计目标不是 Dribbble 式炫技，而是 **更有氛围、更有层级，同时仍能每天长时间使用**。
+Vault Pulse 位于 Hero 下方作为紧凑 KPI dock。
+
+### 新默认 Home 布局
+
+首屏从“多个等权 Widget”改为明确的执行优先级：
+
+```text
+┌────────────────────────┬──────────────────┐
+│ Today Tasks             │ Quick Capture    │
+│ 7 columns · primary     ├───────┬──────────┤
+│                         │Progress│Countdown │
+├─────────────────────────┼───────┴──────────┤
+│ Projects                │ Upcoming          │
+├─────────────────────────┼───────────────────┤
+│ Habits                  │ Activity          │
+├─────────────────────────┴───────────────────┤
+│ Weekly Review                               │
+├─────────────────────────────────────────────┤
+│ Calendar                                    │
+├─────────────────────────────────────────────┤
+│ Vault Pulse                                  │
+└─────────────────────────────────────────────┘
+```
+
+Untouched 的旧 Home（包括 v0.2.3 和 v0.2.4 默认布局）会安全迁移到 Aurora 布局，同时保留 Widget 配置。用户手动移动 / resize 过的 Dashboard 不会被强制覆盖。
+
+### Settings Control Center
+
+设置页也重新设计：
+
+- 顶部产品 Hero + 当前版本
+- Inbox / Project / Habit 识别设置放进同一个紧凑 Data & Recognition panel
+- Project / Habit Markdown 协议并排显示为 code cards
+- 不再使用四块巨大的默认灰色 Setting 卡片
+
+数据边界没有改变：视觉重构不会复制或迁移 Task / Project / Habit 业务数据。
 
 ## 核心能力
 
@@ -208,7 +237,7 @@ Layout Engine
   ├── Desktop 12-column grid
   └── Mobile single-column order
   ↓
-Design System + Visual Polish
+Aurora Design + Interaction Layer
   ↓
 Dashboard View
 ```
@@ -231,6 +260,7 @@ npm run dev
 
 ## 近期版本
 
+- **v0.2.5** — Aurora UI + Command Center layout + Settings redesign
 - **v0.2.4** — Visual Polish + refined Home layout
 - **v0.2.3** — UI / Design System 2.0
 - **v0.2.2** — 自定义 Dashboard Template
