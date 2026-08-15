@@ -9,3 +9,4 @@ import "./dashboard-collection.test";
 import "./dashboard-templates.test";
 import "./dashboard-transfer.test";
 import "./custom-dashboard-templates.test";
+import "./design-system.test";
