@@ -31,6 +31,8 @@ export interface TaskEditInput {
   text: string;
   completed: boolean;
   due?: string;
+  scheduled?: string;
+  start?: string;
   priority: TaskPriority;
   projectId?: string;
 }
@@ -46,6 +48,17 @@ export interface Project {
   progressMode: ProjectProgressMode;
   manualProgress?: number;
   source: SourceLocation;
+}
+
+export interface ProjectEditInput {
+  id?: string;
+  name: string;
+  description?: string;
+  status: ProjectStatus;
+  start?: string;
+  deadline?: string;
+  progressMode: ProjectProgressMode;
+  manualProgress?: number;
 }
 
 export interface Habit {
@@ -187,12 +200,17 @@ export interface CustomDashboardTemplate {
 export interface DashFlowSettings {
   inboxPath: string;
   projectTypeValue: string;
+  projectFolder: string;
   habitTypeValue: string;
   habitFolder: string;
+  aiEnabled: boolean;
+  aiBaseUrl: string;
+  aiModel: string;
+  aiSecretId: string;
 }
 
 export interface DashFlowData {
-  schemaVersion: 4;
+  schemaVersion: 5;
   settings: DashFlowSettings;
   dashboards: DashboardDefinition[];
   activeDashboardId: string;
