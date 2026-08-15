@@ -6,6 +6,7 @@ import { createDefaultDashboard } from "./dashboard/defaultDashboard";
 import type { DashFlowData } from "./models";
 import { CaptureService } from "./services/CaptureService";
 import { ProjectService } from "./services/ProjectService";
+import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
 import { VaultIndexService } from "./services/VaultIndexService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
@@ -20,6 +21,7 @@ export default class DashFlowPlugin extends Plugin {
   taskService!: TaskService;
   projectService!: ProjectService;
   captureService!: CaptureService;
+  taskInteractions!: TaskInteractionService;
 
   async onload(): Promise<void> {
     this.widgetRegistry = new WidgetRegistry();
@@ -38,6 +40,7 @@ export default class DashFlowPlugin extends Plugin {
       this.app,
       () => this.data.settings.inboxPath,
     );
+    this.taskInteractions = new TaskInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -62,9 +65,11 @@ export default class DashFlowPlugin extends Plugin {
 
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
     this.vaultIndex.initializeWhenReady();
+    this.taskInteractions.start();
   }
 
   onunload(): void {
+    this.taskInteractions?.stop();
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
   }
 

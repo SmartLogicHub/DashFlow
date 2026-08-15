@@ -2,11 +2,11 @@ import esbuild from "esbuild";
 import { spawnSync } from "node:child_process";
 import { rm } from "node:fs/promises";
 
-const outfile = ".dashflow-layout-tests.mjs";
+const outfile = ".dashflow-tests.mjs";
 
 try {
   await esbuild.build({
-    entryPoints: ["tests/layout.test.ts"],
+    entryPoints: ["tests/all.test.ts"],
     bundle: true,
     platform: "node",
     format: "esm",

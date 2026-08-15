@@ -22,6 +22,14 @@ export interface Task {
   source: SourceLocation;
 }
 
+export interface TaskEditInput {
+  text: string;
+  completed: boolean;
+  due?: string;
+  priority: TaskPriority;
+  projectId?: string;
+}
+
 export interface Project {
   id: string;
   name: string;
