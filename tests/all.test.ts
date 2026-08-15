@@ -5,3 +5,4 @@ import "./habit.test";
 import "./calendar.test";
 import "./weekly-review.test";
 import "./mobile-layout.test";
+import "./dashboard-collection.test";

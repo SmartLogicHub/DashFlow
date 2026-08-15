@@ -34,6 +34,10 @@ export class DashboardView extends ItemView {
     this.renderer.render();
   }
 
+  refresh(): void {
+    this.renderer?.render();
+  }
+
   async onClose(): Promise<void> {
     this.renderer?.destroy();
     this.renderer = null;

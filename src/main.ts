@@ -9,6 +9,7 @@ import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInter
 import { CalendarService } from "./services/CalendarService";
 import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInteractionService";
 import { CaptureService } from "./services/CaptureService";
+import { DashboardSwitcherInteractionService } from "./services/DashboardSwitcherInteractionService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
 import { MobileDashboardInteractionService } from "./services/MobileDashboardInteractionService";
@@ -27,6 +28,7 @@ export default class DashFlowPlugin extends Plugin {
   data!: DashFlowData;
   widgetRegistry!: WidgetRegistry;
   dashboardManager!: DashboardManager;
+  dashboardSwitcher!: DashboardSwitcherInteractionService;
   vaultIndex!: VaultIndexService;
   activityService!: ActivityService;
   activityWidgets!: ActivityWidgetInteractionService;
@@ -88,6 +90,7 @@ export default class DashFlowPlugin extends Plugin {
     this.calendarWidgets = new CalendarWidgetInteractionService(this);
     this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
     this.mobileDashboard = new MobileDashboardInteractionService(this);
+    this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -119,9 +122,11 @@ export default class DashFlowPlugin extends Plugin {
     this.calendarWidgets.start();
     this.weeklyReviewWidgets.start();
     this.mobileDashboard.start();
+    this.dashboardSwitcher.start();
   }
 
   onunload(): void {
+    this.dashboardSwitcher?.stop();
     this.mobileDashboard?.stop();
     this.weeklyReviewWidgets?.stop();
     this.calendarWidgets?.stop();
@@ -141,6 +146,13 @@ export default class DashFlowPlugin extends Plugin {
     }
 
     await this.app.workspace.revealLeaf(leaf);
+  }
+
+  refreshDashboardViews(): void {
+    for (const leaf of this.app.workspace.getLeavesOfType(VIEW_TYPE)) {
+      const view = leaf.view as unknown as { refresh?: () => void };
+      view.refresh?.();
+    }
   }
 
   private async loadPluginData(): Promise<void> {
