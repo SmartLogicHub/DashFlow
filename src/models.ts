@@ -1,16 +1,5 @@
-/**
- * DashFlow core data contracts.
- * These interfaces are documentation-first in v0.1; main.js is the
- * dependency-free installable build.
- */
-
 export type TaskPriority = "low" | "normal" | "high" | "urgent";
-export type ProjectStatus =
-  | "planned"
-  | "active"
-  | "paused"
-  | "completed"
-  | "archived";
+export type ProjectStatus = "planned" | "active" | "paused" | "completed" | "archived";
 export type ProjectProgressMode = "tasks" | "manual";
 
 export interface SourceLocation {
@@ -53,7 +42,12 @@ export interface WidgetLayout {
   h: number;
 }
 
-export interface WidgetInstance<TConfig = Record<string, unknown>> {
+export interface WidgetSize {
+  w: number;
+  h: number;
+}
+
+export interface WidgetInstance<TConfig extends Record<string, unknown> = Record<string, unknown>> {
   id: string;
   type: string;
   title?: string;
@@ -62,14 +56,14 @@ export interface WidgetInstance<TConfig = Record<string, unknown>> {
   hidden?: boolean;
 }
 
-export interface WidgetDefinition<TConfig = Record<string, unknown>> {
+export interface WidgetDefinition<TConfig extends Record<string, unknown> = Record<string, unknown>> {
   type: string;
   name: string;
   description: string;
   icon: string;
-  defaultSize: Pick<WidgetLayout, "w" | "h">;
-  minSize?: Pick<WidgetLayout, "w" | "h">;
-  maxSize?: Pick<WidgetLayout, "w" | "h">;
+  defaultSize: WidgetSize;
+  minSize?: WidgetSize;
+  maxSize?: WidgetSize;
   defaultConfig: () => TConfig;
 }
 
@@ -101,4 +95,38 @@ export interface DashFlowData {
   settings: DashFlowSettings;
   dashboards: DashboardDefinition[];
   activeDashboardId: string;
+}
+
+export interface VaultSnapshot {
+  revision: number;
+  notes: number;
+  tasks: Task[];
+  projects: Project[];
+}
+
+export interface QuickCaptureWidgetConfig extends Record<string, unknown> {
+  placeholder: string;
+}
+
+export interface TasksWidgetConfig extends Record<string, unknown> {
+  includeOverdue: boolean;
+  limit: number;
+}
+
+export interface ProgressWidgetConfig extends Record<string, unknown> {
+  label: string;
+}
+
+export interface ProjectsWidgetConfig extends Record<string, unknown> {
+  limit: number;
+}
+
+export interface UpcomingWidgetConfig extends Record<string, unknown> {
+  days: number;
+  limit: number;
+}
+
+export interface CountdownWidgetConfig extends Record<string, unknown> {
+  title: string;
+  targetDate: string;
 }
