@@ -1,15 +1,60 @@
+/* DashFlow Design System 2.0
+ * Theme-aware surfaces and semantic colors are derived from Obsidian variables.
+ */
+
+.dashflow-view-container,
+.dashflow-dashboard-manager-container,
+.dashflow-dashboard-transfer-container {
+  --df-accent: var(--color-accent, var(--interactive-accent));
+  --df-accent-hover: var(--color-accent-1, var(--interactive-accent-hover));
+  --df-info: var(--color-blue, var(--text-accent));
+  --df-success: var(--color-green, var(--text-success));
+  --df-warning: var(--color-orange, var(--text-warning));
+  --df-danger: var(--color-red, var(--text-error));
+  --df-purple: var(--color-purple, var(--interactive-accent));
+  --df-cyan: var(--color-cyan, var(--interactive-accent));
+  --df-border: color-mix(in srgb, var(--background-modifier-border) 82%, transparent);
+  --df-border-strong: color-mix(in srgb, var(--background-modifier-border) 76%, var(--text-muted));
+  --df-surface-card: color-mix(in srgb, var(--background-primary) 95%, var(--background-secondary));
+  --df-surface-raised: color-mix(in srgb, var(--background-primary) 86%, var(--background-secondary));
+  --df-surface-soft: color-mix(in srgb, var(--background-secondary) 72%, transparent);
+  --df-accent-soft: color-mix(in srgb, var(--df-accent) 10%, transparent);
+  --df-info-soft: color-mix(in srgb, var(--df-info) 10%, transparent);
+  --df-success-soft: color-mix(in srgb, var(--df-success) 11%, transparent);
+  --df-warning-soft: color-mix(in srgb, var(--df-warning) 11%, transparent);
+  --df-danger-soft: color-mix(in srgb, var(--df-danger) 10%, transparent);
+  --df-purple-soft: color-mix(in srgb, var(--df-purple) 10%, transparent);
+  --df-card-shadow: 0 8px 28px rgba(0, 0, 0, .05);
+  --df-card-shadow-hover: 0 12px 34px rgba(0, 0, 0, .08);
+}
+
+.theme-dark .dashflow-view-container,
+.theme-dark .dashflow-dashboard-manager-container,
+.theme-dark .dashflow-dashboard-transfer-container {
+  --df-surface-card: color-mix(in srgb, var(--background-primary) 91%, var(--background-secondary));
+  --df-surface-raised: color-mix(in srgb, var(--background-primary) 78%, var(--background-secondary));
+  --df-card-shadow: 0 10px 30px rgba(0, 0, 0, .18);
+  --df-card-shadow-hover: 0 14px 38px rgba(0, 0, 0, .25);
+}
+
+.theme-light .dashflow-view-container,
+.theme-light .dashflow-dashboard-manager-container,
+.theme-light .dashflow-dashboard-transfer-container {
+  --df-card-shadow: 0 8px 26px rgba(35, 40, 52, .055);
+  --df-card-shadow-hover: 0 12px 34px rgba(35, 40, 52, .09);
+}
+
 .dashflow-view-container {
   padding: 0 !important;
   overflow: auto;
   background:
-    radial-gradient(circle at 12% -10%, color-mix(in srgb, var(--interactive-accent) 10%, transparent), transparent 34%),
+    radial-gradient(circle at 13% -8%, color-mix(in srgb, var(--df-accent) 11%, transparent), transparent 34%),
+    radial-gradient(circle at 92% 2%, color-mix(in srgb, var(--df-info) 5%, transparent), transparent 25%),
     var(--background-primary);
 }
 
 .dashflow-shell {
-  --df-border: color-mix(in srgb, var(--background-modifier-border) 78%, transparent);
-  --df-soft: color-mix(in srgb, var(--background-secondary) 76%, transparent);
-  --df-muted: var(--text-muted);
+  --df-widget-tone: var(--df-accent);
   width: min(1440px, calc(100% - 48px));
   margin: 0 auto;
   padding: 44px 0 110px;
@@ -34,61 +79,104 @@
   color: var(--text-muted);
 }
 
+.dashflow-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.dashflow-eyebrow::before {
+  content: "";
+  width: 18px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--df-accent);
+  box-shadow: 0 0 14px color-mix(in srgb, var(--df-accent) 35%, transparent);
+}
+
 .dashflow-hero h1 {
-  margin: 8px 0 5px;
+  margin: 9px 0 6px;
   font-size: clamp(30px, 5vw, 52px);
   line-height: 1;
-  letter-spacing: -.04em;
+  letter-spacing: -.045em;
   font-weight: 720;
+  text-wrap: balance;
 }
 
 .dashflow-hero p {
   margin: 0;
+  max-width: 660px;
   color: var(--text-muted);
   font-size: 13px;
+  line-height: 1.55;
 }
 
 .dashflow-edit-button,
 .dashflow-edit-bar button,
 .dashflow-capture button {
   border: 1px solid var(--df-border);
-  background: var(--background-secondary);
+  background: var(--df-surface-raised);
   color: var(--text-normal);
   border-radius: 9px;
   padding: 8px 12px;
   font: inherit;
   font-size: 12px;
   cursor: pointer;
+  transition: background .16s ease, border-color .16s ease, transform .12s ease, box-shadow .16s ease;
 }
 
 .dashflow-edit-button:hover,
 .dashflow-edit-bar button:hover,
 .dashflow-capture button:hover {
   background: var(--background-modifier-hover);
+  border-color: var(--df-border-strong);
+}
+
+.dashflow-edit-button:active,
+.dashflow-edit-bar button:active,
+.dashflow-capture button:active {
+  transform: translateY(1px);
 }
 
 .dashflow-edit-button.is-active {
-  background: var(--interactive-accent);
+  background: var(--df-accent);
   color: var(--text-on-accent);
-  border-color: var(--interactive-accent);
+  border-color: var(--df-accent);
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--df-accent) 16%, transparent);
+}
+
+.dashflow-view-container button:focus-visible,
+.dashflow-view-container input:focus-visible,
+.dashflow-view-container select:focus-visible,
+.dashflow-view-container textarea:focus-visible,
+.dashflow-dashboard-manager-container button:focus-visible,
+.dashflow-dashboard-manager-container input:focus-visible,
+.dashflow-dashboard-manager-container textarea:focus-visible,
+.dashflow-dashboard-transfer-container button:focus-visible,
+.dashflow-dashboard-transfer-container input:focus-visible,
+.dashflow-dashboard-transfer-container textarea:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--df-accent) 72%, var(--text-normal));
+  outline-offset: 2px;
 }
 
 .dashflow-pulse {
   display: flex;
   align-items: center;
   gap: 0;
-  border-block: 1px solid var(--df-border);
-  min-height: 45px;
-  margin-bottom: 42px;
+  min-height: 46px;
+  margin-bottom: 40px;
   overflow-x: auto;
   scrollbar-width: none;
+  border: 1px solid var(--df-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--df-surface-soft) 72%, transparent);
 }
 
 .dashflow-pulse > span {
   white-space: nowrap;
   padding: 0 18px;
   font-size: 10px;
-  letter-spacing: .08em;
+  letter-spacing: .075em;
   color: var(--text-muted);
 }
 
@@ -98,13 +186,19 @@
 
 .dashflow-pulse strong {
   color: var(--text-normal);
-  margin-right: 4px;
+  margin-right: 5px;
   font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashflow-pulse > span:last-child strong {
+  color: var(--df-danger);
 }
 
 .dashflow-pulse-label {
-  padding-left: 4px !important;
+  padding-left: 14px !important;
   padding-right: 22px !important;
+  color: var(--df-accent) !important;
 }
 
 .dashflow-section-title {
@@ -126,39 +220,55 @@
 }
 
 .dashflow-widget {
+  --df-widget-tone: var(--df-accent);
   position: relative;
   min-width: 0;
   overflow: hidden;
   border: 1px solid var(--df-border);
-  background: color-mix(in srgb, var(--background-primary) 94%, var(--background-secondary));
-  border-radius: 13px;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, .04);
-  transition: border-color .16s ease, box-shadow .16s ease;
+  background: var(--df-surface-card);
+  border-radius: 14px;
+  box-shadow: var(--df-card-shadow);
+  transition: border-color .16s ease, box-shadow .18s ease, transform .16s ease, background .16s ease;
+}
+
+.dashflow-grid:not(.is-editing) .dashflow-widget:hover {
+  border-color: color-mix(in srgb, var(--df-widget-tone) 30%, var(--df-border));
+  box-shadow: var(--df-card-shadow-hover);
+  transform: translateY(-1px);
 }
 
 .dashflow-grid.is-editing .dashflow-widget {
   border-style: dashed;
-  border-color: color-mix(in srgb, var(--interactive-accent) 38%, var(--df-border));
+  border-color: color-mix(in srgb, var(--df-accent) 45%, var(--df-border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--df-accent) 5%, transparent);
 }
 
-.dashflow-widget:hover {
-  border-color: color-mix(in srgb, var(--interactive-accent) 35%, var(--df-border));
-}
+.dashflow-widget:has(.dashflow-capture) { --df-widget-tone: var(--df-cyan); }
+.dashflow-widget:has(.dashflow-task-list) { --df-widget-tone: var(--df-accent); }
+.dashflow-widget:has(.dashflow-progress-wrap) { --df-widget-tone: var(--df-accent); }
+.dashflow-widget:has(.dashflow-project-list) { --df-widget-tone: var(--df-info); }
+.dashflow-widget:has(.dashflow-countdown) { --df-widget-tone: var(--df-warning); }
+.dashflow-widget:has(.dashflow-habits) { --df-widget-tone: var(--df-success); }
+.dashflow-widget:has(.dashflow-calendar) { --df-widget-tone: var(--df-info); }
+.dashflow-widget:has(.dashflow-weekly) { --df-widget-tone: var(--df-purple); }
+.dashflow-widget:has(.dashflow-heatmap) { --df-widget-tone: var(--df-accent); }
+.dashflow-widget:has(.dashflow-stats-grid) { --df-widget-tone: var(--df-cyan); }
 
 .dashflow-widget-header {
-  height: 42px;
+  height: 43px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 14px;
+  padding: 0 13px;
   border-bottom: 1px solid var(--df-border);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--df-widget-tone) 3.5%, transparent), transparent);
   user-select: none;
 }
 
 .dashflow-widget-header > div:first-child {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
   min-width: 0;
 }
 
@@ -171,9 +281,15 @@
 }
 
 .dashflow-widget-icon {
-  color: var(--text-muted);
-  font-size: 13px;
-  width: 16px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border-radius: 7px;
+  color: var(--df-widget-tone);
+  background: color-mix(in srgb, var(--df-widget-tone) 10%, transparent);
+  font-size: 12px;
   text-align: center;
 }
 
@@ -187,11 +303,12 @@
   border: 0;
   background: transparent;
   color: var(--text-muted);
-  width: 25px;
-  height: 25px;
-  border-radius: 6px;
+  width: 27px;
+  height: 27px;
+  border-radius: 7px;
   cursor: pointer;
   font-size: 15px;
+  transition: background .14s ease, color .14s ease, transform .12s ease;
 }
 
 .dashflow-widget-controls button:hover {
@@ -199,8 +316,12 @@
   color: var(--text-normal);
 }
 
+.dashflow-widget-controls button:active {
+  transform: scale(.94);
+}
+
 .dashflow-widget-body {
-  height: calc(100% - 43px);
+  height: calc(100% - 44px);
   box-sizing: border-box;
   padding: 14px;
   overflow: auto;
@@ -221,12 +342,17 @@
 
 .dashflow-empty code {
   font-size: 10px;
+  color: var(--text-muted);
+  background: var(--df-surface-soft);
+  border-radius: 5px;
+  padding: 1px 4px;
 }
 
 .dashflow-widget-kicker {
   display: flex;
   justify-content: space-between;
   margin-bottom: 9px;
+  color: var(--df-widget-tone);
 }
 
 .dashflow-widget-kicker span {
@@ -239,25 +365,33 @@
 .dashflow-task-list {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
 .dashflow-task {
   display: grid;
   grid-template-columns: 18px minmax(0, 1fr) auto;
-  gap: 7px;
+  gap: 8px;
   align-items: start;
-  padding: 7px 1px;
-  border-bottom: 1px solid color-mix(in srgb, var(--df-border) 55%, transparent);
+  padding: 7px 5px;
+  border-radius: 7px;
+  border-bottom: 1px solid color-mix(in srgb, var(--df-border) 50%, transparent);
   font-size: 11px;
   line-height: 1.35;
+  transition: background .14s ease;
+}
+
+.dashflow-task:hover {
+  background: color-mix(in srgb, var(--df-accent) 5%, transparent);
 }
 
 .dashflow-task:last-child {
-  border-bottom: 0;
+  border-bottom-color: transparent;
 }
 
 .dashflow-task input {
   margin: 1px 0 0;
+  accent-color: var(--df-accent);
 }
 
 .dashflow-task span.is-completed {
@@ -265,10 +399,17 @@
   color: var(--text-faint);
 }
 
+.dashflow-task:has(span.is-completed) {
+  opacity: .68;
+}
+
 .dashflow-task time {
   color: var(--text-faint);
   font-size: 9px;
-  padding-top: 2px;
+  padding: 2px 5px;
+  border-radius: 999px;
+  background: var(--df-surface-soft);
+  font-variant-numeric: tabular-nums;
 }
 
 .dashflow-capture {
@@ -280,14 +421,25 @@
 .dashflow-capture textarea {
   flex: 1;
   resize: none;
-  border: 0;
+  border: 1px solid transparent;
+  border-radius: 9px;
   background: transparent;
   color: var(--text-normal);
-  padding: 2px;
+  padding: 7px 8px;
   min-height: 54px;
   font: inherit;
   font-size: 12px;
   box-shadow: none !important;
+  transition: background .15s ease, border-color .15s ease;
+}
+
+.dashflow-capture textarea:hover {
+  background: color-mix(in srgb, var(--df-cyan) 4%, transparent);
+}
+
+.dashflow-capture textarea:focus {
+  border-color: color-mix(in srgb, var(--df-cyan) 28%, var(--df-border));
+  background: color-mix(in srgb, var(--df-cyan) 5%, transparent);
 }
 
 .dashflow-capture textarea::placeholder {
@@ -300,6 +452,7 @@
   align-items: center;
   gap: 10px;
   padding-top: 9px;
+  margin-top: 4px;
   border-top: 1px solid var(--df-border);
 }
 
@@ -309,7 +462,9 @@
 }
 
 .dashflow-capture button {
-  padding: 5px 9px;
+  padding: 5px 10px;
+  color: var(--df-cyan);
+  border-color: color-mix(in srgb, var(--df-cyan) 22%, var(--df-border));
 }
 
 .dashflow-progress-wrap {
@@ -317,18 +472,19 @@
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 8px;
+  gap: 9px;
 }
 
 .dashflow-progress-ring {
   --dashflow-progress: 0deg;
-  width: 105px;
+  width: 106px;
   aspect-ratio: 1;
   border-radius: 50%;
   display: grid;
   place-items: center;
-  background: conic-gradient(var(--interactive-accent) var(--dashflow-progress), var(--background-modifier-border) 0);
+  background: conic-gradient(var(--df-accent) var(--dashflow-progress), color-mix(in srgb, var(--background-modifier-border) 72%, transparent) 0);
   position: relative;
+  filter: drop-shadow(0 5px 13px color-mix(in srgb, var(--df-accent) 10%, transparent));
 }
 
 .dashflow-progress-ring::after {
@@ -336,7 +492,8 @@
   position: absolute;
   inset: 7px;
   border-radius: 50%;
-  background: var(--background-primary);
+  background: var(--df-surface-card);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--df-border) 70%, transparent);
 }
 
 .dashflow-progress-ring > div {
@@ -349,12 +506,13 @@
   display: block;
   font-size: 22px;
   letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
 }
 
 .dashflow-progress-ring span {
   display: block;
   margin-top: 2px;
-  color: var(--text-faint);
+  color: var(--df-accent);
   font-size: 8px;
   letter-spacing: .12em;
 }
@@ -379,15 +537,16 @@
   border: 0;
   background: transparent;
   color: var(--text-normal);
-  padding: 9px 3px;
+  padding: 9px 6px;
   border-bottom: 1px solid color-mix(in srgb, var(--df-border) 55%, transparent);
   cursor: pointer;
   text-align: left;
+  border-radius: 8px;
+  transition: background .14s ease;
 }
 
 .dashflow-project-row:hover {
-  background: var(--background-modifier-hover);
-  border-radius: 7px;
+  background: var(--df-info-soft);
 }
 
 .dashflow-project-name {
@@ -398,7 +557,7 @@
 .dashflow-project-bar {
   height: 4px;
   border-radius: 99px;
-  background: var(--background-modifier-border);
+  background: color-mix(in srgb, var(--df-info) 12%, var(--background-modifier-border));
   overflow: hidden;
 }
 
@@ -406,7 +565,7 @@
   display: block;
   height: 100%;
   border-radius: inherit;
-  background: var(--interactive-accent);
+  background: var(--df-info);
 }
 
 .dashflow-project-stat {
@@ -416,6 +575,7 @@
 .dashflow-project-stat strong {
   display: block;
   font-size: 11px;
+  color: var(--df-info);
 }
 
 .dashflow-project-stat span {
@@ -431,7 +591,7 @@
 }
 
 .dashflow-countdown > span {
-  color: var(--text-faint);
+  color: var(--df-warning);
   font-size: 9px;
   letter-spacing: .16em;
 }
@@ -442,6 +602,8 @@
   margin-top: 3px;
   letter-spacing: -.06em;
   font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 8px 26px color-mix(in srgb, var(--df-warning) 12%, transparent);
 }
 
 .dashflow-countdown > small {
@@ -477,7 +639,13 @@
 .dashflow-stat strong {
   font-size: clamp(20px, 3vw, 34px);
   letter-spacing: -.04em;
+  font-variant-numeric: tabular-nums;
 }
+
+.dashflow-stat:nth-child(1) strong { color: var(--df-info); }
+.dashflow-stat:nth-child(2) strong { color: var(--df-warning); }
+.dashflow-stat:nth-child(3) strong { color: var(--df-purple); }
+.dashflow-stat:nth-child(4) strong { color: var(--df-success); }
 
 .dashflow-stat span {
   font-size: 8px;
@@ -494,9 +662,9 @@
   height: 18px;
   border: 0;
   background:
-    linear-gradient(135deg, transparent 50%, color-mix(in srgb, var(--interactive-accent) 70%, var(--text-muted)) 51% 57%, transparent 58% 66%, color-mix(in srgb, var(--interactive-accent) 70%, var(--text-muted)) 67% 73%, transparent 74%);
+    linear-gradient(135deg, transparent 50%, color-mix(in srgb, var(--df-accent) 70%, var(--text-muted)) 51% 57%, transparent 58% 66%, color-mix(in srgb, var(--df-accent) 70%, var(--text-muted)) 67% 73%, transparent 74%);
   cursor: nwse-resize;
-  opacity: .65;
+  opacity: .7;
 }
 
 .dashflow-edit-bar {
@@ -511,10 +679,10 @@
   gap: 7px;
   padding: 8px;
   border: 1px solid var(--df-border);
-  border-radius: 12px;
-  background: color-mix(in srgb, var(--background-secondary) 92%, transparent);
-  box-shadow: 0 10px 40px rgba(0, 0, 0, .12);
-  backdrop-filter: blur(12px);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--background-secondary) 88%, transparent);
+  box-shadow: 0 12px 42px rgba(0, 0, 0, .14);
+  backdrop-filter: blur(16px);
 }
 
 .dashflow-edit-bar select {
@@ -526,6 +694,234 @@
   color: var(--text-faint);
   font-size: 9px;
   padding: 0 5px;
+}
+
+/* Activity / Heatmap semantic treatment */
+.dashflow-view-container .dashflow-heatmap-summary {
+  padding: 2px 1px 4px;
+}
+
+.dashflow-view-container .dashflow-heatmap-stat strong {
+  color: var(--df-accent);
+  font-variant-numeric: tabular-nums;
+}
+
+.dashflow-view-container .dashflow-heatmap-cell {
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--background-modifier-border) 74%, transparent);
+  outline-color: color-mix(in srgb, var(--df-border) 72%, transparent);
+  transition: transform .12s ease, background .15s ease, box-shadow .15s ease;
+}
+
+.dashflow-view-container .dashflow-heatmap-cell:not(.is-pad):hover {
+  transform: scale(1.16);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--df-accent) 35%, var(--df-border));
+}
+
+.dashflow-view-container .dashflow-heatmap-cell[data-level="1"] { background: color-mix(in srgb, var(--df-accent) 18%, var(--background-primary)); }
+.dashflow-view-container .dashflow-heatmap-cell[data-level="2"] { background: color-mix(in srgb, var(--df-accent) 36%, var(--background-primary)); }
+.dashflow-view-container .dashflow-heatmap-cell[data-level="3"] { background: color-mix(in srgb, var(--df-accent) 61%, var(--background-primary)); }
+.dashflow-view-container .dashflow-heatmap-cell[data-level="4"] { background: var(--df-accent); }
+
+/* Habit semantic treatment */
+.dashflow-view-container .dashflow-habit-row {
+  border-color: var(--df-border);
+  background: var(--df-surface-raised);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--df-success) 22%, transparent);
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.dashflow-view-container .dashflow-habit-row:hover {
+  border-color: color-mix(in srgb, var(--df-success) 28%, var(--df-border));
+  background: color-mix(in srgb, var(--df-success) 4%, var(--df-surface-raised));
+}
+
+.dashflow-view-container .dashflow-habit-name:hover { color: var(--df-success); }
+.dashflow-view-container .dashflow-habit-day.is-done { background: var(--df-success); }
+.dashflow-view-container .dashflow-habit-day.is-today { outline-color: color-mix(in srgb, var(--df-success) 64%, var(--text-muted)); }
+.dashflow-view-container .dashflow-habit-progress-track span { background: var(--df-success); }
+.dashflow-view-container .dashflow-habit-check.is-done {
+  background: var(--df-success-soft);
+  color: var(--df-success);
+  border-color: color-mix(in srgb, var(--df-success) 24%, var(--df-border));
+}
+
+/* Calendar semantic treatment */
+.dashflow-view-container .dashflow-calendar-day {
+  border-color: var(--df-border);
+  background: color-mix(in srgb, var(--df-surface-card) 96%, transparent);
+  transition: border-color .14s ease, background .14s ease, transform .12s ease;
+}
+
+.dashflow-view-container .dashflow-calendar-day:hover {
+  border-color: color-mix(in srgb, var(--df-info) 30%, var(--df-border));
+  background: var(--df-info-soft);
+}
+
+.dashflow-view-container .dashflow-calendar-day.is-selected {
+  border-color: var(--df-accent);
+  box-shadow: inset 0 0 0 1px var(--df-accent), 0 0 0 3px var(--df-accent-soft);
+}
+
+.dashflow-view-container .dashflow-calendar-day.is-today .dashflow-calendar-day-number {
+  background: var(--df-accent);
+  color: var(--text-on-accent);
+}
+
+.dashflow-view-container .dashflow-calendar-dot.is-task-due { background: var(--df-danger); }
+.dashflow-view-container .dashflow-calendar-dot.is-task-scheduled { background: var(--df-info); }
+.dashflow-view-container .dashflow-calendar-dot.is-project-deadline { background: var(--df-warning); }
+.dashflow-view-container .dashflow-calendar-dot.is-habit { background: var(--df-success); }
+
+.dashflow-view-container .dashflow-calendar-agenda {
+  border-color: var(--df-border);
+}
+
+.dashflow-view-container .dashflow-calendar-event {
+  border-color: var(--df-border);
+  background: var(--df-surface-raised);
+  transition: border-color .14s ease, background .14s ease;
+}
+
+.dashflow-view-container .dashflow-calendar-event:hover {
+  border-color: color-mix(in srgb, var(--df-info) 24%, var(--df-border));
+  background: var(--df-info-soft);
+}
+
+.dashflow-view-container .dashflow-calendar-event-kind {
+  background: var(--df-surface-soft);
+  border-color: var(--df-border);
+}
+
+/* Weekly Review semantic treatment */
+.dashflow-view-container .dashflow-weekly-kpi {
+  border-color: var(--df-border);
+  background: var(--df-surface-raised);
+  position: relative;
+  overflow: hidden;
+}
+
+.dashflow-view-container .dashflow-weekly-kpi::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 2px;
+  background: var(--df-accent);
+}
+
+.dashflow-view-container .dashflow-weekly-kpi:nth-child(2)::before { background: var(--df-success); }
+.dashflow-view-container .dashflow-weekly-kpi:nth-child(3)::before { background: var(--df-info); }
+.dashflow-view-container .dashflow-weekly-kpi:nth-child(4)::before { background: var(--df-purple); }
+
+.dashflow-view-container .dashflow-weekly-row {
+  border-color: var(--df-border);
+  background: color-mix(in srgb, var(--df-surface-card) 96%, transparent);
+  transition: border-color .14s ease, background .14s ease, transform .12s ease;
+}
+
+.dashflow-view-container .dashflow-weekly-row:hover {
+  border-color: color-mix(in srgb, var(--df-purple) 22%, var(--df-border));
+  background: var(--df-purple-soft);
+}
+
+.dashflow-view-container .dashflow-weekly-badge.is-overdue {
+  color: var(--df-danger);
+  border-color: color-mix(in srgb, var(--df-danger) 34%, var(--df-border));
+  background: var(--df-danger-soft);
+}
+
+.dashflow-view-container .dashflow-weekly-badge.is-project {
+  color: var(--df-warning);
+  border-color: color-mix(in srgb, var(--df-warning) 30%, var(--df-border));
+  background: var(--df-warning-soft);
+}
+
+.dashflow-view-container .dashflow-weekly-badge.is-habit {
+  color: var(--df-success);
+  border-color: color-mix(in srgb, var(--df-success) 30%, var(--df-border));
+  background: var(--df-success-soft);
+}
+
+.dashflow-view-container .dashflow-weekly-progress span { background: var(--df-info); }
+
+/* Dashboard switcher and template management */
+.dashflow-shell .dashflow-dashboard-switcher select,
+.dashflow-shell .dashflow-dashboard-switcher button {
+  border-color: var(--df-border);
+  background: var(--df-surface-raised);
+  transition: border-color .14s ease, background .14s ease, transform .12s ease;
+}
+
+.dashflow-shell .dashflow-dashboard-switcher button:hover {
+  border-color: color-mix(in srgb, var(--df-accent) 28%, var(--df-border));
+  background: var(--df-accent-soft);
+}
+
+.dashflow-dashboard-manager-container .modal,
+.dashflow-dashboard-transfer-container .modal,
+.modal:has(.dashflow-task-editor),
+.modal:has(.dashflow-habit-editor) {
+  border: 1px solid var(--df-border, var(--background-modifier-border));
+  border-radius: 15px;
+  background: var(--background-primary);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .22);
+}
+
+.dashflow-dashboard-manager-container .dashflow-dashboard-template-card {
+  border-color: var(--df-border);
+  background: var(--df-surface-raised);
+  transition: border-color .14s ease, background .14s ease, transform .14s ease, box-shadow .14s ease;
+}
+
+.dashflow-dashboard-manager-container .dashflow-dashboard-template-card:hover {
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--df-accent) 26%, var(--df-border));
+  background: var(--df-accent-soft);
+}
+
+.dashflow-dashboard-manager-container .dashflow-dashboard-template-card.is-selected {
+  border-color: var(--df-accent);
+  background: var(--df-accent-soft);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--df-accent) 11%, transparent);
+}
+
+.dashflow-dashboard-manager-container .dashflow-dashboard-manager-row,
+.dashflow-dashboard-manager-container .dashflow-custom-template-row {
+  border-color: var(--df-border);
+  background: var(--df-surface-raised);
+}
+
+.dashflow-dashboard-manager-container .dashflow-dashboard-manager-row.is-active {
+  border-color: color-mix(in srgb, var(--df-accent) 40%, var(--df-border));
+  background: var(--df-accent-soft);
+}
+
+.dashflow-dashboard-manager-container .dashflow-dashboard-manager-row-badge {
+  color: var(--df-accent);
+  background: var(--df-accent-soft);
+}
+
+.dashflow-dashboard-transfer-container textarea,
+.modal:has(.dashflow-task-editor) input,
+.modal:has(.dashflow-task-editor) select,
+.modal:has(.dashflow-habit-editor) input,
+.modal:has(.dashflow-habit-editor) select {
+  border-color: var(--df-border, var(--background-modifier-border));
+}
+
+.modal:has(.dashflow-task-editor) .setting-item,
+.modal:has(.dashflow-habit-editor) .setting-item {
+  border-color: color-mix(in srgb, var(--background-modifier-border) 72%, transparent);
+}
+
+.dashflow-task-editor h2,
+.dashflow-habit-editor h2 {
+  letter-spacing: -.02em;
+}
+
+.dashflow-task-editor-actions,
+.dashflow-habit-editor-actions {
+  margin-top: 8px;
 }
 
 .dashflow-settings-guide {
@@ -555,6 +951,7 @@
 
   .dashflow-widget {
     min-height: 220px;
+    border-radius: 13px;
   }
 
   .dashflow-widget[style] {
@@ -590,6 +987,10 @@
     font-size: 34px;
   }
 
+  .dashflow-pulse > span {
+    padding-inline: 13px;
+  }
+
   .dashflow-stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -601,5 +1002,22 @@
 
   .dashflow-widget {
     min-height: 210px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashflow-view-container *,
+  .dashflow-dashboard-manager-container *,
+  .dashflow-dashboard-transfer-container * {
+    scroll-behavior: auto !important;
+    transition-duration: .01ms !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+
+  .dashflow-grid:not(.is-editing) .dashflow-widget:hover,
+  .dashflow-dashboard-manager-container .dashflow-dashboard-template-card:hover,
+  .dashflow-view-container .dashflow-heatmap-cell:not(.is-pad):hover {
+    transform: none;
   }
 }

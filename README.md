@@ -1,116 +1,53 @@
-# DashFlow v0.2.2
+# DashFlow v0.2.3
 
-DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 继续以 Markdown / frontmatter 为真实数据源，Dashboard 负责查询、展示和操作。
+DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源，Dashboard 负责查询、展示和直接操作。
 
-## v0.2.2：自定义 Dashboard Template
+## v0.2.3：UI / Design System 2.0
 
-现在可以把已经调好的工作台直接保存成自己的模板：
+这一版暂停堆业务功能，集中统一 DashFlow 的视觉系统和交互层级：
 
-- 在「管理工作台」里点击 **✦ 保存为模板**
-- 自定义模板保存 Widget 组合、标题、配置、桌面布局、隐藏状态、移动端排序、折叠状态和紧凑模式
-- 新建工作台时，内置模板和「我的模板」在同一个模板选择器里分区展示
-- 从自定义模板创建 Dashboard 时重新生成 Dashboard / Widget ID，创建出的工作台与模板之后独立保存
-- 可以在「管理工作台」里查看并删除自己的模板
-- 自定义模板保存在插件 `data.json`，不会写进 Vault Markdown
-- 模板不包含 Task、Project、Habit、Activity 或 Vault 笔记内容
-
-```text
-Current Dashboard
-  ↓ Save as template
-Custom Dashboard Template
-  ↓ Create
-New independent Dashboard
-```
-
-内置模板仍然由插件代码提供；自定义模板属于用户 UI 编排数据。后续模板分享可以继续复用 v0.2.1 的 Dashboard Transfer JSON。
-
-## v0.2.1：Dashboard 导入 / 导出
-
-已经调好的 Dashboard 可以跨 Vault 搬运：
-
-- 在「管理工作台」里直接导出当前 Dashboard
-- 支持复制 JSON，也支持下载 `.json` 文件
-- 导入时可以粘贴 JSON，也可以读取 `.json` 文件
-- 导入始终创建新的 Dashboard，不覆盖现有工作台
-- 自动重新生成 Dashboard / Widget ID，避免和目标 Vault 冲突
-- 保留 Widget 组合、标题、配置、桌面布局、隐藏状态、移动端排序、折叠状态和紧凑模式
-- 如果目标 DashFlow 缺少导出文件使用的 Widget 类型，会拒绝导入并提示缺失类型
-- 导入前校验格式版本、Widget ID、布局边界和可见卡片碰撞
-- 命令面板也提供「导出当前 Dashboard JSON」和「导入 Dashboard JSON」
-
-导出文件只包含 Dashboard UI 编排，不包含 Task、Project、Habit、Activity 或 Vault 笔记内容。
-
-当前传输格式为 `dashflow-dashboard / formatVersion: 1`，后续格式升级会独立于插件内部 `data.json` schema 管理。
-
-## v0.2.0：Dashboard Templates
-
-新建工作台可以直接选择起始模板：
-
-- **Daily Focus**：Quick Capture / Today / Progress / Upcoming / Calendar / Countdown / Heatmap
-- **Project Management**：Projects / Today / Upcoming / Calendar / Milestone / Vault Pulse
-- **Habit Tracker**：Habits / Habit Heatmap / Habit Calendar / Weekly Review
-- **Weekly Review**：Weekly Review / Heatmap / Projects / Calendar / Vault Pulse
-- **Minimal**：Quick Capture / Today / Progress
-
-模板只保存 Widget 组合、默认配置、桌面布局和移动端初始顺序，不复制 Task / Project / Habit 数据。创建之后，工作台会立即变成普通独立 Dashboard，可以继续拖拽、resize、删卡片、改 Widget 配置和手机排序。
-
-“复制当前工作台”用来复制已经高度定制的 Dashboard；“从模板新建”更适合从标准场景开始。
-
-## v0.1.9：Multiple Dashboards UI
-
-- 顶部工作台切换器，可在多个 Dashboard 之间快速切换
-- 新建、重命名、复制、删除工作台
-- 至少保留一个 Dashboard
-- 删除当前工作台后自动切换到有效工作台
-- 每个 Dashboard 独立保存桌面布局、Widget 配置、手机排序、折叠状态和紧凑模式
-
-例如可以同时维护：
+- 配色继续跟随 Obsidian Light / Dark、Accent Color 和社区主题，不写死一套 Dashboard 皮肤
+- 使用 Obsidian 的扩展颜色建立语义色：Info / Success / Warning / Danger / Purple / Cyan
+- 卡片、边框、浮层、按钮和编辑栏统一成一套 surface / border / shadow tokens
+- Light / Dark 分别调整卡片表面与阴影强度
+- Widget 图标根据内容类型获得克制的语义强调色
+- Calendar：due / scheduled / project deadline / habit 使用不同语义色
+- Habit：打卡、进度和完成状态统一使用 Success 色
+- Weekly Review：Overdue / Project / Habit badge 使用一致的 Danger / Warning / Success 色
+- Heatmap：四档强度继续从当前 Obsidian Accent 动态生成
+- Vault Pulse 的 Overdue 数量使用 Danger 强调
+- Dashboard 模板卡片、管理弹窗、导入导出弹窗和 Task / Habit Editor 做统一视觉收敛
+- 增加 `:focus-visible` 键盘焦点状态
+- 支持 `prefers-reduced-motion`，减少不必要的 hover / transition 动效
 
 ```text
-Home      → 日常总览
-Work      → 工作项目 / Today / Calendar
-Personal  → 个人任务 / Habit
-Review    → Weekly Review / Heatmap
+Obsidian Theme / Accent
+        ↓
+DashFlow Design Tokens
+        ↓
+Surface / Border / Accent / Semantic Colors
+        ↓
+Widgets / Calendar / Habit / Weekly Review / Heatmap / Modals
 ```
 
-## v0.1.8：移动端布局 / 排序模式
+DashFlow 不维护一套固定的“品牌蓝/品牌绿”覆盖用户主题，而是优先继承 Obsidian CSS variables，再用语义映射增强信息层级。
 
-- 桌面继续使用 12 列自由拖拽 / resize / 自动碰撞重排
-- 900px 以下进入独立移动端单列模式
-- 每张卡片支持独立折叠 / 展开
-- 编辑模式用 ↑ / ↓ 调整手机排序
-- 手机排序独立保存，不改变桌面位置
-- 支持移动端紧凑模式和独立重置
+## 核心能力
 
-## v0.1.7：Weekly Review
-
-Weekly Review 会把 Task / Project / Habit / Activity / Calendar 汇总成本周复盘，包括 Activity Score 对比、Habit 完成率、逾期/未完成事项、活动项目进度和下周关注事项，并支持复制 Markdown 周报。
-
-## v0.1.6：Calendar + Agenda
-
-统一时间层把 Task `📅 due`、Task `⏳ scheduled`、Project `deadline` 和 Habit 节奏投射到月历与 Agenda。CalendarEvent 是运行时派生对象，不创建第二份业务数据。
-
-## v0.1.5：Habit / 长周期任务
-
-Habit 是正式 Domain，真实打卡保存在 Markdown frontmatter 的 `habit_log` 中。支持 daily / weekdays、历史补打卡、streak、30 天完成率、长期目标进度和暂停 / 完成 / 归档。
-
-## v0.1.4：Activity Tracker + Heatmap
-
-Activity Tracker 从启用后开始累计笔记活动、任务创建 / 完成与 Habit 打卡。Heatmap 支持综合活跃度 / Tasks / Habits / Notes。
-
-> Activity 是派生统计，不会伪造安装前的历史编辑数据。
-
-## v0.1.3：Task Editor
-
-Dashboard 中可直接创建和编辑任务，并写回原始 Markdown。支持标题、完成状态、due date、优先级和项目归属。
-
-## v0.1.2：Widget 配置系统
-
-每张 Widget 实例可以独立配置，同一种 Widget 可以添加多张并拥有不同参数。
-
-## v0.1.1：Layout Engine
-
-卡片支持碰撞检测、拖动自动推挤、resize 级联重排、垂直压缩、旧布局修复和新卡片自动寻找空位。
+- 12 列桌面 Dashboard，拖拽、resize、碰撞推挤和自动压缩
+- 手机独立单列排序、折叠和紧凑模式
+- 多 Dashboard：新建、切换、重命名、复制、删除
+- 5 套内置 Dashboard Template
+- 把当前 Dashboard 保存成自定义 Template
+- Dashboard JSON 导入 / 导出，可跨 Vault 搬运 UI 编排
+- Widget 多实例与独立配置
+- Task 创建 / 编辑 / 完成并直接写回 Markdown
+- Project 自动关联任务并计算进度
+- Habit 打卡、streak、30 天完成率和目标进度
+- Activity Tracker + Heatmap
+- Calendar 月视图 + Agenda
+- Weekly Review + Markdown 周报复制
+- Quick Capture / Countdown / Vault Pulse
 
 ## 当前内置 Widget
 
@@ -128,15 +65,47 @@ Dashboard 中可直接创建和编辑任务，并写回原始 Markdown。支持�
 | 倒计时 | 目标日期 |
 | Vault Pulse | Vault 统计 |
 
+## Dashboard Templates
+
+内置起始模板：
+
+- **Daily Focus**：Quick Capture / Today / Progress / Upcoming / Calendar / Countdown / Heatmap
+- **Project Management**：Projects / Today / Upcoming / Calendar / Milestone / Vault Pulse
+- **Habit Tracker**：Habits / Habit Heatmap / Habit Calendar / Weekly Review
+- **Weekly Review**：Weekly Review / Heatmap / Projects / Calendar / Vault Pulse
+- **Minimal**：Quick Capture / Today / Progress
+
+也可以在「管理工作台」里把当前 Dashboard 保存为自己的模板。自定义模板保存 Widget、配置和布局，不包含 Task、Project、Habit、Activity 或 Vault 笔记内容。
+
+## Dashboard 导入 / 导出
+
+Dashboard Transfer JSON 只包含可移植的 UI 编排：
+
+```text
+Dashboard
+  ↓ export
+DashFlow Dashboard JSON
+  ↓ import
+New Dashboard with remapped IDs
+```
+
+导入始终创建新 Dashboard，并重新生成 Dashboard / Widget ID。当前传输格式为 `dashflow-dashboard / formatVersion: 1`。
+
 ## 安装测试版
 
-GitHub Actions 构建成功后会产生 `dashflow-plugin` artifact，包含：
+GitHub Actions 构建成功后会生成 `dashflow-plugin` artifact，包含：
 
 - `manifest.json`
 - `main.js`
 - `styles.css`
 
-放入 `<你的 Vault>/.obsidian/plugins/dashflow/`，然后在 Obsidian → 设置 → 第三方插件中启用 **DashFlow**。开发阶段建议先使用测试 Vault。
+把三个文件放入：
+
+```text
+<你的 Vault>/.obsidian/plugins/dashflow/
+```
+
+然后在 Obsidian → 设置 → 第三方插件中启用 **DashFlow**。开发阶段建议使用测试 Vault。
 
 ## 本地开发
 
@@ -162,6 +131,17 @@ npm run dev
 - [ ] 紧急任务 ⏫ 📅 2026-08-18
 - [ ] 完成 Widget Registry #project/dashflow
 ```
+
+支持：
+
+- due：`📅 YYYY-MM-DD`
+- scheduled：`⏳ YYYY-MM-DD`
+- start：`🛫 YYYY-MM-DD`
+- completed：`✅ YYYY-MM-DD`
+- urgent：`⏫` / `🔺`
+- high：`🔼`
+- low：`🔽`
+- project：`#project/<id>`
 
 ## Project 格式
 
@@ -232,25 +212,38 @@ Custom Templates ─────────┼──→ New Dashboard
 Dashboard Transfer JSON ──┘
                            ↓
 Dashboard Collection
-  ├── Home
-  ├── Work
-  ├── Personal
-  └── ...
   ↓
 Layout Engine
   ├── Desktop 12-column grid
   └── Mobile single-column order
   ↓
+Design System 2.0
+  ↓
 Dashboard View
 ```
 
+## 近期版本
+
+- **v0.2.3** — UI / Design System 2.0
+- **v0.2.2** — 自定义 Dashboard Template
+- **v0.2.1** — Dashboard JSON 导入 / 导出
+- **v0.2.0** — 5 套内置 Dashboard Templates
+- **v0.1.9** — Multiple Dashboards UI
+- **v0.1.8** — 移动端排序 / 折叠 / 紧凑模式
+- **v0.1.7** — Weekly Review
+- **v0.1.6** — Calendar + Agenda
+- **v0.1.5** — Habit
+- **v0.1.4** — Activity Tracker + Heatmap
+- **v0.1.3** — Task Editor
+- **v0.1.2** — Widget Configuration
+- **v0.1.1** — Layout Engine
+
 ## 下一阶段
 
-1. UI / Design System 2.0：动态语义色、层级、图标、Dark / Light 精修
-2. Dashboard Template 分享 / 模板库体验
-3. Calendar 周视图 / 更完整 scheduled 编辑
-4. Habit 自定义周期 / 提醒
-5. 自定义 Query / Widget
+1. Dashboard Template 分享 / 模板库体验
+2. Calendar 周视图 / 更完整 scheduled 编辑
+3. Habit 自定义周期 / 提醒
+4. 自定义 Query / Widget
 
 ## CI
 
