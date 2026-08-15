@@ -1,4 +1,5 @@
 import type {
+  CalendarWidgetConfig,
   CountdownWidgetConfig,
   HabitsWidgetConfig,
   HeatmapWidgetConfig,
@@ -74,6 +75,36 @@ export function registerBuiltins(registry: WidgetRegistry): void {
         { key: "limit", type: "number", label: "最多显示", description: "限制卡片内显示的任务数量。", min: 1, max: 100, step: 1 },
       ],
       defaultConfig: (): UpcomingWidgetConfig => ({ days: 7, limit: 12 }),
+    },
+    {
+      type: "calendar",
+      name: "日历",
+      description: "把任务日期、项目截止日和习惯节奏统一放进月历与 Agenda。",
+      icon: "□",
+      defaultSize: { w: 12, h: 8 },
+      minSize: { w: 7, h: 6 },
+      settings: [
+        {
+          key: "weekStart", type: "select", label: "每周起始日", description: "选择月历从周一还是周日开始。",
+          options: [
+            { label: "周一", value: "monday" },
+            { label: "周日", value: "sunday" },
+          ],
+        },
+        { key: "showTasks", type: "toggle", label: "显示任务", description: "显示 due 与 scheduled 日期。" },
+        { key: "showCompletedTasks", type: "toggle", label: "显示已完成任务", description: "把已完成任务保留在历史日期中。" },
+        { key: "showProjects", type: "toggle", label: "显示项目截止日", description: "显示 Project deadline。" },
+        { key: "showHabits", type: "toggle", label: "显示习惯", description: "按 daily / weekdays 节奏生成习惯日程。" },
+        { key: "agendaLimit", type: "number", label: "Agenda 最多显示", description: "限制右侧当日 Agenda 的项目数量。", min: 1, max: 50, step: 1 },
+      ],
+      defaultConfig: (): CalendarWidgetConfig => ({
+        weekStart: "monday",
+        showTasks: true,
+        showProjects: true,
+        showHabits: true,
+        showCompletedTasks: false,
+        agendaLimit: 12,
+      }),
     },
     {
       type: "habits",

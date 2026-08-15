@@ -14,6 +14,7 @@ export class TaskEditorModal extends Modal {
   constructor(
     private readonly plugin: DashFlowPlugin,
     private readonly task?: Task,
+    private readonly initial: Partial<TaskEditInput> = {},
   ) {
     super(plugin.app);
   }
@@ -24,11 +25,11 @@ export class TaskEditorModal extends Modal {
     contentEl.addClass("dashflow-task-editor");
 
     const draft: TaskEditInput = {
-      text: this.task?.text ?? "",
-      completed: this.task?.completed ?? false,
-      due: this.task?.due,
-      priority: this.task?.priority ?? "normal",
-      projectId: this.task?.projectId,
+      text: this.task?.text ?? this.initial.text ?? "",
+      completed: this.task?.completed ?? this.initial.completed ?? false,
+      due: this.task?.due ?? this.initial.due,
+      priority: this.task?.priority ?? this.initial.priority ?? "normal",
+      projectId: this.task?.projectId ?? this.initial.projectId,
     };
 
     contentEl.createEl("h2", { text: this.task ? "编辑任务" : "新建任务" });
@@ -45,9 +46,7 @@ export class TaskEditorModal extends Modal {
       .addText((component) => {
         component.setPlaceholder("要完成什么？");
         component.setValue(draft.text);
-        component.onChange((value) => {
-          draft.text = value;
-        });
+        component.onChange((value) => { draft.text = value; });
         window.setTimeout(() => component.inputEl.focus(), 0);
       });
 
@@ -57,9 +56,7 @@ export class TaskEditorModal extends Modal {
         .setDesc("切换任务的完成状态。")
         .addToggle((component) => {
           component.setValue(draft.completed);
-          component.onChange((value) => {
-            draft.completed = value;
-          });
+          component.onChange((value) => { draft.completed = value; });
         });
     }
 
@@ -69,9 +66,7 @@ export class TaskEditorModal extends Modal {
       .addText((component) => {
         component.inputEl.type = "date";
         component.setValue(draft.due ?? "");
-        component.onChange((value) => {
-          draft.due = value || undefined;
-        });
+        component.onChange((value) => { draft.due = value || undefined; });
       });
 
     new Setting(contentEl)
@@ -79,28 +74,21 @@ export class TaskEditorModal extends Modal {
       .addDropdown((component) => {
         for (const [value, label] of PRIORITY_OPTIONS) component.addOption(value, label);
         component.setValue(draft.priority);
-        component.onChange((value) => {
-          draft.priority = value as TaskPriority;
-        });
+        component.onChange((value) => { draft.priority = value as TaskPriority; });
       });
 
-    const projects = [...this.plugin.vaultIndex.getSnapshot().projects]
-      .sort((a, b) => a.name.localeCompare(b.name));
+    const projects = [...this.plugin.vaultIndex.getSnapshot().projects].sort((a, b) => a.name.localeCompare(b.name));
     new Setting(contentEl)
       .setName("所属项目")
       .setDesc("通过 #project/<id> 写回 Markdown。")
       .addDropdown((component) => {
         component.addOption("", "无项目");
-        for (const project of projects) {
-          component.addOption(project.id, project.name);
-        }
+        for (const project of projects) component.addOption(project.id, project.name);
         if (draft.projectId && !projects.some((project) => project.id === draft.projectId)) {
           component.addOption(draft.projectId, `${draft.projectId}（未索引）`);
         }
         component.setValue(draft.projectId ?? "");
-        component.onChange((value) => {
-          draft.projectId = value || undefined;
-        });
+        component.onChange((value) => { draft.projectId = value || undefined; });
       });
 
     const actions = new Setting(contentEl);
