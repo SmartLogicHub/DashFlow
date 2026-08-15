@@ -11,6 +11,7 @@ import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInter
 import { CaptureService } from "./services/CaptureService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
+import { MobileDashboardInteractionService } from "./services/MobileDashboardInteractionService";
 import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
@@ -33,6 +34,7 @@ export default class DashFlowPlugin extends Plugin {
   calendarWidgets!: CalendarWidgetInteractionService;
   weeklyReviewService!: WeeklyReviewService;
   weeklyReviewWidgets!: WeeklyReviewWidgetInteractionService;
+  mobileDashboard!: MobileDashboardInteractionService;
   habitService!: HabitService;
   habitWidgets!: HabitWidgetInteractionService;
   taskService!: TaskService;
@@ -85,6 +87,7 @@ export default class DashFlowPlugin extends Plugin {
     this.habitWidgets = new HabitWidgetInteractionService(this);
     this.calendarWidgets = new CalendarWidgetInteractionService(this);
     this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
+    this.mobileDashboard = new MobileDashboardInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -115,9 +118,11 @@ export default class DashFlowPlugin extends Plugin {
     this.habitWidgets.start();
     this.calendarWidgets.start();
     this.weeklyReviewWidgets.start();
+    this.mobileDashboard.start();
   }
 
   onunload(): void {
+    this.mobileDashboard?.stop();
     this.weeklyReviewWidgets?.stop();
     this.calendarWidgets?.stop();
     this.habitWidgets?.stop();

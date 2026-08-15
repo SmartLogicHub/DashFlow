@@ -1,7 +1,14 @@
 import type DashFlowPlugin from "../main";
-import type { DashboardDefinition, WidgetInstance } from "../models";
+import type { DashboardDefinition, DashboardMobileSettings, WidgetInstance } from "../models";
 import type { WidgetRegistry } from "../widgets/WidgetRegistry";
 import { compactWidgetLayout, findFirstAvailableLayout } from "../layout/grid";
+import {
+  desktopWidgetOrder,
+  normalizeCollapsedWidgetIds,
+  normalizeMobileOrder,
+  reorderVisibleMobileOrder,
+  type MobileMoveDirection,
+} from "../mobile/mobileLayout";
 import { createDefaultDashboard } from "./defaultDashboard";
 
 export class DashboardManager {
@@ -23,6 +30,17 @@ export class DashboardManager {
     }
     this.plugin.data.activeDashboardId = active.id;
     return active;
+  }
+
+  mobileState(dashboard: DashboardDefinition): DashboardMobileSettings {
+    return {
+      order: normalizeMobileOrder(dashboard.widgets, dashboard.mobile?.order),
+      collapsedWidgetIds: normalizeCollapsedWidgetIds(
+        dashboard.widgets,
+        dashboard.mobile?.collapsedWidgetIds,
+      ),
+      compactMode: dashboard.mobile?.compactMode === true,
+    };
   }
 
   async updateDashboard(next: DashboardDefinition): Promise<void> {
@@ -53,10 +71,16 @@ export class DashboardManager {
   async removeWidget(dashboardId: string, widgetId: string): Promise<void> {
     const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
     if (!dashboard) return;
+    const state = this.mobileState(dashboard);
     const remaining = dashboard.widgets.filter((widget) => widget.id !== widgetId);
     await this.updateDashboard({
       ...dashboard,
       widgets: compactWidgetLayout(remaining, dashboard.settings.columns),
+      mobile: {
+        ...state,
+        order: state.order.filter((id) => id !== widgetId),
+        collapsedWidgetIds: state.collapsedWidgetIds.filter((id) => id !== widgetId),
+      },
     });
   }
 
@@ -78,10 +102,70 @@ export class DashboardManager {
       config: definition.defaultConfig(),
       hidden: false,
     };
+    const state = this.mobileState(dashboard);
 
     await this.updateDashboard({
       ...dashboard,
       widgets: compactWidgetLayout([...dashboard.widgets, widget], dashboard.settings.columns),
+      mobile: {
+        ...state,
+        order: [...state.order, widget.id],
+      },
+    });
+  }
+
+  async moveMobileWidget(
+    dashboardId: string,
+    widgetId: string,
+    direction: MobileMoveDirection,
+    visibleIds?: string[],
+  ): Promise<void> {
+    const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
+    if (!dashboard) return;
+    const state = this.mobileState(dashboard);
+    const visible = visibleIds ?? dashboard.widgets.filter((widget) => !widget.hidden).map((widget) => widget.id);
+    const order = reorderVisibleMobileOrder(
+      dashboard.widgets,
+      state.order,
+      visible,
+      widgetId,
+      direction,
+    );
+    if (order.join("|") === state.order.join("|")) return;
+    await this.updateDashboard({ ...dashboard, mobile: { ...state, order } });
+  }
+
+  async toggleMobileCollapsed(dashboardId: string, widgetId: string): Promise<void> {
+    const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
+    if (!dashboard) return;
+    const state = this.mobileState(dashboard);
+    const collapsed = new Set(state.collapsedWidgetIds);
+    if (collapsed.has(widgetId)) collapsed.delete(widgetId);
+    else collapsed.add(widgetId);
+    await this.updateDashboard({
+      ...dashboard,
+      mobile: { ...state, collapsedWidgetIds: [...collapsed] },
+    });
+  }
+
+  async setMobileCompactMode(dashboardId: string, compactMode: boolean): Promise<void> {
+    const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
+    if (!dashboard) return;
+    const state = this.mobileState(dashboard);
+    if (state.compactMode === compactMode) return;
+    await this.updateDashboard({ ...dashboard, mobile: { ...state, compactMode } });
+  }
+
+  async resetMobileLayout(dashboardId: string): Promise<void> {
+    const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
+    if (!dashboard) return;
+    await this.updateDashboard({
+      ...dashboard,
+      mobile: {
+        order: desktopWidgetOrder(dashboard.widgets),
+        collapsedWidgetIds: [],
+        compactMode: false,
+      },
     });
   }
 
@@ -93,6 +177,7 @@ export class DashboardManager {
       ...current,
       widgets: defaults.widgets,
       settings: defaults.settings,
+      mobile: defaults.mobile,
     });
   }
 }
