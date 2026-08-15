@@ -1,10 +1,36 @@
-# DashFlow v0.2.0
+# DashFlow v0.2.1
 
 DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 继续以 Markdown / frontmatter 为真实数据源，Dashboard 负责查询、展示和操作。
 
+## v0.2.1：Dashboard 导入 / 导出
+
+已经调好的 Dashboard 现在可以跨 Vault 搬运：
+
+- 在「管理工作台」里直接导出当前 Dashboard
+- 支持复制 JSON，也支持下载 `.json` 文件
+- 导入时可以粘贴 JSON，也可以读取 `.json` 文件
+- 导入始终创建新的 Dashboard，不覆盖现有工作台
+- 自动重新生成 Dashboard / Widget ID，避免和目标 Vault 冲突
+- 保留 Widget 组合、标题、配置、桌面布局、隐藏状态、移动端排序、折叠状态和紧凑模式
+- 如果目标 DashFlow 缺少导出文件使用的 Widget 类型，会拒绝导入并提示缺失类型
+- 导入前校验格式版本、Widget ID、布局边界和可见卡片碰撞
+- 命令面板也提供「导出当前 Dashboard JSON」和「导入 Dashboard JSON」
+
+导出文件只包含 Dashboard UI 编排，不包含 Task、Project、Habit、Activity 或 Vault 笔记内容。
+
+```text
+Dashboard
+  ↓ export
+DashFlow Dashboard JSON
+  ↓ import into another Vault
+New Dashboard with remapped IDs
+```
+
+当前传输格式为 `dashflow-dashboard / formatVersion: 1`，后续格式升级会独立于插件内部 `data.json` schema 管理。
+
 ## v0.2.0：Dashboard Templates
 
-新建工作台现在不再只有一套默认布局，而是可以直接选择起始模板：
+新建工作台可以直接选择起始模板：
 
 - **Daily Focus**：Quick Capture / Today / Progress / Upcoming / Calendar / Countdown / Heatmap
 - **Project Management**：Projects / Today / Upcoming / Calendar / Milestone / Vault Pulse
@@ -14,7 +40,7 @@ DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Pro
 
 模板只保存 Widget 组合、默认配置、桌面布局和移动端初始顺序，不复制 Task / Project / Habit 数据。创建之后，工作台会立即变成普通独立 Dashboard，可以继续拖拽、resize、删卡片、改 Widget 配置和手机排序。
 
-“复制当前工作台”仍然保留，用来复制已经高度定制的 Dashboard；“从模板新建”更适合从标准场景开始。
+“复制当前工作台”用来复制已经高度定制的 Dashboard；“从模板新建”更适合从标准场景开始。
 
 ## v0.1.9：Multiple Dashboards UI
 
@@ -164,6 +190,7 @@ habit_log:
 | Weekly Review | 运行时聚合 |
 | WidgetDefinition | 插件代码 |
 | Dashboard Template | 插件代码，仅作为起始布局 |
+| Dashboard Transfer JSON | 可移植 UI 编排，不含业务数据 |
 | WidgetInstance | 插件 `data.json` |
 | Dashboard 集合 / activeDashboardId | 插件 `data.json` |
 | Desktop layout | 每个 Dashboard 独立 UI 状态 |
@@ -187,7 +214,7 @@ Widget Registry + Widget Instances
   ↓
 Dashboard Templates ──→ New Dashboard
                          ↓
-Dashboard Collection
+Dashboard Collection ↔ Dashboard Transfer JSON
   ├── Home
   ├── Work
   ├── Personal
@@ -202,8 +229,8 @@ Dashboard View
 
 ## 下一阶段
 
-1. Dashboard 导入 / 导出
-2. 自定义 Dashboard Template
+1. 自定义 Dashboard Template
+2. Dashboard Template 分享 / 保存到模板库
 3. Habit 自定义周期 / 提醒
 4. Calendar 周视图 / 更完整 scheduled 编辑
 5. 自定义 Query / Widget
