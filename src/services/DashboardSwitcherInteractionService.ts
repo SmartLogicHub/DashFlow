@@ -1,6 +1,11 @@
 import { Notice } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { DashboardDefinition } from "../models";
+import {
+  DASHBOARD_TEMPLATES,
+  DEFAULT_DASHBOARD_TEMPLATE_ID,
+  type DashboardTemplateId,
+} from "../dashboard/dashboardTemplates";
 
 const STYLE_ID = "dashflow-dashboard-switcher-styles";
 const MODAL_CLASS = "dashflow-dashboard-manager-container";
@@ -11,8 +16,19 @@ const SWITCHER_STYLES = `
 .dashflow-dashboard-switcher button{appearance:none;border:1px solid var(--background-modifier-border);background:var(--background-secondary);color:var(--text-muted);height:32px;min-width:32px;border-radius:8px;padding:0 9px;cursor:pointer;font-size:12px}
 .dashflow-dashboard-switcher button:hover{background:var(--background-modifier-hover);color:var(--text-normal)}
 .dashflow-dashboard-count{color:var(--text-faint);font-size:10px;margin-left:2px}
-.dashflow-dashboard-manager-container .modal{width:min(620px,calc(100vw - 28px));max-width:620px}
+.dashflow-dashboard-manager-container .modal{width:min(680px,calc(100vw - 28px));max-width:680px}
 .dashflow-dashboard-manager-container .modal-content{padding-bottom:18px}
+.dashflow-dashboard-template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:14px 0}
+.dashflow-dashboard-template-card{appearance:none;border:1px solid var(--background-modifier-border);background:var(--background-secondary);color:var(--text-normal);border-radius:12px;padding:11px 12px;text-align:left;cursor:pointer;min-height:88px;display:grid;grid-template-columns:30px minmax(0,1fr);gap:9px;align-items:start}
+.dashflow-dashboard-template-card:hover{background:var(--background-modifier-hover)}
+.dashflow-dashboard-template-card.is-selected{border-color:var(--interactive-accent);box-shadow:0 0 0 1px color-mix(in srgb,var(--interactive-accent) 45%,transparent);background:color-mix(in srgb,var(--interactive-accent) 7%,var(--background-secondary))}
+.dashflow-dashboard-template-icon{font-size:20px;line-height:1.1;text-align:center;padding-top:2px}
+.dashflow-dashboard-template-copy strong{display:block;font-size:12px;margin-bottom:4px}
+.dashflow-dashboard-template-copy small{display:block;color:var(--text-muted);font-size:10px;line-height:1.45}
+.dashflow-dashboard-template-meta{display:block;color:var(--text-faint);font-size:9px;margin-top:5px}
+.dashflow-dashboard-create-name{margin-top:12px}
+.dashflow-dashboard-create-name label{display:block;font-size:10px;color:var(--text-muted);margin-bottom:5px}
+.dashflow-dashboard-create-name input{width:100%}
 .dashflow-dashboard-manager-list{display:flex;flex-direction:column;gap:6px;margin:16px 0}
 .dashflow-dashboard-manager-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--background-modifier-border);border-radius:10px;padding:7px 8px}
 .dashflow-dashboard-manager-row.is-active{border-color:color-mix(in srgb,var(--interactive-accent) 50%,var(--background-modifier-border));background:color-mix(in srgb,var(--interactive-accent) 7%,transparent)}
@@ -25,7 +41,7 @@ const SWITCHER_STYLES = `
 .dashflow-dashboard-manager-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
 .dashflow-dashboard-manager-actions .is-danger{color:var(--text-error)}
 .dashflow-dashboard-modal-note{color:var(--text-faint);font-size:10px;line-height:1.5;margin-top:6px}
-@media(max-width:900px){.dashflow-dashboard-switcher{margin-top:-8px;margin-bottom:18px}.dashflow-dashboard-switcher select{flex:1;max-width:none}.dashflow-dashboard-count{display:none}.dashflow-dashboard-manager-row{grid-template-columns:minmax(0,1fr) auto}}
+@media(max-width:900px){.dashflow-dashboard-switcher{margin-top:-8px;margin-bottom:18px}.dashflow-dashboard-switcher select{flex:1;max-width:none}.dashflow-dashboard-count{display:none}.dashflow-dashboard-manager-row{grid-template-columns:minmax(0,1fr) auto}.dashflow-dashboard-template-grid{grid-template-columns:1fr}}
 `;
 
 export class DashboardSwitcherInteractionService {
@@ -117,25 +133,76 @@ export class DashboardSwitcherInteractionService {
   private openCreateModal(): void {
     this.closeModal();
     const { container, content, close } = this.modalFrame("新建工作台");
+    let selectedTemplateId: DashboardTemplateId = DEFAULT_DASHBOARD_TEMPLATE_ID;
+
     const description = document.createElement("p");
     description.className = "setting-item-description";
-    description.textContent = "创建一个带默认 Widget 的独立工作台。之后可以自由删卡片、改布局或复制其他工作台。";
+    description.textContent = "先选一个起始模板。模板只决定 Widget 与布局，不会复制或移动 Vault 里的 Task、Project、Habit。";
+    content.appendChild(description);
+
+    const templateGrid = document.createElement("div");
+    templateGrid.className = "dashflow-dashboard-template-grid";
+    const selectTemplate = (templateId: DashboardTemplateId): void => {
+      selectedTemplateId = templateId;
+      for (const card of templateGrid.querySelectorAll<HTMLButtonElement>("[data-template-id]")) {
+        const selected = card.dataset.templateId === templateId;
+        card.classList.toggle("is-selected", selected);
+        card.setAttribute("aria-pressed", selected ? "true" : "false");
+      }
+    };
+
+    for (const template of DASHBOARD_TEMPLATES) {
+      const card = document.createElement("button");
+      card.type = "button";
+      card.className = "dashflow-dashboard-template-card";
+      card.dataset.templateId = template.id;
+      card.setAttribute("aria-pressed", "false");
+
+      const icon = document.createElement("span");
+      icon.className = "dashflow-dashboard-template-icon";
+      icon.textContent = template.icon;
+      const copy = document.createElement("span");
+      copy.className = "dashflow-dashboard-template-copy";
+      const name = document.createElement("strong");
+      name.textContent = template.name;
+      const details = document.createElement("small");
+      details.textContent = template.description;
+      const meta = document.createElement("span");
+      meta.className = "dashflow-dashboard-template-meta";
+      meta.textContent = `${template.widgetCount} 张卡片`;
+      copy.append(name, details, meta);
+      card.append(icon, copy);
+      card.addEventListener("click", () => selectTemplate(template.id));
+      templateGrid.appendChild(card);
+    }
+    content.appendChild(templateGrid);
+    selectTemplate(selectedTemplateId);
+
+    const nameField = document.createElement("div");
+    nameField.className = "dashflow-dashboard-create-name";
+    const label = document.createElement("label");
+    label.textContent = "工作台名称（可选）";
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = "例如：Work / Personal / Review";
+    input.placeholder = "留空则使用模板名称";
     input.maxLength = 48;
-    input.style.width = "100%";
+    nameField.append(label, input);
+    content.appendChild(nameField);
 
     const buttons = document.createElement("div");
     buttons.className = "modal-button-container";
     const cancel = this.button("取消", "取消");
     cancel.addEventListener("click", close);
-    const create = this.button("创建", "创建工作台");
+    const create = this.button("创建", "按模板创建工作台");
     create.classList.add("mod-cta");
     const submit = async (): Promise<void> => {
-      const dashboard = await this.plugin.dashboardManager.createDashboard(input.value);
+      const template = DASHBOARD_TEMPLATES.find((item) => item.id === selectedTemplateId)!;
+      const dashboard = await this.plugin.dashboardManager.createDashboard(
+        input.value.trim() || template.name,
+        selectedTemplateId,
+      );
       if (!dashboard) {
-        new Notice("请输入工作台名称");
+        new Notice("无法创建工作台，请检查名称");
         input.focus();
         return;
       }
@@ -151,9 +218,8 @@ export class DashboardSwitcherInteractionService {
       }
     });
     buttons.append(cancel, create);
-    content.append(description, input, buttons);
+    content.appendChild(buttons);
     document.body.appendChild(container);
-    window.setTimeout(() => input.focus(), 0);
   }
 
   private openManageModal(): void {
@@ -201,7 +267,7 @@ export class DashboardSwitcherInteractionService {
 
     const actions = document.createElement("div");
     actions.className = "dashflow-dashboard-manager-actions";
-    const create = this.button("＋ 新建", "新建工作台");
+    const create = this.button("＋ 新建", "从模板新建工作台");
     create.addEventListener("click", () => {
       close();
       this.openCreateModal();

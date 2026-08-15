@@ -1,20 +1,28 @@
-# DashFlow v0.1.9
+# DashFlow v0.2.0
 
 DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 继续以 Markdown / frontmatter 为真实数据源，Dashboard 负责查询、展示和操作。
 
+## v0.2.0：Dashboard Templates
+
+新建工作台现在不再只有一套默认布局，而是可以直接选择起始模板：
+
+- **Daily Focus**：Quick Capture / Today / Progress / Upcoming / Calendar / Countdown / Heatmap
+- **Project Management**：Projects / Today / Upcoming / Calendar / Milestone / Vault Pulse
+- **Habit Tracker**：Habits / Habit Heatmap / Habit Calendar / Weekly Review
+- **Weekly Review**：Weekly Review / Heatmap / Projects / Calendar / Vault Pulse
+- **Minimal**：Quick Capture / Today / Progress
+
+模板只保存 Widget 组合、默认配置、桌面布局和移动端初始顺序，不复制 Task / Project / Habit 数据。创建之后，工作台会立即变成普通独立 Dashboard，可以继续拖拽、resize、删卡片、改 Widget 配置和手机排序。
+
+“复制当前工作台”仍然保留，用来复制已经高度定制的 Dashboard；“从模板新建”更适合从标准场景开始。
+
 ## v0.1.9：Multiple Dashboards UI
 
-这一版把从第一天就存在的数据结构正式开放成多工作台 UI：
-
 - 顶部工作台切换器，可在多个 Dashboard 之间快速切换
-- 新建工作台，新 Dashboard 从完整默认布局开始
-- 重命名当前工作台
-- 一键复制当前工作台
-- 删除工作台，并保证至少保留一个 Dashboard
-- 删除当前工作台后自动切换到相邻可用工作台
-- 复制时重新生成 Widget ID，副本与原工作台之后完全独立
-- 桌面布局、Widget 配置、隐藏状态、手机排序、折叠状态和紧凑模式都会随工作台分别保存
-- 工作台管理器同时支持桌面和移动端
+- 新建、重命名、复制、删除工作台
+- 至少保留一个 Dashboard
+- 删除当前工作台后自动切换到有效工作台
+- 每个 Dashboard 独立保存桌面布局、Widget 配置、手机排序、折叠状态和紧凑模式
 
 例如可以同时维护：
 
@@ -24,8 +32,6 @@ Work      → 工作项目 / Today / Calendar
 Personal  → 个人任务 / Habit
 Review    → Weekly Review / Heatmap
 ```
-
-Dashboard 仍然只保存 UI 编排和 Widget 实例，不复制 Vault 中的 Task / Project / Habit 数据。
 
 ## v0.1.8：移动端布局 / 排序模式
 
@@ -157,6 +163,7 @@ habit_log:
 | CalendarEvent | 运行时派生 |
 | Weekly Review | 运行时聚合 |
 | WidgetDefinition | 插件代码 |
+| Dashboard Template | 插件代码，仅作为起始布局 |
 | WidgetInstance | 插件 `data.json` |
 | Dashboard 集合 / activeDashboardId | 插件 `data.json` |
 | Desktop layout | 每个 Dashboard 独立 UI 状态 |
@@ -175,16 +182,11 @@ VaultIndexService
 Task / Project / Habit Domain
   ↓
 Services
-  ├── TaskService
-  ├── ProjectService
-  ├── HabitService
-  ├── CalendarService
-  ├── WeeklyReviewService
-  ├── CaptureService
-  └── ActivityService
   ↓
 Widget Registry + Widget Instances
   ↓
+Dashboard Templates ──→ New Dashboard
+                         ↓
 Dashboard Collection
   ├── Home
   ├── Work
@@ -200,8 +202,8 @@ Dashboard View
 
 ## 下一阶段
 
-1. Dashboard 模板
-2. Dashboard 导入 / 导出
+1. Dashboard 导入 / 导出
+2. 自定义 Dashboard Template
 3. Habit 自定义周期 / 提醒
 4. Calendar 周视图 / 更完整 scheduled 编辑
 5. 自定义 Query / Widget
