@@ -8,25 +8,29 @@ export function emptyDailyActivity(date: string): DailyActivity {
     notesModified: 0,
     tasksCreated: 0,
     tasksCompleted: 0,
+    habitsCompleted: 0,
     createdNoteKeys: [],
     modifiedNoteKeys: [],
     createdTaskKeys: [],
     completedTaskKeys: [],
+    completedHabitKeys: [],
   };
 }
 
 export function activityScore(day?: DailyActivity): number {
   if (!day) return 0;
-  return day.tasksCompleted * 4
-    + day.tasksCreated
-    + day.notesCreated * 3
-    + day.notesModified;
+  return (day.tasksCompleted ?? 0) * 4
+    + (day.tasksCreated ?? 0)
+    + (day.notesCreated ?? 0) * 3
+    + (day.notesModified ?? 0)
+    + (day.habitsCompleted ?? 0) * 3;
 }
 
 export function activityMetricValue(day: DailyActivity | undefined, metric: ActivityMetric): number {
   if (!day) return 0;
-  if (metric === "tasks") return day.tasksCreated + day.tasksCompleted;
-  if (metric === "notes") return day.notesCreated + day.notesModified;
+  if (metric === "tasks") return (day.tasksCreated ?? 0) + (day.tasksCompleted ?? 0);
+  if (metric === "notes") return (day.notesCreated ?? 0) + (day.notesModified ?? 0);
+  if (metric === "habits") return day.habitsCompleted ?? 0;
   return activityScore(day);
 }
 

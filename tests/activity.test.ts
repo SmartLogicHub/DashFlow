@@ -20,6 +20,13 @@ test("activity score weights completed tasks and note creation", () => {
   assert.equal(activityMetricValue(day, "notes"), 4);
 });
 
+test("habit check-ins contribute to activity and expose a dedicated metric", () => {
+  const day = emptyDailyActivity("2026-08-15");
+  day.habitsCompleted = 2;
+  assert.equal(activityMetricValue(day, "habits"), 2);
+  assert.equal(activityScore(day), 6);
+});
+
 test("activity range fills missing dates with zero values", () => {
   const store: ActivityStore = { startedAt: "2026-08-01", days: {} };
   const day = emptyDailyActivity("2026-08-14");

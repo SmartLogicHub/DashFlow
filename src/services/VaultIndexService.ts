@@ -1,13 +1,21 @@
 import { TFile, type App, type Plugin } from "obsidian";
-import type { Project, Task, VaultSnapshot } from "../models";
+import type { Habit, Project, Task, VaultSnapshot } from "../models";
+import { parseHabit } from "../parsers/habitParser";
 import { parseProject } from "../parsers/projectParser";
 import { parseTasks } from "../parsers/taskParser";
 
 export class VaultIndexService {
   private readonly tasksByPath = new Map<string, Task[]>();
   private readonly projectByPath = new Map<string, Project>();
+  private readonly habitByPath = new Map<string, Habit>();
   private readonly listeners = new Set<(snapshot: VaultSnapshot) => void>();
-  private snapshot: VaultSnapshot = { revision: 0, notes: 0, tasks: [], projects: [] };
+  private snapshot: VaultSnapshot = {
+    revision: 0,
+    notes: 0,
+    tasks: [],
+    projects: [],
+    habits: [],
+  };
   private initialized = false;
   private timer: number | null = null;
 
@@ -15,6 +23,7 @@ export class VaultIndexService {
     private readonly app: App,
     private readonly plugin: Plugin,
     private readonly getProjectTypeValue: () => string,
+    private readonly getHabitTypeValue: () => string,
   ) {}
 
   initializeWhenReady(): void {
@@ -58,6 +67,7 @@ export class VaultIndexService {
   async reindexAll(): Promise<void> {
     this.tasksByPath.clear();
     this.projectByPath.clear();
+    this.habitByPath.clear();
     const files = this.app.vault.getMarkdownFiles();
     await Promise.all(files.map((file) => this.indexFile(file, false)));
     this.rebuildSnapshot();
@@ -68,13 +78,14 @@ export class VaultIndexService {
       const content = await this.app.vault.cachedRead(file);
       this.tasksByPath.set(file.path, parseTasks(file.path, content));
 
-      const project = parseProject(
-        file,
-        this.app.metadataCache.getFileCache(file),
-        this.getProjectTypeValue(),
-      );
+      const cache = this.app.metadataCache.getFileCache(file);
+      const project = parseProject(file, cache, this.getProjectTypeValue());
       if (project) this.projectByPath.set(file.path, project);
       else this.projectByPath.delete(file.path);
+
+      const habit = parseHabit(file, cache, this.getHabitTypeValue());
+      if (habit) this.habitByPath.set(file.path, habit);
+      else this.habitByPath.delete(file.path);
 
       if (notify && this.initialized) this.scheduleSnapshot();
     } catch (error) {
@@ -85,6 +96,7 @@ export class VaultIndexService {
   private removePath(path: string, notify = true): void {
     this.tasksByPath.delete(path);
     this.projectByPath.delete(path);
+    this.habitByPath.delete(path);
     if (notify && this.initialized) this.scheduleSnapshot();
   }
 
@@ -102,6 +114,7 @@ export class VaultIndexService {
       notes: this.app.vault.getMarkdownFiles().length,
       tasks: [...this.tasksByPath.values()].flat(),
       projects: [...this.projectByPath.values()],
+      habits: [...this.habitByPath.values()],
     };
     for (const listener of this.listeners) listener(this.snapshot);
   }

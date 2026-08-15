@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "minAppVersion": "1.7.2",
-  "description": "A modular personal dashboard for tasks, projects and daily focus inside your vault.",
+  "description": "A modular personal dashboard for tasks, projects, habits and daily focus inside your vault.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }

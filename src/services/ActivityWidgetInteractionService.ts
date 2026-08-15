@@ -82,6 +82,7 @@ export class ActivityWidgetInteractionService {
     const maxValue = Math.max(1, ...points.map((point) => point.value));
     const activeCount = points.filter((point) => point.value > 0).length;
     const taskDone = points.reduce((sum, point) => sum + (point.activity?.tasksCompleted ?? 0), 0);
+    const habitDone = points.reduce((sum, point) => sum + (point.activity?.habitsCompleted ?? 0), 0);
     const streak = activityStreak(store);
 
     body.innerHTML = "";
@@ -97,6 +98,7 @@ export class ActivityWidgetInteractionService {
     summaryMain.append(
       this.stat(String(activeCount), "active days"),
       this.stat(String(taskDone), "tasks done"),
+      this.stat(String(habitDone), "habit checks"),
       this.stat(String(streak), "day streak"),
     );
     const range = document.createElement("div");
@@ -126,7 +128,7 @@ export class ActivityWidgetInteractionService {
       const level = point.value === 0 ? 0 : Math.max(1, Math.min(4, Math.ceil((point.value / maxValue) * 4)));
       cell.dataset.level = String(level);
       const activity = point.activity;
-      cell.title = `${point.date} · ${this.metricLabel(metric)} ${point.value} · 完成任务 ${activity?.tasksCompleted ?? 0} · 新建任务 ${activity?.tasksCreated ?? 0} · 笔记活动 ${(activity?.notesCreated ?? 0) + (activity?.notesModified ?? 0)}`;
+      cell.title = `${point.date} · ${this.metricLabel(metric)} ${point.value} · 完成任务 ${activity?.tasksCompleted ?? 0} · 习惯打卡 ${activity?.habitsCompleted ?? 0} · 新建任务 ${activity?.tasksCreated ?? 0} · 笔记活动 ${(activity?.notesCreated ?? 0) + (activity?.notesModified ?? 0)}`;
       grid.appendChild(cell);
     }
     scroll.appendChild(grid);
@@ -168,12 +170,13 @@ export class ActivityWidgetInteractionService {
   }
 
   private metric(value: unknown): ActivityMetric {
-    return value === "tasks" || value === "notes" ? value : "score";
+    return value === "tasks" || value === "notes" || value === "habits" ? value : "score";
   }
 
   private metricLabel(metric: ActivityMetric): string {
     if (metric === "tasks") return "TASKS";
     if (metric === "notes") return "NOTES";
+    if (metric === "habits") return "HABITS";
     return "ACTIVITY";
   }
 

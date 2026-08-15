@@ -33,6 +33,28 @@ export class DashFlowSettingsTab extends PluginSettingTab {
           await this.dashFlow.vaultIndex.reindexAll();
         }));
 
+    new Setting(containerEl)
+      .setName("习惯 type 值")
+      .setDesc("frontmatter 中 type 等于这个值的笔记会被识别为 Habit。")
+      .addText((text) => text
+        .setValue(this.dashFlow.data.settings.habitTypeValue)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.habitTypeValue = value.trim() || "habit";
+          await this.dashFlow.savePluginData();
+          await this.dashFlow.vaultIndex.reindexAll();
+        }));
+
+    new Setting(containerEl)
+      .setName("习惯文件夹")
+      .setDesc("从 Dashboard 新建 Habit 时，Markdown 文件会创建在这个目录。")
+      .addText((text) => text
+        .setPlaceholder("DashFlow/Habits")
+        .setValue(this.dashFlow.data.settings.habitFolder)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.habitFolder = value.trim() || "DashFlow/Habits";
+          await this.dashFlow.savePluginData();
+        }));
+
     const guide = containerEl.createDiv("dashflow-settings-guide");
     guide.createEl("h3", { text: "项目格式" });
     guide.createEl("pre", {
@@ -40,6 +62,14 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     });
     guide.createEl("p", {
       text: "任务通过 #project/dashflow 与项目关联；到期日支持 📅 YYYY-MM-DD。",
+    });
+
+    guide.createEl("h3", { text: "Habit 格式" });
+    guide.createEl("pre", {
+      text: "---\ntype: habit\nhabit_id: workout\nname: 每天运动\nstatus: active\nfrequency: daily\ntarget_days: 30\nhabit_log:\n  - 2026-08-15\n---",
+    });
+    guide.createEl("p", {
+      text: "Habit 定义和打卡日期都保存在 Markdown frontmatter；Activity 只保存派生统计。",
     });
   }
 }
