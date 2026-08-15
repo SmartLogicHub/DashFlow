@@ -11,7 +11,9 @@ export class ActivityService {
   private readonly listeners = new Set<() => void>();
   private unsubscribeIndex: (() => void) | null = null;
   private previousTaskStates = new Map<string, boolean>();
+  private previousHabitStates = new Map<string, boolean>();
   private hasTaskBaseline = false;
+  private hasHabitBaseline = false;
   private saveTimer: number | null = null;
   private started = false;
 
@@ -27,7 +29,7 @@ export class ActivityService {
     if (this.started) return;
     this.started = true;
 
-    this.unsubscribeIndex = this.index.subscribe((snapshot) => this.handleTaskSnapshot(snapshot));
+    this.unsubscribeIndex = this.index.subscribe((snapshot) => this.handleSnapshot(snapshot));
 
     this.plugin.registerEvent(this.app.vault.on("create", (file) => {
       if (file instanceof TFile && file.extension === "md") this.recordNoteCreated(file.path);
@@ -75,6 +77,25 @@ export class ActivityService {
     this.changed();
   }
 
+  setHabitCompleted(habitId: string, date: string, completed: boolean): void {
+    const day = this.ensureDate(date);
+    const key = stableHash(habitId);
+    const index = day.completedHabitKeys.indexOf(key);
+
+    if (completed) {
+      if (index >= 0) return;
+      day.completedHabitKeys.push(key);
+      day.habitsCompleted += 1;
+      this.changed();
+      return;
+    }
+
+    if (index < 0) return;
+    day.completedHabitKeys.splice(index, 1);
+    day.habitsCompleted = Math.max(0, day.habitsCompleted - 1);
+    this.changed();
+  }
+
   private recordNoteCreated(path: string): void {
     const day = this.ensureToday();
     const key = stableHash(path);
@@ -93,17 +114,31 @@ export class ActivityService {
     this.changed();
   }
 
-  private handleTaskSnapshot(snapshot: VaultSnapshot): void {
-    const next = new Map<string, boolean>();
+  private handleSnapshot(snapshot: VaultSnapshot): void {
+    const nextTasks = new Map<string, boolean>();
     for (const task of snapshot.tasks) {
       const key = this.taskKey(task);
-      next.set(key, task.completed);
+      nextTasks.set(key, task.completed);
       if (this.hasTaskBaseline && this.previousTaskStates.get(key) === false && task.completed) {
         this.recordTaskCompleted(task);
       }
     }
-    this.previousTaskStates = next;
+    this.previousTaskStates = nextTasks;
     this.hasTaskBaseline = true;
+
+    const today = localDate();
+    const nextHabits = new Map<string, boolean>();
+    for (const habit of snapshot.habits) {
+      const key = stableHash(habit.id);
+      const completed = habit.completedDates.includes(today);
+      nextHabits.set(key, completed);
+      if (this.hasHabitBaseline) {
+        const previous = this.previousHabitStates.get(key) ?? false;
+        if (previous !== completed) this.setHabitCompleted(habit.id, today, completed);
+      }
+    }
+    this.previousHabitStates = nextHabits;
+    this.hasHabitBaseline = true;
   }
 
   private taskKey(task: Task): string {
@@ -111,8 +146,11 @@ export class ActivityService {
   }
 
   private ensureToday(): DailyActivity {
+    return this.ensureDate(localDate());
+  }
+
+  private ensureDate(date: string): DailyActivity {
     const store = this.getStoreValue();
-    const date = localDate();
     const existing = store.days[date];
     if (existing) return this.normalizeDay(existing, date);
     const created = emptyDailyActivity(date);
@@ -122,14 +160,16 @@ export class ActivityService {
 
   private normalizeDay(day: DailyActivity, date: string): DailyActivity {
     day.date ||= date;
-    day.notesCreated ||= 0;
-    day.notesModified ||= 0;
-    day.tasksCreated ||= 0;
-    day.tasksCompleted ||= 0;
+    day.notesCreated ??= 0;
+    day.notesModified ??= 0;
+    day.tasksCreated ??= 0;
+    day.tasksCompleted ??= 0;
+    day.habitsCompleted ??= 0;
     day.createdNoteKeys ??= [];
     day.modifiedNoteKeys ??= [];
     day.createdTaskKeys ??= [];
     day.completedTaskKeys ??= [];
+    day.completedHabitKeys ??= [];
     return day;
   }
 

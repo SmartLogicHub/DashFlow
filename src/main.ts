@@ -7,6 +7,8 @@ import type { ActivityStore, DashFlowData } from "./models";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
 import { CaptureService } from "./services/CaptureService";
+import { HabitService } from "./services/HabitService";
+import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
 import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
@@ -23,6 +25,8 @@ export default class DashFlowPlugin extends Plugin {
   vaultIndex!: VaultIndexService;
   activityService!: ActivityService;
   activityWidgets!: ActivityWidgetInteractionService;
+  habitService!: HabitService;
+  habitWidgets!: HabitWidgetInteractionService;
   taskService!: TaskService;
   projectService!: ProjectService;
   captureService!: CaptureService;
@@ -38,6 +42,7 @@ export default class DashFlowPlugin extends Plugin {
       this.app,
       this,
       () => this.data.settings.projectTypeValue,
+      () => this.data.settings.habitTypeValue,
     );
     this.activityService = new ActivityService(
       this.app,
@@ -53,8 +58,16 @@ export default class DashFlowPlugin extends Plugin {
       () => this.data.settings.inboxPath,
       this.activityService,
     );
+    this.habitService = new HabitService(
+      this.app,
+      this.vaultIndex,
+      this.activityService,
+      () => this.data.settings.habitFolder,
+      () => this.data.settings.habitTypeValue,
+    );
     this.taskInteractions = new TaskInteractionService(this);
     this.activityWidgets = new ActivityWidgetInteractionService(this);
+    this.habitWidgets = new HabitWidgetInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -82,9 +95,11 @@ export default class DashFlowPlugin extends Plugin {
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
     this.activityWidgets.start();
+    this.habitWidgets.start();
   }
 
   onunload(): void {
+    this.habitWidgets?.stop();
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
     this.activityService?.stop();

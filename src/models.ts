@@ -1,7 +1,9 @@
 export type TaskPriority = "low" | "normal" | "high" | "urgent";
 export type ProjectStatus = "planned" | "active" | "paused" | "completed" | "archived";
 export type ProjectProgressMode = "tasks" | "manual";
-export type ActivityMetric = "score" | "tasks" | "notes";
+export type HabitStatus = "active" | "paused" | "completed" | "archived";
+export type HabitFrequency = "daily" | "weekdays";
+export type ActivityMetric = "score" | "tasks" | "notes" | "habits";
 
 export interface SourceLocation {
   path: string;
@@ -44,16 +46,43 @@ export interface Project {
   source: SourceLocation;
 }
 
+export interface Habit {
+  id: string;
+  name: string;
+  description?: string;
+  status: HabitStatus;
+  frequency: HabitFrequency;
+  start?: string;
+  end?: string;
+  targetDays?: number;
+  tags: string[];
+  completedDates: string[];
+  source: SourceLocation;
+}
+
+export interface HabitEditInput {
+  id?: string;
+  name: string;
+  description?: string;
+  status: HabitStatus;
+  frequency: HabitFrequency;
+  start?: string;
+  end?: string;
+  targetDays?: number;
+}
+
 export interface DailyActivity {
   date: string;
   notesCreated: number;
   notesModified: number;
   tasksCreated: number;
   tasksCompleted: number;
+  habitsCompleted: number;
   createdNoteKeys: string[];
   modifiedNoteKeys: string[];
   createdTaskKeys: string[];
   completedTaskKeys: string[];
+  completedHabitKeys: string[];
 }
 
 export interface ActivityStore {
@@ -143,10 +172,12 @@ export interface DashboardDefinition {
 export interface DashFlowSettings {
   inboxPath: string;
   projectTypeValue: string;
+  habitTypeValue: string;
+  habitFolder: string;
 }
 
 export interface DashFlowData {
-  schemaVersion: 2;
+  schemaVersion: 3;
   settings: DashFlowSettings;
   dashboards: DashboardDefinition[];
   activeDashboardId: string;
@@ -158,6 +189,7 @@ export interface VaultSnapshot {
   notes: number;
   tasks: Task[];
   projects: Project[];
+  habits: Habit[];
 }
 
 export interface QuickCaptureWidgetConfig extends Record<string, unknown> {
@@ -191,4 +223,11 @@ export interface HeatmapWidgetConfig extends Record<string, unknown> {
   days: number;
   metric: ActivityMetric;
   showLegend: boolean;
+}
+
+export interface HabitsWidgetConfig extends Record<string, unknown> {
+  historyDays: number;
+  limit: number;
+  showProgress: boolean;
+  includePaused: boolean;
 }
