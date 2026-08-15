@@ -3,6 +3,7 @@ import { DEFAULT_SETTINGS, SCHEMA_VERSION, VIEW_TYPE } from "./constants";
 import { DashboardManager } from "./dashboard/DashboardManager";
 import { DashboardView } from "./dashboard/DashboardView";
 import { createDefaultDashboard } from "./dashboard/defaultDashboard";
+import { upgradeLegacyHomeLayout } from "./dashboard/defaultLayoutMigration";
 import type { ActivityStore, DashFlowData } from "./models";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
@@ -18,6 +19,7 @@ import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
 import { VaultIndexService } from "./services/VaultIndexService";
+import { VisualPolishService } from "./services/VisualPolishService";
 import { WeeklyReviewService } from "./services/WeeklyReviewService";
 import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
@@ -45,6 +47,7 @@ export default class DashFlowPlugin extends Plugin {
   projectService!: ProjectService;
   captureService!: CaptureService;
   taskInteractions!: TaskInteractionService;
+  visualPolish!: VisualPolishService;
 
   async onload(): Promise<void> {
     this.widgetRegistry = new WidgetRegistry();
@@ -94,6 +97,7 @@ export default class DashFlowPlugin extends Plugin {
     this.mobileDashboard = new MobileDashboardInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
+    this.visualPolish = new VisualPolishService();
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -139,9 +143,11 @@ export default class DashFlowPlugin extends Plugin {
     this.mobileDashboard.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
+    this.visualPolish.start();
   }
 
   onunload(): void {
+    this.visualPolish?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
     this.mobileDashboard?.stop();
@@ -195,6 +201,10 @@ export default class DashFlowPlugin extends Plugin {
     if (this.data.dashboards.length === 0) {
       this.data.dashboards = [createDefaultDashboard(this.widgetRegistry)];
       this.data.activeDashboardId = "home";
+    } else {
+      this.data.dashboards = this.data.dashboards.map((dashboard) =>
+        upgradeLegacyHomeLayout(dashboard, this.widgetRegistry)
+      );
     }
 
     await this.savePluginData();

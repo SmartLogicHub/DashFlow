@@ -10,3 +10,4 @@ import "./dashboard-templates.test";
 import "./dashboard-transfer.test";
 import "./custom-dashboard-templates.test";
 import "./design-system.test";
+import "./visual-polish.test";
