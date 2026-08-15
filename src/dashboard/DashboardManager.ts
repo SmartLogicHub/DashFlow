@@ -9,13 +9,30 @@ import {
   reorderVisibleMobileOrder,
   type MobileMoveDirection,
 } from "../mobile/mobileLayout";
+import {
+  cloneDashboardDefinition,
+  nextDashboardId,
+  nextDuplicateDashboardName,
+  normalizeDashboardName,
+} from "./dashboardCollection";
 import { createDefaultDashboard } from "./defaultDashboard";
 
 export class DashboardManager {
+  private readonly listeners = new Set<() => void>();
+
   constructor(
     private readonly plugin: DashFlowPlugin,
     private readonly registry: WidgetRegistry,
   ) {}
+
+  subscribe(listener: () => void): () => void {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  }
+
+  list(): DashboardDefinition[] {
+    return [...this.plugin.data.dashboards];
+  }
 
   active(): DashboardDefinition {
     let active = this.plugin.data.dashboards.find(
@@ -30,6 +47,79 @@ export class DashboardManager {
     }
     this.plugin.data.activeDashboardId = active.id;
     return active;
+  }
+
+  async setActiveDashboard(dashboardId: string): Promise<boolean> {
+    const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
+    if (!dashboard) return false;
+    if (this.plugin.data.activeDashboardId === dashboardId) return true;
+    this.plugin.data.activeDashboardId = dashboardId;
+    await this.plugin.savePluginData();
+    this.emit();
+    return true;
+  }
+
+  async createDashboard(name: string): Promise<DashboardDefinition | null> {
+    const normalizedName = normalizeDashboardName(name);
+    if (!normalizedName) return null;
+    const id = nextDashboardId(normalizedName, this.plugin.data.dashboards.map((item) => item.id));
+    const dashboard = cloneDashboardDefinition(
+      createDefaultDashboard(this.registry),
+      id,
+      normalizedName,
+    );
+    this.plugin.data.dashboards.push(dashboard);
+    this.plugin.data.activeDashboardId = dashboard.id;
+    await this.plugin.savePluginData();
+    this.emit();
+    return dashboard;
+  }
+
+  async renameDashboard(dashboardId: string, name: string): Promise<boolean> {
+    const normalizedName = normalizeDashboardName(name);
+    if (!normalizedName) return false;
+    const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
+    if (!dashboard) return false;
+    if (dashboard.name === normalizedName) return true;
+    dashboard.name = normalizedName;
+    dashboard.updatedAt = Date.now();
+    await this.plugin.savePluginData();
+    this.emit();
+    return true;
+  }
+
+  async duplicateDashboard(dashboardId: string, name?: string): Promise<DashboardDefinition | null> {
+    const source = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
+    if (!source) return null;
+    const copyName = normalizeDashboardName(name ?? "") || nextDuplicateDashboardName(
+      source.name,
+      this.plugin.data.dashboards.map((item) => item.name),
+    );
+    const id = nextDashboardId(copyName, this.plugin.data.dashboards.map((item) => item.id));
+    const dashboard = cloneDashboardDefinition(source, id, copyName);
+    this.plugin.data.dashboards.push(dashboard);
+    this.plugin.data.activeDashboardId = dashboard.id;
+    await this.plugin.savePluginData();
+    this.emit();
+    return dashboard;
+  }
+
+  async deleteDashboard(dashboardId: string): Promise<boolean> {
+    if (this.plugin.data.dashboards.length <= 1) return false;
+    const index = this.plugin.data.dashboards.findIndex((item) => item.id === dashboardId);
+    if (index < 0) return false;
+    const wasActive = this.plugin.data.activeDashboardId === dashboardId;
+    this.plugin.data.dashboards.splice(index, 1);
+    if (wasActive) {
+      const fallback = (
+        this.plugin.data.dashboards[Math.min(index, this.plugin.data.dashboards.length - 1)]
+        ?? this.plugin.data.dashboards[0]
+      )!;
+      this.plugin.data.activeDashboardId = fallback.id;
+    }
+    await this.plugin.savePluginData();
+    this.emit();
+    return true;
   }
 
   mobileState(dashboard: DashboardDefinition): DashboardMobileSettings {
@@ -49,6 +139,7 @@ export class DashboardManager {
     if (index >= 0) this.plugin.data.dashboards[index] = value;
     else this.plugin.data.dashboards.push(value);
     await this.plugin.savePluginData();
+    this.emit();
   }
 
   async updateWidget(
@@ -179,5 +270,9 @@ export class DashboardManager {
       settings: defaults.settings,
       mobile: defaults.mobile,
     });
+  }
+
+  private emit(): void {
+    for (const listener of this.listeners) listener();
   }
 }
