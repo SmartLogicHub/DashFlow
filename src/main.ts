@@ -185,6 +185,7 @@ export default class DashFlowPlugin extends Plugin {
       },
       dashboards: Array.isArray(loaded?.dashboards) ? loaded.dashboards : [],
       activeDashboardId: loaded?.activeDashboardId ?? "home",
+      customTemplates: Array.isArray(loaded?.customTemplates) ? loaded.customTemplates : [],
       activity: {
         startedAt: loaded?.activity?.startedAt ?? localDate(),
         days: loaded?.activity?.days ?? {},

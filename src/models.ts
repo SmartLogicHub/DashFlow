@@ -174,6 +174,16 @@ export interface DashboardDefinition {
   updatedAt: number;
 }
 
+export interface CustomDashboardTemplate {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  dashboard: DashboardDefinition;
+  createdAt: number;
+  updatedAt: number;
+}
+
 export interface DashFlowSettings {
   inboxPath: string;
   projectTypeValue: string;
@@ -182,10 +192,11 @@ export interface DashFlowSettings {
 }
 
 export interface DashFlowData {
-  schemaVersion: 3;
+  schemaVersion: 4;
   settings: DashFlowSettings;
   dashboards: DashboardDefinition[];
   activeDashboardId: string;
+  customTemplates: CustomDashboardTemplate[];
   activity: ActivityStore;
 }
 
