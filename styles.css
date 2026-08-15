@@ -1,0 +1,605 @@
+.dashflow-view-container {
+  padding: 0 !important;
+  overflow: auto;
+  background:
+    radial-gradient(circle at 12% -10%, color-mix(in srgb, var(--interactive-accent) 10%, transparent), transparent 34%),
+    var(--background-primary);
+}
+
+.dashflow-shell {
+  --df-border: color-mix(in srgb, var(--background-modifier-border) 78%, transparent);
+  --df-soft: color-mix(in srgb, var(--background-secondary) 76%, transparent);
+  --df-muted: var(--text-muted);
+  width: min(1440px, calc(100% - 48px));
+  margin: 0 auto;
+  padding: 44px 0 110px;
+  color: var(--text-normal);
+}
+
+.dashflow-hero {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 0 4px 28px;
+}
+
+.dashflow-eyebrow,
+.dashflow-widget-kicker,
+.dashflow-pulse-label,
+.dashflow-section-title > span {
+  letter-spacing: .12em;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.dashflow-hero h1 {
+  margin: 8px 0 5px;
+  font-size: clamp(30px, 5vw, 52px);
+  line-height: 1;
+  letter-spacing: -.04em;
+  font-weight: 720;
+}
+
+.dashflow-hero p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 13px;
+}
+
+.dashflow-edit-button,
+.dashflow-edit-bar button,
+.dashflow-capture button {
+  border: 1px solid var(--df-border);
+  background: var(--background-secondary);
+  color: var(--text-normal);
+  border-radius: 9px;
+  padding: 8px 12px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dashflow-edit-button:hover,
+.dashflow-edit-bar button:hover,
+.dashflow-capture button:hover {
+  background: var(--background-modifier-hover);
+}
+
+.dashflow-edit-button.is-active {
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  border-color: var(--interactive-accent);
+}
+
+.dashflow-pulse {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  border-block: 1px solid var(--df-border);
+  min-height: 45px;
+  margin-bottom: 42px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.dashflow-pulse > span {
+  white-space: nowrap;
+  padding: 0 18px;
+  font-size: 10px;
+  letter-spacing: .08em;
+  color: var(--text-muted);
+}
+
+.dashflow-pulse > span + span {
+  border-left: 1px solid var(--df-border);
+}
+
+.dashflow-pulse strong {
+  color: var(--text-normal);
+  margin-right: 4px;
+  font-size: 12px;
+}
+
+.dashflow-pulse-label {
+  padding-left: 4px !important;
+  padding-right: 22px !important;
+}
+
+.dashflow-section-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px 12px;
+}
+
+.dashflow-section-title small {
+  color: var(--text-faint);
+  font-size: 11px;
+}
+
+.dashflow-grid {
+  display: grid;
+  align-items: stretch;
+  position: relative;
+}
+
+.dashflow-widget {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--df-border);
+  background: color-mix(in srgb, var(--background-primary) 94%, var(--background-secondary));
+  border-radius: 13px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, .04);
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+
+.dashflow-grid.is-editing .dashflow-widget {
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--interactive-accent) 38%, var(--df-border));
+}
+
+.dashflow-widget:hover {
+  border-color: color-mix(in srgb, var(--interactive-accent) 35%, var(--df-border));
+}
+
+.dashflow-widget-header {
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--df-border);
+  user-select: none;
+}
+
+.dashflow-widget-header > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.dashflow-widget-header strong {
+  font-size: 12px;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dashflow-widget-icon {
+  color: var(--text-muted);
+  font-size: 13px;
+  width: 16px;
+  text-align: center;
+}
+
+.dashflow-widget-controls {
+  display: flex;
+  gap: 4px;
+}
+
+.dashflow-widget-controls button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-muted);
+  width: 25px;
+  height: 25px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 15px;
+}
+
+.dashflow-widget-controls button:hover {
+  background: var(--background-modifier-hover);
+  color: var(--text-normal);
+}
+
+.dashflow-widget-body {
+  height: calc(100% - 43px);
+  box-sizing: border-box;
+  padding: 14px;
+  overflow: auto;
+}
+
+.dashflow-empty {
+  height: 100%;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 11px;
+  line-height: 1.6;
+  padding: 8px;
+  box-sizing: border-box;
+}
+
+.dashflow-empty code {
+  font-size: 10px;
+}
+
+.dashflow-widget-kicker {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 9px;
+}
+
+.dashflow-widget-kicker span {
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 500;
+  color: var(--text-faint);
+}
+
+.dashflow-task-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.dashflow-task {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr) auto;
+  gap: 7px;
+  align-items: start;
+  padding: 7px 1px;
+  border-bottom: 1px solid color-mix(in srgb, var(--df-border) 55%, transparent);
+  font-size: 11px;
+  line-height: 1.35;
+}
+
+.dashflow-task:last-child {
+  border-bottom: 0;
+}
+
+.dashflow-task input {
+  margin: 1px 0 0;
+}
+
+.dashflow-task span.is-completed {
+  text-decoration: line-through;
+  color: var(--text-faint);
+}
+
+.dashflow-task time {
+  color: var(--text-faint);
+  font-size: 9px;
+  padding-top: 2px;
+}
+
+.dashflow-capture {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.dashflow-capture textarea {
+  flex: 1;
+  resize: none;
+  border: 0;
+  background: transparent;
+  color: var(--text-normal);
+  padding: 2px;
+  min-height: 54px;
+  font: inherit;
+  font-size: 12px;
+  box-shadow: none !important;
+}
+
+.dashflow-capture textarea::placeholder {
+  color: var(--text-faint);
+}
+
+.dashflow-capture-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--df-border);
+}
+
+.dashflow-capture-footer span {
+  color: var(--text-faint);
+  font-size: 9px;
+}
+
+.dashflow-capture button {
+  padding: 5px 9px;
+}
+
+.dashflow-progress-wrap {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 8px;
+}
+
+.dashflow-progress-ring {
+  --dashflow-progress: 0deg;
+  width: 105px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--interactive-accent) var(--dashflow-progress), var(--background-modifier-border) 0);
+  position: relative;
+}
+
+.dashflow-progress-ring::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  background: var(--background-primary);
+}
+
+.dashflow-progress-ring > div {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+}
+
+.dashflow-progress-ring strong {
+  display: block;
+  font-size: 22px;
+  letter-spacing: -.04em;
+}
+
+.dashflow-progress-ring span {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-faint);
+  font-size: 8px;
+  letter-spacing: .12em;
+}
+
+.dashflow-progress-meta {
+  font-size: 9px;
+  color: var(--text-faint);
+}
+
+.dashflow-project-list {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.dashflow-project-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 54px;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  color: var(--text-normal);
+  padding: 9px 3px;
+  border-bottom: 1px solid color-mix(in srgb, var(--df-border) 55%, transparent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.dashflow-project-row:hover {
+  background: var(--background-modifier-hover);
+  border-radius: 7px;
+}
+
+.dashflow-project-name {
+  font-size: 11px;
+  margin-bottom: 7px;
+}
+
+.dashflow-project-bar {
+  height: 4px;
+  border-radius: 99px;
+  background: var(--background-modifier-border);
+  overflow: hidden;
+}
+
+.dashflow-project-bar span {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--interactive-accent);
+}
+
+.dashflow-project-stat {
+  text-align: right;
+}
+
+.dashflow-project-stat strong {
+  display: block;
+  font-size: 11px;
+}
+
+.dashflow-project-stat span {
+  color: var(--text-faint);
+  font-size: 9px;
+}
+
+.dashflow-countdown {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  align-content: center;
+}
+
+.dashflow-countdown > span {
+  color: var(--text-faint);
+  font-size: 9px;
+  letter-spacing: .16em;
+}
+
+.dashflow-countdown > strong {
+  font-size: clamp(35px, 5vw, 58px);
+  line-height: .95;
+  margin-top: 3px;
+  letter-spacing: -.06em;
+  font-weight: 700;
+}
+
+.dashflow-countdown > small {
+  color: var(--text-muted);
+  font-size: 9px;
+  letter-spacing: .18em;
+  margin-top: 5px;
+}
+
+.dashflow-date-input {
+  margin-top: 8px;
+  max-width: 130px;
+  font-size: 10px;
+}
+
+.dashflow-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  height: 100%;
+}
+
+.dashflow-stat {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  border-right: 1px solid var(--df-border);
+}
+
+.dashflow-stat:last-child {
+  border-right: 0;
+}
+
+.dashflow-stat strong {
+  font-size: clamp(20px, 3vw, 34px);
+  letter-spacing: -.04em;
+}
+
+.dashflow-stat span {
+  font-size: 8px;
+  color: var(--text-faint);
+  letter-spacing: .12em;
+}
+
+.dashflow-resize-handle {
+  appearance: none;
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 18px;
+  height: 18px;
+  border: 0;
+  background:
+    linear-gradient(135deg, transparent 50%, color-mix(in srgb, var(--interactive-accent) 70%, var(--text-muted)) 51% 57%, transparent 58% 66%, color-mix(in srgb, var(--interactive-accent) 70%, var(--text-muted)) 67% 73%, transparent 74%);
+  cursor: nwse-resize;
+  opacity: .65;
+}
+
+.dashflow-edit-bar {
+  position: sticky;
+  bottom: 18px;
+  z-index: 20;
+  margin: 26px auto 0;
+  width: fit-content;
+  max-width: calc(100% - 20px);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border: 1px solid var(--df-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--background-secondary) 92%, transparent);
+  box-shadow: 0 10px 40px rgba(0, 0, 0, .12);
+  backdrop-filter: blur(12px);
+}
+
+.dashflow-edit-bar select {
+  max-width: 145px;
+  font-size: 11px;
+}
+
+.dashflow-edit-bar > span {
+  color: var(--text-faint);
+  font-size: 9px;
+  padding: 0 5px;
+}
+
+.dashflow-settings-guide {
+  margin-top: 24px;
+}
+
+.dashflow-settings-guide pre {
+  font-size: 11px;
+}
+
+@media (max-width: 900px) {
+  .dashflow-shell {
+    width: min(100% - 24px, 720px);
+    padding-top: 24px;
+  }
+
+  .dashflow-hero {
+    flex-direction: column;
+    padding-bottom: 20px;
+  }
+
+  .dashflow-grid {
+    display: flex !important;
+    flex-direction: column;
+    gap: 12px !important;
+  }
+
+  .dashflow-widget {
+    min-height: 220px;
+  }
+
+  .dashflow-widget[style] {
+    grid-column: auto !important;
+    grid-row: auto !important;
+  }
+
+  .dashflow-resize-handle,
+  .dashflow-widget-controls button:first-child {
+    display: none;
+  }
+
+  .dashflow-pulse {
+    margin-bottom: 28px;
+  }
+
+  .dashflow-edit-bar {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .dashflow-edit-bar > span {
+    display: none;
+  }
+}
+
+@media (max-width: 520px) {
+  .dashflow-shell {
+    width: calc(100% - 16px);
+  }
+
+  .dashflow-hero h1 {
+    font-size: 34px;
+  }
+
+  .dashflow-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .dashflow-stat {
+    min-height: 70px;
+    border-bottom: 1px solid var(--df-border);
+  }
+
+  .dashflow-widget {
+    min-height: 210px;
+  }
+}
