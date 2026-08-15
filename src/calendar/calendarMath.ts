@@ -49,5 +49,5 @@ export function groupCalendarEvents(events: CalendarEvent[]): Map<string, Calend
 
 export function calendarWeekdayLabels(weekStart: CalendarWeekStart): string[] {
   const sunday = ["日", "一", "二", "三", "四", "五", "六"];
-  return weekStart === "monday" ? [...sunday.slice(1), sunday[0]] : sunday;
+  return weekStart === "monday" ? [...sunday.slice(1), sunday[0]!] : sunday;
 }

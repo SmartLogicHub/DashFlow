@@ -98,7 +98,7 @@ export class CalendarWidgetInteractionService {
     const selected = this.selectedByWidget.get(widget.id) ?? today;
     const month = this.monthByWidget.get(widget.id) ?? selected.slice(0, 7);
     const cells = calendarMonthGrid(month, weekStart, today);
-    const events = this.plugin.calendarService.eventsBetween(cells[0].date, cells[cells.length - 1].date, config);
+    const events = this.plugin.calendarService.eventsBetween(cells[0]!.date, cells[cells.length - 1]!.date, config);
     const grouped = groupCalendarEvents(events);
 
     body.innerHTML = "";
