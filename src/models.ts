@@ -47,6 +47,34 @@ export interface WidgetSize {
   h: number;
 }
 
+interface WidgetSettingBase {
+  key: string;
+  label: string;
+  description?: string;
+}
+
+export type WidgetSettingField =
+  | (WidgetSettingBase & {
+      type: "text";
+      placeholder?: string;
+    })
+  | (WidgetSettingBase & {
+      type: "number";
+      min?: number;
+      max?: number;
+      step?: number;
+    })
+  | (WidgetSettingBase & {
+      type: "toggle";
+    })
+  | (WidgetSettingBase & {
+      type: "date";
+    })
+  | (WidgetSettingBase & {
+      type: "select";
+      options: Array<{ label: string; value: string }>;
+    });
+
 export interface WidgetInstance<TConfig extends Record<string, unknown> = Record<string, unknown>> {
   id: string;
   type: string;
@@ -64,6 +92,7 @@ export interface WidgetDefinition<TConfig extends Record<string, unknown> = Reco
   defaultSize: WidgetSize;
   minSize?: WidgetSize;
   maxSize?: WidgetSize;
+  settings?: WidgetSettingField[];
   defaultConfig: () => TConfig;
 }
 
