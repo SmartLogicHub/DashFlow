@@ -3,3 +3,4 @@ import "./task-format.test";
 import "./activity.test";
 import "./habit.test";
 import "./calendar.test";
+import "./weekly-review.test";

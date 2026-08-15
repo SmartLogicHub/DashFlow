@@ -206,3 +206,11 @@ export interface CalendarWidgetConfig extends Record<string, unknown> {
   showCompletedTasks: boolean;
   agendaLimit: number;
 }
+export interface WeeklyReviewWidgetConfig extends Record<string, unknown> {
+  weekStart: CalendarWeekStart;
+  carryoverLimit: number;
+  projectLimit: number;
+  nextWeekLimit: number;
+  showHabits: boolean;
+  showActivityComparison: boolean;
+}
