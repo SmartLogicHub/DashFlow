@@ -12,6 +12,7 @@ import type {
   WidgetDefinition,
   WidgetInstance,
   WidgetLayout,
+  WidgetSettingField,
 } from "../models";
 import { moveLayout, resizeLayout, resolveWidgetLayout } from "../layout/grid";
 import { createElement } from "../ui/dom";
@@ -20,6 +21,7 @@ import { PLUGIN_VERSION } from "../constants";
 
 export class DashboardRenderer {
   private editing = false;
+  private configuringWidgetId: string | null = null;
   private readonly unsubscribe: () => void;
 
   constructor(
@@ -70,6 +72,16 @@ export class DashboardRenderer {
     }
 
     if (this.editing) shell.appendChild(this.renderEditBar(dashboard));
+
+    if (this.configuringWidgetId) {
+      const widget = dashboard.widgets.find((item) => item.id === this.configuringWidgetId);
+      const definition = widget ? this.plugin.widgetRegistry.get(widget.type) : undefined;
+      if (widget && definition) {
+        this.container.appendChild(this.renderWidgetConfigModal(dashboard, widget, definition));
+      } else {
+        this.configuringWidgetId = null;
+      }
+    }
   }
 
   private renderHero(dashboard: DashboardDefinition): HTMLElement {
@@ -86,6 +98,7 @@ export class DashboardRenderer {
     );
     button.addEventListener("click", () => {
       this.editing = !this.editing;
+      if (!this.editing) this.configuringWidgetId = null;
       this.render();
     });
 
@@ -141,14 +154,23 @@ export class DashboardRenderer {
         this.startPointerAction(event, dashboard, widget, definition, grid, card, "move");
       });
 
+      const settings = createElement("button", "", "⚙");
+      settings.type = "button";
+      settings.title = "配置卡片";
+      settings.addEventListener("click", () => {
+        this.configuringWidgetId = widget.id;
+        this.render();
+      });
+
       const remove = createElement("button", "", "×");
       remove.type = "button";
       remove.title = "移除";
       remove.addEventListener("click", async () => {
         await this.plugin.dashboardManager.removeWidget(dashboard.id, widget.id);
+        if (this.configuringWidgetId === widget.id) this.configuringWidgetId = null;
         this.render();
       });
-      controls.append(drag, remove);
+      controls.append(drag, settings, remove);
       header.appendChild(controls);
     }
 
@@ -194,7 +216,7 @@ export class DashboardRenderer {
         this.renderUpcoming(body, widget);
         break;
       case "countdown":
-        this.renderCountdown(body, dashboard, widget);
+        this.renderCountdown(body, widget);
         break;
       case "vault-stats":
         this.renderVaultStats(body);
@@ -351,11 +373,7 @@ export class DashboardRenderer {
     this.renderTaskList(body, tasks, "未来几天没有到期任务");
   }
 
-  private renderCountdown(
-    body: HTMLElement,
-    dashboard: DashboardDefinition,
-    widget: WidgetInstance,
-  ): void {
+  private renderCountdown(body: HTMLElement, widget: WidgetInstance): void {
     const config = widget.config as CountdownWidgetConfig;
     const today = new Date(`${localDate()}T12:00:00`);
     const target = new Date(`${config.targetDate}T12:00:00`);
@@ -369,25 +387,6 @@ export class DashboardRenderer {
       createElement("strong", "", String(days)),
       createElement("small", "", "DAYS"),
     );
-
-    if (this.editing) {
-      const input = createElement("input", "dashflow-date-input");
-      input.type = "date";
-      input.value = config.targetDate ?? "";
-      input.addEventListener("change", async () => {
-        await this.plugin.dashboardManager.updateWidget(
-          dashboard.id,
-          widget.id,
-          (current) => ({
-            ...current,
-            config: { ...current.config, targetDate: input.value },
-          }),
-        );
-        this.render();
-      });
-      wrap.appendChild(input);
-    }
-
     body.appendChild(wrap);
   }
 
@@ -436,9 +435,189 @@ export class DashboardRenderer {
       select,
       add,
       reset,
-      createElement("span", "", "拖动会自动让位并压缩空白；右下角可调整大小"),
+      createElement("span", "", "⠿ 拖动 · ⚙ 配置 · 右下角调整大小"),
     );
     return bar;
+  }
+
+  private renderWidgetConfigModal(
+    dashboard: DashboardDefinition,
+    widget: WidgetInstance,
+    definition: WidgetDefinition,
+  ): HTMLElement {
+    const container = createElement("div", "modal-container mod-dim");
+    const backdrop = createElement("div", "modal-bg");
+    const modal = createElement("div", "modal");
+    const closeButton = createElement("button", "modal-close-button", "×");
+    closeButton.type = "button";
+    closeButton.setAttribute("aria-label", "关闭");
+    const content = createElement("div", "modal-content");
+    const draftConfig: Record<string, unknown> = { ...widget.config };
+    let draftTitle = widget.title ?? "";
+
+    const close = (): void => {
+      this.configuringWidgetId = null;
+      this.render();
+    };
+
+    closeButton.addEventListener("click", close);
+    backdrop.addEventListener("click", close);
+    container.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") close();
+    });
+    container.tabIndex = -1;
+
+    content.appendChild(createElement("h2", "", `配置 · ${widget.title ?? definition.name}`));
+    content.appendChild(createElement(
+      "p",
+      "setting-item-description",
+      "设置只作用于当前这张卡片。同一种 Widget 的其他实例不会被修改。",
+    ));
+
+    const titleInput = createElement("input");
+    titleInput.type = "text";
+    titleInput.value = draftTitle;
+    titleInput.placeholder = definition.name;
+    titleInput.addEventListener("input", () => {
+      draftTitle = titleInput.value;
+    });
+    content.appendChild(this.renderSettingRow(
+      "卡片标题",
+      "留空时使用 Widget 默认名称。",
+      titleInput,
+    ));
+
+    for (const field of definition.settings ?? []) {
+      const control = this.createWidgetSettingControl(field, draftConfig);
+      content.appendChild(this.renderSettingRow(
+        field.label,
+        field.description ?? "",
+        control,
+      ));
+    }
+
+    if ((definition.settings?.length ?? 0) === 0) {
+      content.appendChild(createElement(
+        "p",
+        "setting-item-description",
+        "这个 Widget 当前没有额外参数，但仍可以为该实例设置独立标题。",
+      ));
+    }
+
+    const buttons = createElement("div", "modal-button-container");
+    const reset = createElement("button", "", "恢复默认");
+    reset.type = "button";
+    reset.addEventListener("click", async () => {
+      await this.plugin.dashboardManager.updateWidget(
+        dashboard.id,
+        widget.id,
+        (current) => ({
+          ...current,
+          title: undefined,
+          config: definition.defaultConfig(),
+        }),
+      );
+      close();
+    });
+
+    const cancel = createElement("button", "", "取消");
+    cancel.type = "button";
+    cancel.addEventListener("click", close);
+
+    const save = createElement("button", "mod-cta", "保存");
+    save.type = "button";
+    save.addEventListener("click", async () => {
+      await this.plugin.dashboardManager.updateWidget(
+        dashboard.id,
+        widget.id,
+        (current) => ({
+          ...current,
+          title: draftTitle.trim() || undefined,
+          config: { ...draftConfig },
+        }),
+      );
+      close();
+    });
+
+    buttons.append(reset, cancel, save);
+    content.appendChild(buttons);
+    modal.append(closeButton, content);
+    container.append(backdrop, modal);
+
+    window.setTimeout(() => titleInput.focus(), 0);
+    return container;
+  }
+
+  private renderSettingRow(
+    label: string,
+    description: string,
+    control: HTMLElement,
+  ): HTMLElement {
+    const row = createElement("div", "setting-item");
+    const info = createElement("div", "setting-item-info");
+    info.appendChild(createElement("div", "setting-item-name", label));
+    if (description) info.appendChild(createElement("div", "setting-item-description", description));
+    const controlWrap = createElement("div", "setting-item-control");
+    controlWrap.appendChild(control);
+    row.append(info, controlWrap);
+    return row;
+  }
+
+  private createWidgetSettingControl(
+    field: WidgetSettingField,
+    draftConfig: Record<string, unknown>,
+  ): HTMLElement {
+    const current = draftConfig[field.key];
+
+    if (field.type === "toggle") {
+      const input = createElement("input");
+      input.type = "checkbox";
+      input.checked = Boolean(current);
+      input.addEventListener("change", () => {
+        draftConfig[field.key] = input.checked;
+      });
+      return input;
+    }
+
+    if (field.type === "select") {
+      const select = createElement("select");
+      for (const optionDefinition of field.options) {
+        const option = createElement("option", "", optionDefinition.label);
+        option.value = optionDefinition.value;
+        option.selected = String(current ?? "") === optionDefinition.value;
+        select.appendChild(option);
+      }
+      select.addEventListener("change", () => {
+        draftConfig[field.key] = select.value;
+      });
+      return select;
+    }
+
+    const input = createElement("input");
+    input.type = field.type;
+
+    if (field.type === "number") {
+      if (field.min !== undefined) input.min = String(field.min);
+      if (field.max !== undefined) input.max = String(field.max);
+      if (field.step !== undefined) input.step = String(field.step);
+      input.value = String(current ?? field.min ?? 0);
+      input.addEventListener("change", () => {
+        let value = Number(input.value);
+        if (!Number.isFinite(value)) value = Number(current ?? field.min ?? 0);
+        if (field.min !== undefined) value = Math.max(field.min, value);
+        if (field.max !== undefined) value = Math.min(field.max, value);
+        draftConfig[field.key] = value;
+        input.value = String(value);
+      });
+      return input;
+    }
+
+    input.value = String(current ?? "");
+    if (field.type === "text" && field.placeholder) input.placeholder = field.placeholder;
+    input.addEventListener("input", () => {
+      draftConfig[field.key] = input.value;
+    });
+    return input;
   }
 
   private startPointerAction(
