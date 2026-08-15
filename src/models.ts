@@ -4,6 +4,8 @@ export type ProjectProgressMode = "tasks" | "manual";
 export type HabitStatus = "active" | "paused" | "completed" | "archived";
 export type HabitFrequency = "daily" | "weekdays";
 export type ActivityMetric = "score" | "tasks" | "notes" | "habits";
+export type CalendarEventKind = "task-due" | "task-scheduled" | "project-deadline" | "habit";
+export type CalendarWeekStart = "monday" | "sunday";
 
 export interface SourceLocation {
   path: string;
@@ -71,6 +73,17 @@ export interface HabitEditInput {
   targetDays?: number;
 }
 
+export interface CalendarEvent {
+  id: string;
+  date: string;
+  kind: CalendarEventKind;
+  title: string;
+  entityId: string;
+  source: SourceLocation;
+  completed?: boolean;
+  priority?: TaskPriority;
+}
+
 export interface DailyActivity {
   date: string;
   notesCreated: number;
@@ -109,26 +122,11 @@ interface WidgetSettingBase {
 }
 
 export type WidgetSettingField =
-  | (WidgetSettingBase & {
-      type: "text";
-      placeholder?: string;
-    })
-  | (WidgetSettingBase & {
-      type: "number";
-      min?: number;
-      max?: number;
-      step?: number;
-    })
-  | (WidgetSettingBase & {
-      type: "toggle";
-    })
-  | (WidgetSettingBase & {
-      type: "date";
-    })
-  | (WidgetSettingBase & {
-      type: "select";
-      options: Array<{ label: string; value: string }>;
-    });
+  | (WidgetSettingBase & { type: "text"; placeholder?: string })
+  | (WidgetSettingBase & { type: "number"; min?: number; max?: number; step?: number })
+  | (WidgetSettingBase & { type: "toggle" })
+  | (WidgetSettingBase & { type: "date" })
+  | (WidgetSettingBase & { type: "select"; options: Array<{ label: string; value: string }> });
 
 export interface WidgetInstance<TConfig extends Record<string, unknown> = Record<string, unknown>> {
   id: string;
@@ -192,42 +190,19 @@ export interface VaultSnapshot {
   habits: Habit[];
 }
 
-export interface QuickCaptureWidgetConfig extends Record<string, unknown> {
-  placeholder: string;
-}
-
-export interface TasksWidgetConfig extends Record<string, unknown> {
-  includeOverdue: boolean;
-  limit: number;
-}
-
-export interface ProgressWidgetConfig extends Record<string, unknown> {
-  label: string;
-}
-
-export interface ProjectsWidgetConfig extends Record<string, unknown> {
-  limit: number;
-}
-
-export interface UpcomingWidgetConfig extends Record<string, unknown> {
-  days: number;
-  limit: number;
-}
-
-export interface CountdownWidgetConfig extends Record<string, unknown> {
-  title: string;
-  targetDate: string;
-}
-
-export interface HeatmapWidgetConfig extends Record<string, unknown> {
-  days: number;
-  metric: ActivityMetric;
-  showLegend: boolean;
-}
-
-export interface HabitsWidgetConfig extends Record<string, unknown> {
-  historyDays: number;
-  limit: number;
-  showProgress: boolean;
-  includePaused: boolean;
+export interface QuickCaptureWidgetConfig extends Record<string, unknown> { placeholder: string; }
+export interface TasksWidgetConfig extends Record<string, unknown> { includeOverdue: boolean; limit: number; }
+export interface ProgressWidgetConfig extends Record<string, unknown> { label: string; }
+export interface ProjectsWidgetConfig extends Record<string, unknown> { limit: number; }
+export interface UpcomingWidgetConfig extends Record<string, unknown> { days: number; limit: number; }
+export interface CountdownWidgetConfig extends Record<string, unknown> { title: string; targetDate: string; }
+export interface HeatmapWidgetConfig extends Record<string, unknown> { days: number; metric: ActivityMetric; showLegend: boolean; }
+export interface HabitsWidgetConfig extends Record<string, unknown> { historyDays: number; limit: number; showProgress: boolean; includePaused: boolean; }
+export interface CalendarWidgetConfig extends Record<string, unknown> {
+  weekStart: CalendarWeekStart;
+  showTasks: boolean;
+  showProjects: boolean;
+  showHabits: boolean;
+  showCompletedTasks: boolean;
+  agendaLimit: number;
 }

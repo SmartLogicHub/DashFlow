@@ -6,6 +6,8 @@ import { createDefaultDashboard } from "./dashboard/defaultDashboard";
 import type { ActivityStore, DashFlowData } from "./models";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
+import { CalendarService } from "./services/CalendarService";
+import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInteractionService";
 import { CaptureService } from "./services/CaptureService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
@@ -25,6 +27,8 @@ export default class DashFlowPlugin extends Plugin {
   vaultIndex!: VaultIndexService;
   activityService!: ActivityService;
   activityWidgets!: ActivityWidgetInteractionService;
+  calendarService!: CalendarService;
+  calendarWidgets!: CalendarWidgetInteractionService;
   habitService!: HabitService;
   habitWidgets!: HabitWidgetInteractionService;
   taskService!: TaskService;
@@ -53,6 +57,7 @@ export default class DashFlowPlugin extends Plugin {
     );
     this.taskService = new TaskService(this.app, this.vaultIndex, this.activityService);
     this.projectService = new ProjectService(this.vaultIndex);
+    this.calendarService = new CalendarService(this.vaultIndex);
     this.captureService = new CaptureService(
       this.app,
       () => this.data.settings.inboxPath,
@@ -68,6 +73,7 @@ export default class DashFlowPlugin extends Plugin {
     this.taskInteractions = new TaskInteractionService(this);
     this.activityWidgets = new ActivityWidgetInteractionService(this);
     this.habitWidgets = new HabitWidgetInteractionService(this);
+    this.calendarWidgets = new CalendarWidgetInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -96,9 +102,11 @@ export default class DashFlowPlugin extends Plugin {
     this.taskInteractions.start();
     this.activityWidgets.start();
     this.habitWidgets.start();
+    this.calendarWidgets.start();
   }
 
   onunload(): void {
+    this.calendarWidgets?.stop();
     this.habitWidgets?.stop();
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();

@@ -1,27 +1,48 @@
-# DashFlow v0.1.5
+# DashFlow v0.1.6
 
 DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 继续以 Markdown / frontmatter 为真实数据源，Widget 和 Dashboard 负责查询、展示和操作。
 
+## v0.1.6：Calendar + Agenda
+
+这一版加入统一时间层，把现有 Domain 里的日期投射到同一张月历：
+
+- Task `📅 due`
+- Task `⏳ scheduled`
+- Project `deadline`
+- Habit `daily / weekdays` 节奏
+
+Calendar Widget 支持：
+
+- 6 周月视图，周一 / 周日起始可配置
+- 上一月 / 下一月 / 回到今天
+- 每日事件标记和选中日期
+- 右侧当日 Agenda
+- Agenda 直接打开 Task Editor / Habit Editor / Project 原文
+- 在选中日期直接新建 Task，自动预填 due date
+- Habit 支持当天与历史日期补打卡 / 取消打卡；未来日期不会提前打卡
+- 可配置是否显示 Task、已完成 Task、Project deadline、Habit
+- Agenda 显示数量可配置
+- 同一种 Calendar Widget 支持多实例独立配置
+
+Calendar 本身不保存第二份业务数据。它只读取 VaultIndexService 中已有的 Task / Project / Habit，然后通过 CalendarService 生成临时 `CalendarEvent`。
+
+```text
+Task / Project / Habit
+        ↓
+   VaultIndexService
+        ↓
+    CalendarService
+        ↓
+ CalendarEvent[]
+        ↓
+ Month Grid + Agenda
+```
+
+现有用户升级后可以在 **编辑布局 → 添加卡片 → 日历** 中加入；新安装的默认 Dashboard 会直接带一张全宽 Calendar。
+
 ## v0.1.5：Habit / 长周期任务
 
-这一版把长期习惯正式纳入 DashFlow 的 Domain 层，并复用 v0.1.4 的 Activity 数据层。
-
-Habit 支持：
-
-- Dashboard 直接创建 Habit Markdown
-- Dashboard 直接编辑名称、频率、状态、起止日期与目标天数
-- 每日一键打卡 / 取消打卡
-- `daily` 与 `weekdays` 两种频率
-- 最近 7–30 天打卡轨迹
-- 连续打卡 streak
-- 最近 30 天完成率
-- 14 / 30 / 100 天等长期目标进度
-- active / paused / completed / archived 状态
-- Habit Widget 多实例与独立配置
-- Heatmap 新增「习惯」统计维度
-- 习惯打卡进入综合 Activity Score
-
-Habit 的定义和真实打卡日期保存在 Markdown frontmatter：
+Habit 已是正式 Domain，并保持 Markdown source-of-truth：
 
 ```yaml
 ---
@@ -37,48 +58,21 @@ habit_log:
 ---
 ```
 
-`habit_log` 是打卡记录的 Source of Truth。Activity 只保存派生统计，因此卸载 DashFlow 后习惯数据仍然保留在 Vault 中。
-
-综合活跃度当前权重为：完成任务 ×4、新建任务 ×1、新建笔记 ×3、当天首次修改笔记 ×1、习惯打卡 ×3。
+支持 Dashboard 创建 / 编辑、daily / weekdays、每日打卡、历史轨迹、streak、30 天完成率、长期目标进度、暂停 / 完成 / 归档，以及 Heatmap Habit 维度。
 
 ## v0.1.4：Activity Tracker + Heatmap
 
-Activity Tracker 从启用 v0.1.4 后开始累计：
-
-- 新建 Markdown 笔记
-- 当天首次修改某篇 Markdown 笔记
-- 通过 DashFlow 新建任务
-- 完成任务（包括 Dashboard 操作和大部分直接 Markdown 勾选）
-- v0.1.5 起记录 Habit 打卡
-
-Heatmap 支持：
-
-- 28–365 天显示范围
-- 综合活跃度 / 任务 / 习惯 / 笔记统计维度
-- 4 级强度显示
-- Active days
-- Tasks done
-- Habit checks
-- Day streak
-- 每日 hover 明细
-- 独立 Widget 配置与多实例
+Activity Tracker 从启用后开始累计新建/修改笔记、任务创建/完成和 Habit 打卡。Heatmap 支持综合活跃度 / Tasks / Habits / Notes 四种统计维度。
 
 > Activity 是派生统计，不会伪造安装前的历史编辑数据。
 
 ## v0.1.3：Task Editor
 
-Dashboard 里的任务可以直接操作，同时 Markdown 仍然是唯一真实数据源：
-
-- 点击 Today / Upcoming 的任务标题打开编辑器
-- 修改标题、完成状态、到期日期、优先级、所属项目
-- 修改直接写回原始 Markdown 行
-- 保留缩进、列表符号、普通标签及已有 start / scheduled / completed 元数据
-- Today Widget 可结构化新建任务到 Inbox
-- 项目通过 `#project/<id>` 关联
+Dashboard 中可直接创建和编辑任务，修改会写回原始 Markdown。支持标题、完成状态、due date、优先级和项目归属；v0.1.6 起 Calendar 新建任务可以预填选中日期。
 
 ## v0.1.2：Widget 配置系统
 
-进入 **编辑布局** 后，每张卡片右上角会出现 `⚙`。配置只作用于当前 Widget 实例，因此同一种 Widget 可以添加多张并使用不同参数。
+每张 Widget 实例都可以独立配置。同一种 Widget 可以添加多张，各自拥有不同筛选和参数。
 
 当前内置 Widget：
 
@@ -89,12 +83,11 @@ Dashboard 里的任务可以直接操作，同时 Markdown 仍然是唯一真实
 | 今日进度 | 中央标签 |
 | 项目 | 显示数量 |
 | 即将到期 | 未来天数、显示数量 |
+| 日历 | 周起始日、数据类型、已完成任务、Agenda 数量 |
 | 长期习惯 | 历史天数、显示数量、进度、暂停状态 |
 | 活跃度 | 天数、统计维度、图例 |
 | 倒计时 | 标题、目标日期 |
 | Vault Pulse | 实例标题 |
-
-底层通过 `WidgetDefinition.settings` 定义配置 Schema，新 Widget 不需要重新实现设置窗口。
 
 ## v0.1.1：Layout Engine
 
@@ -119,6 +112,7 @@ Dashboard 里的任务可以直接操作，同时 Markdown 仍然是唯一真实
 - Markdown Task 解析、勾选、创建和编辑
 - Project frontmatter + 自动项目进度
 - Habit frontmatter + 每日打卡 / streak / 长期目标
+- Calendar + Agenda 时间视图
 - Quick Capture → Inbox
 - Today Tasks / Progress
 - Projects / Upcoming
@@ -161,11 +155,13 @@ npm run dev
 ## Task 格式
 
 ```md
-- [ ] 写 DashFlow 第一版
-- [ ] 完成布局引擎 📅 2026-08-20
+- [ ] 写 Calendar 📅 2026-08-20
+- [ ] 提前安排实现 ⏳ 2026-08-18 📅 2026-08-20
 - [ ] 紧急任务 ⏫ 📅 2026-08-18
 - [ ] 完成 Widget Registry #project/dashflow
 ```
+
+Calendar 会把 `📅` 视为 due，把 `⏳` 视为 scheduled；如果两者日期不同，会显示为两个时间事件。
 
 ## Project 格式
 
@@ -180,7 +176,7 @@ progress_mode: tasks
 ---
 ```
 
-`project_id` 与任务里的 `#project/dashflow` 对应。
+`project_id` 与任务里的 `#project/dashflow` 对应，`deadline` 会进入 Calendar。
 
 ## Habit 格式
 
@@ -190,16 +186,16 @@ type: habit
 habit_id: workout
 name: 每天运动
 status: active
-frequency: daily
+frequency: weekdays
 start: 2026-08-15
-end: 2026-09-13
+end: 2026-09-30
 target_days: 30
 habit_log:
-  - 2026-08-15
+  - 2026-08-17
 ---
 ```
 
-`frequency` 当前支持 `daily` 和 `weekdays`。Dashboard 的打卡操作会直接修改 `habit_log`。
+`frequency` 当前支持 `daily` 和 `weekdays`。Calendar 会根据节奏生成日程，真实完成记录仍由 `habit_log` 保存。
 
 ## 数据边界
 
@@ -209,12 +205,13 @@ habit_log:
 | Project | Markdown / frontmatter |
 | Habit | Markdown / frontmatter |
 | Habit check-in | `habit_log` frontmatter |
+| CalendarEvent | 运行时由 Domain 派生，不持久化 |
 | WidgetDefinition | 插件代码 |
 | WidgetInstance | 插件 `data.json` |
 | Dashboard | 插件 `data.json` |
 | Activity | 插件 `data.json` 中的派生统计 |
 
-卸载 DashFlow 不会带走用户的 Task / Project / Habit 数据。Activity 只是可重新开始累计的统计数据。
+卸载 DashFlow 不会带走用户的 Task / Project / Habit 数据。
 
 ## 架构
 
@@ -229,6 +226,7 @@ Services
   ├── TaskService
   ├── ProjectService
   ├── HabitService
+  ├── CalendarService
   ├── CaptureService
   └── ActivityService
   ↓
@@ -239,15 +237,13 @@ Layout Engine
 Dashboard View
 ```
 
-HabitService 只负责读写 Markdown Habit；ActivityService 监听 Task / Habit / Vault 变化并生成派生每日统计。
-
 ## 下一阶段
 
-1. Calendar
-2. Weekly Review
-3. 移动端排序模式
-4. 多 Dashboard UI
-5. Habit 自定义周期 / 提醒
+1. Weekly Review
+2. 移动端排序模式
+3. 多 Dashboard UI
+4. Habit 自定义周期 / 提醒
+5. Calendar 周视图 / 更完整 scheduled 编辑
 
 ## CI
 
