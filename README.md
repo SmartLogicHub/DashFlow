@@ -1,47 +1,53 @@
-# DashFlow v0.2.3
+# DashFlow v0.2.4
 
 DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源，Dashboard 负责查询、展示和直接操作。
 
-## v0.2.3：UI / Design System 2.0
+## v0.2.4：Visual Polish
 
-这一版暂停堆业务功能，集中统一 DashFlow 的视觉系统和交互层级：
+这一版根据真实 Obsidian 截图做视觉与布局复盘，不继续堆业务功能。
 
-- 配色继续跟随 Obsidian Light / Dark、Accent Color 和社区主题，不写死一套 Dashboard 皮肤
-- 使用 Obsidian 的扩展颜色建立语义色：Info / Success / Warning / Danger / Purple / Cyan
-- 卡片、边框、浮层、按钮和编辑栏统一成一套 surface / border / shadow tokens
-- Light / Dark 分别调整卡片表面与阴影强度
-- Widget 图标根据内容类型获得克制的语义强调色
-- Calendar：due / scheduled / project deadline / habit 使用不同语义色
-- Habit：打卡、进度和完成状态统一使用 Success 色
-- Weekly Review：Overdue / Project / Habit badge 使用一致的 Danger / Warning / Success 色
-- Heatmap：四档强度继续从当前 Obsidian Accent 动态生成
-- Vault Pulse 的 Overdue 数量使用 Danger 强调
-- Dashboard 模板卡片、管理弹窗、导入导出弹窗和 Task / Habit Editor 做统一视觉收敛
-- 增加 `:focus-visible` 键盘焦点状态
-- 支持 `prefers-reduced-motion`，减少不必要的 hover / transition 动效
+重点：
+
+- Home 主标题回归中性主文字色，不再被第三方主题的 Heading Color 染成 Danger / 粉红语义
+- 保留 Obsidian Accent Color，并把 Accent 用在光感、焦点、进度和交互上
+- Canvas / Card / Inner Surface 三层表面更加明确，Light / Dark 都继续跟随 Obsidian 主题
+- 页面背景增加克制的 Accent / Purple 环境光，不使用固定品牌皮肤
+- Widget 增加非常轻的顶缘高光、hover 抬升和语义色边缘，不做大面积霓虹
+- Vault Pulse / Dashboard Switcher 使用轻量 glass surface
+- 提升 muted / faint 文本可读性
+- Project 与 Weekly Review 内部行去掉“按钮/卡片套卡片”观感
+- Calendar 日期格变平，Selected / Today / Event 才承担视觉强调；Agenda 成为独立 Inner Surface
+- Heatmap 格子更大、间距更清晰，高强度格子使用轻微 Accent glow
+- Habit / Weekly Review / Calendar 继续遵守 Success / Warning / Danger / Info 语义色
+- 默认 Home 网格从约 36 行压缩到 31 行，Today Tasks 更宽、Progress 更轻、Projects 成为主区域
+- 只自动迁移完全保持 v0.2.3 默认位置的 Home；用户手工移动过的 Dashboard 不会被覆盖
+- 保持 `prefers-reduced-motion` 与移动端独立单列体验
 
 ```text
 Obsidian Theme / Accent
         ↓
-DashFlow Design Tokens
+DashFlow semantic tokens
         ↓
-Surface / Border / Accent / Semantic Colors
+Canvas → Card → Inner Surface
         ↓
-Widgets / Calendar / Habit / Weekly Review / Heatmap / Modals
+Accent + Success / Info / Warning / Danger
+        ↓
+Dashboard / Calendar / Habit / Review / Heatmap
 ```
 
-DashFlow 不维护一套固定的“品牌蓝/品牌绿”覆盖用户主题，而是优先继承 Obsidian CSS variables，再用语义映射增强信息层级。
+设计目标不是 Dribbble 式炫技，而是 **更有氛围、更有层级，同时仍能每天长时间使用**。
 
 ## 核心能力
 
-- 12 列桌面 Dashboard，拖拽、resize、碰撞推挤和自动压缩
+- 独立 Obsidian Dashboard View
+- 12 列桌面网格：拖拽、resize、碰撞推挤与自动压缩
 - 手机独立单列排序、折叠和紧凑模式
 - 多 Dashboard：新建、切换、重命名、复制、删除
 - 5 套内置 Dashboard Template
-- 把当前 Dashboard 保存成自定义 Template
+- 当前 Dashboard 保存为自定义 Template
 - Dashboard JSON 导入 / 导出，可跨 Vault 搬运 UI 编排
 - Widget 多实例与独立配置
-- Task 创建 / 编辑 / 完成并直接写回 Markdown
+- Task 创建 / 编辑 / 完成并安全写回 Markdown
 - Project 自动关联任务并计算进度
 - Habit 打卡、streak、30 天完成率和目标进度
 - Activity Tracker + Heatmap
@@ -75,7 +81,7 @@ DashFlow 不维护一套固定的“品牌蓝/品牌绿”覆盖用户主题，�
 - **Weekly Review**：Weekly Review / Heatmap / Projects / Calendar / Vault Pulse
 - **Minimal**：Quick Capture / Today / Progress
 
-也可以在「管理工作台」里把当前 Dashboard 保存为自己的模板。自定义模板保存 Widget、配置和布局，不包含 Task、Project、Habit、Activity 或 Vault 笔记内容。
+也可以在「管理工作台」里把当前 Dashboard 保存为自己的模板。模板保存 Widget、配置和布局，不包含 Task、Project、Habit、Activity 或 Vault 笔记内容。
 
 ## Dashboard 导入 / 导出
 
@@ -91,37 +97,27 @@ New Dashboard with remapped IDs
 
 导入始终创建新 Dashboard，并重新生成 Dashboard / Widget ID。当前传输格式为 `dashflow-dashboard / formatVersion: 1`。
 
-## 安装测试版
+## BRAT 安装 / 更新
 
-GitHub Actions 构建成功后会生成 `dashflow-plugin` artifact，包含：
+DashFlow 每个主版本会自动创建和 `manifest.json` 同版本的 GitHub Release，并附带：
 
-- `manifest.json`
 - `main.js`
+- `manifest.json`
 - `styles.css`
 
-把三个文件放入：
+因此可以在 BRAT 中添加：
+
+```text
+https://github.com/SmartLogicHub/DashFlow
+```
+
+也可以手动把 Release 中三个文件放到：
 
 ```text
 <你的 Vault>/.obsidian/plugins/dashflow/
 ```
 
-然后在 Obsidian → 设置 → 第三方插件中启用 **DashFlow**。开发阶段建议使用测试 Vault。
-
-## 本地开发
-
-需要 Node.js 22+。
-
-```bash
-npm install
-npm test
-npm run build
-```
-
-开发监听：
-
-```bash
-npm run dev
-```
+然后在 Obsidian → 设置 → 第三方插件中启用 **DashFlow**。
 
 ## Task 格式
 
@@ -188,8 +184,7 @@ habit_log:
 | Dashboard Transfer JSON | 可移植 UI 编排，不含业务数据 |
 | WidgetInstance | 插件 `data.json` |
 | Dashboard 集合 / activeDashboardId | 插件 `data.json` |
-| Desktop layout | 每个 Dashboard 独立 UI 状态 |
-| Mobile order / collapse | 每个 Dashboard 独立 UI 状态 |
+| Desktop / Mobile layout | 每个 Dashboard 独立 UI 状态 |
 | Activity | 插件 `data.json` 中的派生统计 |
 
 卸载 DashFlow 不会带走用户的 Task / Project / Habit 数据。
@@ -207,23 +202,36 @@ Services
   ↓
 Widget Registry + Widget Instances
   ↓
-Built-in Templates ───────┐
-Custom Templates ─────────┼──→ New Dashboard
-Dashboard Transfer JSON ──┘
-                           ↓
 Dashboard Collection
   ↓
 Layout Engine
   ├── Desktop 12-column grid
   └── Mobile single-column order
   ↓
-Design System 2.0
+Design System + Visual Polish
   ↓
 Dashboard View
 ```
 
+## 本地开发
+
+需要 Node.js 22+。
+
+```bash
+npm install
+npm test
+npm run build
+```
+
+开发监听：
+
+```bash
+npm run dev
+```
+
 ## 近期版本
 
+- **v0.2.4** — Visual Polish + refined Home layout
 - **v0.2.3** — UI / Design System 2.0
 - **v0.2.2** — 自定义 Dashboard Template
 - **v0.2.1** — Dashboard JSON 导入 / 导出
@@ -234,15 +242,12 @@ Dashboard View
 - **v0.1.6** — Calendar + Agenda
 - **v0.1.5** — Habit
 - **v0.1.4** — Activity Tracker + Heatmap
-- **v0.1.3** — Task Editor
-- **v0.1.2** — Widget Configuration
-- **v0.1.1** — Layout Engine
 
 ## 下一阶段
 
-1. Dashboard Template 分享 / 模板库体验
-2. Calendar 周视图 / 更完整 scheduled 编辑
-3. Habit 自定义周期 / 提醒
+1. Calendar Week View / 更完整 scheduled 编辑
+2. Habit 自定义周期 / 提醒
+3. Dashboard Template 分享 / 模板库体验
 4. 自定义 Query / Widget
 
 ## CI
@@ -256,4 +261,4 @@ npm run build
 node --check main.js
 ```
 
-全部通过后才上传可安装 artifact。
+通过后上传可安装 artifact，并在 `main` 上自动发布 BRAT-compatible GitHub Release。

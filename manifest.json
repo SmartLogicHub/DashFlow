@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "minAppVersion": "1.7.2",
-  "description": "A modular personal dashboard for Obsidian with theme-aware design tokens, tasks, projects, habits, calendar planning, templates and mobile focus.",
+  "description": "A modular personal dashboard for Obsidian with polished theme-aware surfaces, tasks, projects, habits, calendar planning, templates and mobile focus.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }

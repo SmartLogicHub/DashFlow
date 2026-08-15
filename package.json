@@ -1,7 +1,7 @@
 {
   "name": "dashflow",
-  "version": "0.2.3",
-  "description": "A modular personal dashboard for Obsidian with theme-aware design tokens, tasks, projects, habits, calendar planning, templates, portable dashboard transfer and mobile focus.",
+  "version": "0.2.4",
+  "description": "A modular personal dashboard for Obsidian with polished theme-aware surfaces, tasks, projects, habits, calendar planning, templates, portable dashboard transfer and mobile focus.",
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "node tests/run-layout-tests.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
-  "keywords": ["obsidian", "dashboard", "design-system", "templates", "custom-templates", "import", "export", "tasks", "projects", "habits", "calendar", "agenda", "activity", "heatmap", "weekly-review", "mobile"],
+  "keywords": ["obsidian", "dashboard", "design-system", "visual-polish", "templates", "custom-templates", "import", "export", "tasks", "projects", "habits", "calendar", "agenda", "activity", "heatmap", "weekly-review", "mobile"],
   "devDependencies": {
     "@types/node": "^22.15.17",
     "esbuild": "0.25.5",
