@@ -3,13 +3,16 @@ import { DEFAULT_SETTINGS, SCHEMA_VERSION, VIEW_TYPE } from "./constants";
 import { DashboardManager } from "./dashboard/DashboardManager";
 import { DashboardView } from "./dashboard/DashboardView";
 import { createDefaultDashboard } from "./dashboard/defaultDashboard";
-import type { DashFlowData } from "./models";
+import type { ActivityStore, DashFlowData } from "./models";
+import { ActivityService } from "./services/ActivityService";
+import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
 import { CaptureService } from "./services/CaptureService";
 import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
 import { VaultIndexService } from "./services/VaultIndexService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
+import { localDate } from "./utils/date";
 import { registerBuiltins } from "./widgets/builtins";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
 
@@ -18,6 +21,8 @@ export default class DashFlowPlugin extends Plugin {
   widgetRegistry!: WidgetRegistry;
   dashboardManager!: DashboardManager;
   vaultIndex!: VaultIndexService;
+  activityService!: ActivityService;
+  activityWidgets!: ActivityWidgetInteractionService;
   taskService!: TaskService;
   projectService!: ProjectService;
   captureService!: CaptureService;
@@ -34,13 +39,22 @@ export default class DashFlowPlugin extends Plugin {
       this,
       () => this.data.settings.projectTypeValue,
     );
-    this.taskService = new TaskService(this.app, this.vaultIndex);
+    this.activityService = new ActivityService(
+      this.app,
+      this,
+      this.vaultIndex,
+      () => this.data.activity,
+      () => this.savePluginData(),
+    );
+    this.taskService = new TaskService(this.app, this.vaultIndex, this.activityService);
     this.projectService = new ProjectService(this.vaultIndex);
     this.captureService = new CaptureService(
       this.app,
       () => this.data.settings.inboxPath,
+      this.activityService,
     );
     this.taskInteractions = new TaskInteractionService(this);
+    this.activityWidgets = new ActivityWidgetInteractionService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -64,12 +78,16 @@ export default class DashFlowPlugin extends Plugin {
     });
 
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
+    this.activityService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
+    this.activityWidgets.start();
   }
 
   onunload(): void {
+    this.activityWidgets?.stop();
     this.taskInteractions?.stop();
+    this.activityService?.stop();
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
   }
 
@@ -85,7 +103,10 @@ export default class DashFlowPlugin extends Plugin {
   }
 
   private async loadPluginData(): Promise<void> {
-    const loaded = await this.loadData() as Partial<DashFlowData> | null;
+    const loaded = await this.loadData() as (Partial<DashFlowData> & {
+      activity?: Partial<ActivityStore>;
+    }) | null;
+
     this.data = {
       schemaVersion: SCHEMA_VERSION,
       settings: {
@@ -94,13 +115,18 @@ export default class DashFlowPlugin extends Plugin {
       },
       dashboards: Array.isArray(loaded?.dashboards) ? loaded.dashboards : [],
       activeDashboardId: loaded?.activeDashboardId ?? "home",
+      activity: {
+        startedAt: loaded?.activity?.startedAt ?? localDate(),
+        days: loaded?.activity?.days ?? {},
+      },
     };
 
     if (this.data.dashboards.length === 0) {
       this.data.dashboards = [createDefaultDashboard(this.widgetRegistry)];
       this.data.activeDashboardId = "home";
-      await this.savePluginData();
     }
+
+    await this.savePluginData();
   }
 
   async savePluginData(): Promise<void> {
