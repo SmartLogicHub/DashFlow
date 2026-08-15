@@ -3,3 +3,4 @@ node_modules/
 *.zip
 *.map
 data.json
+.dashflow-layout-tests.mjs
