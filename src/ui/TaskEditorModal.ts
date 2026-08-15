@@ -22,29 +22,32 @@ export class TaskEditorModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.addClass("dashflow-task-editor");
+    contentEl.addClass("dashflow-task-editor", "dashflow-editor-modal");
 
     const draft: TaskEditInput = {
       text: this.task?.text ?? this.initial.text ?? "",
       completed: this.task?.completed ?? this.initial.completed ?? false,
       due: this.task?.due ?? this.initial.due,
+      scheduled: this.task?.scheduled ?? this.initial.scheduled,
+      start: this.task?.start ?? this.initial.start,
       priority: this.task?.priority ?? this.initial.priority ?? "normal",
       projectId: this.task?.projectId ?? this.initial.projectId,
     };
 
+    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: this.task ? "TASK · EDIT" : "TASK · NEW" });
     contentEl.createEl("h2", { text: this.task ? "编辑任务" : "新建任务" });
     contentEl.createEl("p", {
-      cls: "setting-item-description",
+      cls: "setting-item-description dashflow-modal-lead",
       text: this.task
-        ? `修改会直接写回 ${this.task.source.path}`
-        : `新任务会写入 ${this.plugin.data.settings.inboxPath}`,
+        ? "修改会直接同步回任务所在的 Markdown。"
+        : "先把行动记录下来；项目、计划日和截止日都可以稍后调整。",
     });
 
     new Setting(contentEl)
-      .setName("任务标题")
-      .setDesc("日期、优先级和项目由下面的字段管理。")
+      .setName("任务")
+      .setDesc("写成一个可以直接执行的动作。")
       .addText((component) => {
-        component.setPlaceholder("要完成什么？");
+        component.setPlaceholder("例如：整理本周发布计划");
         component.setValue(draft.text);
         component.onChange((value) => { draft.text = value; });
         window.setTimeout(() => component.inputEl.focus(), 0);
@@ -52,8 +55,8 @@ export class TaskEditorModal extends Modal {
 
     if (this.task) {
       new Setting(contentEl)
-        .setName("已完成")
-        .setDesc("切换任务的完成状态。")
+        .setName("完成状态")
+        .setDesc("完成后仍会保留在 Markdown 中。")
         .addToggle((component) => {
           component.setValue(draft.completed);
           component.onChange((value) => { draft.completed = value; });
@@ -61,12 +64,30 @@ export class TaskEditorModal extends Modal {
     }
 
     new Setting(contentEl)
-      .setName("到期日期")
-      .setDesc("留空表示没有到期日期。")
+      .setName("计划日期")
+      .setDesc("你准备在哪一天推进它。")
+      .addText((component) => {
+        component.inputEl.type = "date";
+        component.setValue(draft.scheduled ?? "");
+        component.onChange((value) => { draft.scheduled = value || undefined; });
+      });
+
+    new Setting(contentEl)
+      .setName("截止日期")
+      .setDesc("真正不能晚于哪一天；没有硬截止可以留空。")
       .addText((component) => {
         component.inputEl.type = "date";
         component.setValue(draft.due ?? "");
         component.onChange((value) => { draft.due = value || undefined; });
+      });
+
+    new Setting(contentEl)
+      .setName("开始日期")
+      .setDesc("可选。适合需要提前进入视野的长期任务。")
+      .addText((component) => {
+        component.inputEl.type = "date";
+        component.setValue(draft.start ?? "");
+        component.onChange((value) => { draft.start = value || undefined; });
       });
 
     new Setting(contentEl)
@@ -77,10 +98,12 @@ export class TaskEditorModal extends Modal {
         component.onChange((value) => { draft.priority = value as TaskPriority; });
       });
 
-    const projects = [...this.plugin.vaultIndex.getSnapshot().projects].sort((a, b) => a.name.localeCompare(b.name));
+    const projects = [...this.plugin.vaultIndex.getSnapshot().projects]
+      .filter((project) => project.status !== "archived")
+      .sort((a, b) => a.name.localeCompare(b.name));
     new Setting(contentEl)
       .setName("所属项目")
-      .setDesc("通过 #project/<id> 写回 Markdown。")
+      .setDesc("把任务放进明确的长期目标，而不是只靠标签记忆。")
       .addDropdown((component) => {
         component.addOption("", "无项目");
         for (const project of projects) component.addOption(project.id, project.name);
@@ -112,7 +135,7 @@ export class TaskEditorModal extends Modal {
 
     actions.addButton((button) => {
       button.setCta();
-      button.setButtonText(this.task ? "保存" : "创建任务");
+      button.setButtonText(this.task ? "保存任务" : "创建任务");
       button.onClick(() => void this.save(draft));
     });
   }
@@ -132,6 +155,8 @@ export class TaskEditorModal extends Modal {
 
     const body = formatTaskBody({
       text: draft.text.trim(),
+      start: draft.start,
+      scheduled: draft.scheduled,
       due: draft.due,
       priority: draft.priority,
       projectId: draft.projectId,

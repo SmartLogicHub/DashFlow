@@ -1,187 +1,91 @@
-# DashFlow v0.2.5
+# DashFlow v0.3.0
 
-DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源，Dashboard 负责查询、展示和直接操作。
+DashFlow 是建立在 Obsidian Vault 之上的个人工作系统。它不再把所有能力堆成一面 Widget 墙，而是把一天的工作拆成六个明确流程：**今天、收集箱、项目、日历、习惯、复盘**。
 
-## v0.2.5：Aurora UI
+Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、组织、呈现和直接操作。
 
-这一版根据真实 Obsidian 使用截图重新定义 DashFlow 的视觉语言与默认工作流布局，不是对旧白卡片主题做小修小补。
+## v0.3.0：Product Reset
 
-### Aurora 视觉系统
+这一版根据真实 Obsidian 使用反馈和成熟任务产品的交互方式重新设计信息架构。
 
-- 独立的 Violet / Cyan / Green / Gold / Rose Aurora 色系，并继续吸收 Obsidian Accent 作为动态主色
-- Light 使用冷白蓝灰 Canvas；Dark 使用深海军蓝 Canvas，不再让所有层级都落在同一种背景亮度
-- 页面使用大尺度 Aurora 环境光，Card 使用克制的 glass / blur / edge highlight，而不是所有内容都玻璃化
-- Today Tasks 成为首屏视觉焦点，拥有更强的 Accent / Cyan 空间光和边缘层级
-- Widget 按角色分色：Capture=Cyan、Progress/Habit=Green、Project=Violet、Countdown=Gold、Calendar=Cyan、Review=Purple
-- Quick Capture CTA 使用 Violet → Cyan 渐变；Progress 使用 Green；Countdown 使用 Gold → Rose 数字渐变
-- Heatmap 从单 Accent 改成 Violet / Cyan 强度梯度，高强度数据才出现轻微 glow
-- Calendar 普通日期保持安静，Today / Selected / Event 承担颜色；Agenda 成为独立内层 surface
-- Project / Weekly Review 内部继续使用扁平信息行，避免“卡片套卡片”
-- `prefers-reduced-motion` 仍然生效
+### 今天
 
-### Command Center 顶部
+打开 DashFlow 默认进入 Today：
 
-Hero 不再只是一个大标题，而是一个工作台状态面板：
+- 今日计划 / 截止 / 逾期任务成为主工作区
+- 紧凑显示今日待推进、逾期、活动项目与习惯完成情况
+- Progress 和 Upcoming 是辅助信息，不再与任务争夺视觉焦点
+- 活动项目只显示必要的进度；点击进入项目详情，而不是直接把用户扔进 Markdown
 
-```text
-Dashboard Name
-今天日期 · 今日待办 · 活动项目
-                                  编辑布局
-```
+### 收集箱
 
-Vault Pulse 位于 Hero 下方作为紧凑 KPI dock。
+“Quick Capture”不再占据首页一张大卡。所有尚未整理的快速任务进入真正的 Inbox 流程：
 
-### 新默认 Home 布局
+- 查看未整理任务
+- 点击任务补充计划日期、截止日期、优先级和所属项目
+- 完成或打开 Inbox 原文
+- 全局“新建任务”仍然可以随时记录行动
 
-首屏从“多个等权 Widget”改为明确的执行优先级：
+### 项目
 
-```text
-┌────────────────────────┬──────────────────┐
-│ Today Tasks             │ Quick Capture    │
-│ 7 columns · primary     ├───────┬──────────┤
-│                         │Progress│Countdown │
-├─────────────────────────┼───────┴──────────┤
-│ Projects                │ Upcoming          │
-├─────────────────────────┼───────────────────┤
-│ Habits                  │ Activity          │
-├─────────────────────────┴───────────────────┤
-│ Weekly Review                               │
-├─────────────────────────────────────────────┤
-│ Calendar                                    │
-├─────────────────────────────────────────────┤
-│ Vault Pulse                                  │
-└─────────────────────────────────────────────┘
-```
+Project 现在是可操作对象：
 
-Untouched 的旧 Home（包括 v0.2.3 和 v0.2.4 默认布局）会安全迁移到 Aurora 布局，同时保留 Widget 配置。用户手动移动 / resize 过的 Dashboard 不会被强制覆盖。
+- 从 DashFlow 直接新建 / 编辑项目
+- 项目组合页显示状态、截止日、下一步任务数和进度
+- 项目详情显示下一步行动、已完成任务和项目进度
+- 在项目详情中直接创建已关联项目的任务
+- 原始 Markdown 仍然保留为二级入口
 
-### Settings Control Center
+### 日历 / 习惯 / 复盘
 
-设置页也重新设计：
+这些能力从 Today 撤出，分别成为清晰的工作流：
 
-- 顶部产品 Hero + 当前版本
-- Inbox / Project / Habit 识别设置放进同一个紧凑 Data & Recognition panel
-- Project / Habit Markdown 协议并排显示为 code cards
-- 不再使用四块巨大的默认灰色 Setting 卡片
+- **日历**：任务计划日 / 截止日、项目截止日、习惯节奏与 Agenda
+- **习惯**：今日打卡、历史轨迹、连续天数、Heatmap
+- **复盘**：Weekly Review、Activity、Vault 统计
 
-数据边界没有改变：视觉重构不会复制或迁移 Task / Project / Habit 业务数据。
+### 全局搜索与命令
 
-## 核心能力
+顶部 Search 可以跨 Task / Project / Habit 搜索，也可以直接新建任务、项目或习惯。命令面板同时提供 Today / Inbox / Projects / Calendar / Habits / Review 的直接入口。
 
-- 独立 Obsidian Dashboard View
-- 12 列桌面网格：拖拽、resize、碰撞推挤与自动压缩
-- 手机独立单列排序、折叠和紧凑模式
-- 多 Dashboard：新建、切换、重命名、复制、删除
-- 5 套内置 Dashboard Template
-- 当前 Dashboard 保存为自定义 Template
-- Dashboard JSON 导入 / 导出，可跨 Vault 搬运 UI 编排
-- Widget 多实例与独立配置
-- Task 创建 / 编辑 / 完成并安全写回 Markdown
-- Project 自动关联任务并计算进度
-- Habit 打卡、streak、30 天完成率和目标进度
-- Activity Tracker + Heatmap
-- Calendar 月视图 + Agenda
-- Weekly Review + Markdown 周报复制
-- Quick Capture / Countdown / Vault Pulse
+### 可选 AI 日计划
 
-## 当前内置 Widget
+v0.3.0 增加可选 AI Planning：
 
-| Widget | 主要能力 |
-|---|---|
-| 快速捕捉 | 写入 Inbox |
-| 今日任务 | 今日 + 逾期任务 |
-| 今日进度 | 当日完成比例 |
-| 项目 | 活动项目 + 自动进度 |
-| 即将到期 | 未来任务 |
-| 日历 | 月历 + Agenda |
-| 长期习惯 | 打卡 / streak / 目标 |
-| Weekly Review | 本周复盘 + 下周关注 |
-| 活跃度 | Heatmap |
-| 倒计时 | 目标日期 |
-| Vault Pulse | Vault 统计 |
+- 默认兼容 DeepSeek OpenAI Chat Completions API
+- 默认 Base URL `https://api.deepseek.com`
+- 默认模型 `deepseek-v4-flash`
+- API Key 使用 Obsidian SecretStorage / Keychain；插件 `data.json` 只保存 secret 名称，不保存 Key
+- 只有用户主动点击“AI 规划”才会发起请求
+- 只发送未完成任务、活动项目和习惯的结构化摘要，不发送笔记正文
+- AI 输出只是建议，不自动改写 Vault
 
-## Dashboard Templates
+因为使用 Obsidian SecretStorage，v0.3.0 的最低 Obsidian 版本为 **1.11.4**。
 
-内置起始模板：
+## 数据格式
 
-- **Daily Focus**：Quick Capture / Today / Progress / Upcoming / Calendar / Countdown / Heatmap
-- **Project Management**：Projects / Today / Upcoming / Calendar / Milestone / Vault Pulse
-- **Habit Tracker**：Habits / Habit Heatmap / Habit Calendar / Weekly Review
-- **Weekly Review**：Weekly Review / Heatmap / Projects / Calendar / Vault Pulse
-- **Minimal**：Quick Capture / Today / Progress
-
-也可以在「管理工作台」里把当前 Dashboard 保存为自己的模板。模板保存 Widget、配置和布局，不包含 Task、Project、Habit、Activity 或 Vault 笔记内容。
-
-## Dashboard 导入 / 导出
-
-Dashboard Transfer JSON 只包含可移植的 UI 编排：
-
-```text
-Dashboard
-  ↓ export
-DashFlow Dashboard JSON
-  ↓ import
-New Dashboard with remapped IDs
-```
-
-导入始终创建新 Dashboard，并重新生成 Dashboard / Widget ID。当前传输格式为 `dashflow-dashboard / formatVersion: 1`。
-
-## BRAT 安装 / 更新
-
-DashFlow 每个主版本会自动创建和 `manifest.json` 同版本的 GitHub Release，并附带：
-
-- `main.js`
-- `manifest.json`
-- `styles.css`
-
-因此可以在 BRAT 中添加：
-
-```text
-https://github.com/SmartLogicHub/DashFlow
-```
-
-也可以手动把 Release 中三个文件放到：
-
-```text
-<你的 Vault>/.obsidian/plugins/dashflow/
-```
-
-然后在 Obsidian → 设置 → 第三方插件中启用 **DashFlow**。
-
-## Task 格式
+### Task
 
 ```md
-- [ ] 写 Calendar 📅 2026-08-20
-- [ ] 提前安排实现 ⏳ 2026-08-18 📅 2026-08-20
-- [ ] 紧急任务 ⏫ 📅 2026-08-18
-- [ ] 完成 Widget Registry #project/dashflow
+- [ ] 整理发布计划 #project/dashflow ⏳ 2026-08-18 📅 2026-08-20
 ```
 
-支持：
+DashFlow UI 可以直接编辑：标题、计划日期、开始日期、截止日期、优先级、所属项目和完成状态。
 
-- due：`📅 YYYY-MM-DD`
-- scheduled：`⏳ YYYY-MM-DD`
-- start：`🛫 YYYY-MM-DD`
-- completed：`✅ YYYY-MM-DD`
-- urgent：`⏫` / `🔺`
-- high：`🔼`
-- low：`🔽`
-- project：`#project/<id>`
-
-## Project 格式
+### Project
 
 ```yaml
 ---
 type: project
 project_id: dashflow
-name: DashFlow Plugin
+name: DashFlow
 status: active
 deadline: 2026-09-30
 progress_mode: tasks
 ---
 ```
 
-## Habit 格式
+### Habit
 
 ```yaml
 ---
@@ -189,62 +93,48 @@ type: habit
 habit_id: workout
 name: 每天运动
 status: active
-frequency: weekdays
-start: 2026-08-15
+frequency: daily
 target_days: 30
 habit_log:
-  - 2026-08-17
+  - 2026-08-15
 ---
 ```
 
-## 数据边界
+## 现有能力
 
-| 数据 | Source of truth |
-|---|---|
-| Task | Markdown checkbox |
-| Project | Markdown / frontmatter |
-| Habit | Markdown / frontmatter |
-| Habit check-in | `habit_log` frontmatter |
-| CalendarEvent | 运行时派生 |
-| Weekly Review | 运行时聚合 |
-| WidgetDefinition | 插件代码 |
-| Built-in Dashboard Template | 插件代码，仅作为起始布局 |
-| Custom Dashboard Template | 插件 `data.json` 中的 UI 编排快照 |
-| Dashboard Transfer JSON | 可移植 UI 编排，不含业务数据 |
-| WidgetInstance | 插件 `data.json` |
-| Dashboard 集合 / activeDashboardId | 插件 `data.json` |
-| Desktop / Mobile layout | 每个 Dashboard 独立 UI 状态 |
-| Activity | 插件 `data.json` 中的派生统计 |
-
-卸载 DashFlow 不会带走用户的 Task / Project / Habit 数据。
+- Vault 增量索引
+- Task 编辑 / 完成 / 日程 / 项目关联
+- Project 新建 / 编辑 / 详情 / 任务进度
+- Habit 新建 / 编辑 / 打卡 / 连续天数
+- Calendar + Agenda
+- Weekly Review
+- Activity Heatmap
+- 多 Dashboard、模板、自定义模板、导入 / 导出
+- Desktop Grid 与移动端排序
+- 全局搜索 / 快速新建
+- 可选 AI 日计划
 
 ## 架构
 
 ```text
-Vault
+Obsidian Vault
   ↓
 VaultIndexService
   ↓
-Task / Project / Habit Domain
+Task / Project / Habit / Activity / Calendar
   ↓
-Services
+Product Workflows
+  ├── Today
+  ├── Inbox
+  ├── Projects
+  ├── Calendar
+  ├── Habits
+  └── Review
   ↓
-Widget Registry + Widget Instances
-  ↓
-Dashboard Collection
-  ↓
-Layout Engine
-  ├── Desktop 12-column grid
-  └── Mobile single-column order
-  ↓
-Aurora Design + Interaction Layer
-  ↓
-Dashboard View
+Dashboard / Search / Editors / Optional AI Plan
 ```
 
-## 本地开发
-
-需要 Node.js 22+。
+## 开发
 
 ```bash
 npm install
@@ -252,43 +142,8 @@ npm test
 npm run build
 ```
 
-开发监听：
+构建输出：`main.js`。CI 同时执行测试、TypeScript build、bundle、`node --check main.js`，并上传插件 artifact。
 
-```bash
-npm run dev
-```
+## 数据边界
 
-## 近期版本
-
-- **v0.2.5** — Aurora UI + Command Center layout + Settings redesign
-- **v0.2.4** — Visual Polish + refined Home layout
-- **v0.2.3** — UI / Design System 2.0
-- **v0.2.2** — 自定义 Dashboard Template
-- **v0.2.1** — Dashboard JSON 导入 / 导出
-- **v0.2.0** — 5 套内置 Dashboard Templates
-- **v0.1.9** — Multiple Dashboards UI
-- **v0.1.8** — 移动端排序 / 折叠 / 紧凑模式
-- **v0.1.7** — Weekly Review
-- **v0.1.6** — Calendar + Agenda
-- **v0.1.5** — Habit
-- **v0.1.4** — Activity Tracker + Heatmap
-
-## 下一阶段
-
-1. Calendar Week View / 更完整 scheduled 编辑
-2. Habit 自定义周期 / 提醒
-3. Dashboard Template 分享 / 模板库体验
-4. 自定义 Query / Widget
-
-## CI
-
-GitHub Actions 执行：
-
-```text
-npm install
-npm test
-npm run build
-node --check main.js
-```
-
-通过后上传可安装 artifact，并在 `main` 上自动发布 BRAT-compatible GitHub Release。
+DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍然留在 Vault Markdown 中。Dashboard 布局、模板与 Activity 派生统计保存在插件数据中；AI API Key 保存在 Obsidian SecretStorage 中。

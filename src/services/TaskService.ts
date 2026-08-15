@@ -7,8 +7,13 @@ import type { VaultIndexService } from "./VaultIndexService";
 
 const PRIORITY_WEIGHT = { urgent: 0, high: 1, normal: 2, low: 3 } as const;
 
+function taskDate(task: Task): string {
+  return task.scheduled ?? task.due ?? "9999";
+}
+
 function sortTasks(a: Task, b: Task): number {
-  return (a.due ?? "9999").localeCompare(b.due ?? "9999")
+  return taskDate(a).localeCompare(taskDate(b))
+    || (a.due ?? "9999").localeCompare(b.due ?? "9999")
     || PRIORITY_WEIGHT[a.priority] - PRIORITY_WEIGHT[b.priority]
     || a.text.localeCompare(b.text);
 }
@@ -46,7 +51,9 @@ export class TaskService {
       return lines.join("\n");
     });
 
-    if (toggled && !task.completed) this.activity.recordTaskCompleted(task);
+    if (!toggled) return;
+    if (!task.completed) this.activity.recordTaskCompleted(task);
+    await this.index.indexFile(file);
   }
 
   async update(task: Task, input: TaskEditInput): Promise<boolean> {
@@ -76,6 +83,8 @@ export class TaskService {
         text: input.text.trim(),
         projectId: input.projectId?.trim() || undefined,
         due: input.due || undefined,
+        scheduled: input.scheduled || undefined,
+        start: input.start || undefined,
       });
       updated = true;
       return lines.join("\n");
@@ -90,7 +99,25 @@ export class TaskService {
 
   today(tasks = this.index.getSnapshot().tasks): Task[] {
     const today = localDate();
-    return tasks.filter((task) => task.due === today).sort(sortTasks);
+    return tasks
+      .filter((task) => task.due === today || task.scheduled === today)
+      .sort(sortTasks);
+  }
+
+  focus(tasks = this.index.getSnapshot().tasks): Task[] {
+    const today = localDate();
+    const byId = new Map<string, Task>();
+    for (const task of tasks) {
+      if (task.completed) continue;
+      if (task.due === today || task.scheduled === today || (task.due && task.due < today)) {
+        byId.set(task.id, task);
+      }
+    }
+    return [...byId.values()].sort((a, b) => {
+      const overdueA = Boolean(a.due && a.due < today);
+      const overdueB = Boolean(b.due && b.due < today);
+      return Number(overdueB) - Number(overdueA) || sortTasks(a, b);
+    });
   }
 
   overdue(tasks = this.index.getSnapshot().tasks): Task[] {
@@ -104,7 +131,15 @@ export class TaskService {
     const start = localDate();
     const end = addDays(start, days);
     return tasks
-      .filter((task) => !task.completed && Boolean(task.due) && (task.due as string) >= start && (task.due as string) <= end)
+      .filter((task) => {
+        if (task.completed) return false;
+        const scheduled = task.scheduled;
+        const due = task.due;
+        return Boolean(
+          (scheduled && scheduled >= start && scheduled <= end)
+          || (due && due >= start && due <= end),
+        );
+      })
       .sort(sortTasks);
   }
 

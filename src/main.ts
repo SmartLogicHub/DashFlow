@@ -5,10 +5,10 @@ import { DashboardView } from "./dashboard/DashboardView";
 import { createDefaultDashboard } from "./dashboard/defaultDashboard";
 import { upgradeLegacyHomeLayout } from "./dashboard/defaultLayoutMigration";
 import type { ActivityStore, DashFlowData } from "./models";
+import type { ProductSection } from "./product/navigation";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
-import { AuroraDesignService } from "./services/AuroraDesignService";
-import { AuroraInteractionService } from "./services/AuroraInteractionService";
+import { AIPlanningService } from "./services/AIPlanningService";
 import { CalendarService } from "./services/CalendarService";
 import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInteractionService";
 import { CaptureService } from "./services/CaptureService";
@@ -16,7 +16,8 @@ import { DashboardSwitcherInteractionService } from "./services/DashboardSwitche
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
-import { MobileDashboardInteractionService } from "./services/MobileDashboardInteractionService";
+import { ProductDesignService } from "./services/ProductDesignService";
+import { ProductExperienceService } from "./services/ProductExperienceService";
 import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
@@ -24,6 +25,10 @@ import { VaultIndexService } from "./services/VaultIndexService";
 import { WeeklyReviewService } from "./services/WeeklyReviewService";
 import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
+import { AIPlanModal } from "./ui/AIPlanModal";
+import { GlobalSearchModal } from "./ui/GlobalSearchModal";
+import { ProjectEditorModal } from "./ui/ProjectEditorModal";
+import { TaskEditorModal } from "./ui/TaskEditorModal";
 import { localDate } from "./utils/date";
 import { registerBuiltins } from "./widgets/builtins";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
@@ -41,15 +46,15 @@ export default class DashFlowPlugin extends Plugin {
   calendarWidgets!: CalendarWidgetInteractionService;
   weeklyReviewService!: WeeklyReviewService;
   weeklyReviewWidgets!: WeeklyReviewWidgetInteractionService;
-  mobileDashboard!: MobileDashboardInteractionService;
   habitService!: HabitService;
   habitWidgets!: HabitWidgetInteractionService;
   taskService!: TaskService;
   projectService!: ProjectService;
   captureService!: CaptureService;
   taskInteractions!: TaskInteractionService;
-  auroraDesign!: AuroraDesignService;
-  auroraInteractions!: AuroraInteractionService;
+  aiPlanning!: AIPlanningService;
+  productDesign!: ProductDesignService;
+  productExperience!: ProductExperienceService;
 
   async onload(): Promise<void> {
     this.widgetRegistry = new WidgetRegistry();
@@ -71,7 +76,12 @@ export default class DashFlowPlugin extends Plugin {
       () => this.savePluginData(),
     );
     this.taskService = new TaskService(this.app, this.vaultIndex, this.activityService);
-    this.projectService = new ProjectService(this.vaultIndex);
+    this.projectService = new ProjectService(
+      this.app,
+      this.vaultIndex,
+      () => this.data.settings.projectFolder,
+      () => this.data.settings.projectTypeValue,
+    );
     this.calendarService = new CalendarService(this.vaultIndex);
     this.weeklyReviewService = new WeeklyReviewService(
       this.vaultIndex,
@@ -91,16 +101,16 @@ export default class DashFlowPlugin extends Plugin {
       () => this.data.settings.habitFolder,
       () => this.data.settings.habitTypeValue,
     );
+    this.aiPlanning = new AIPlanningService(this);
     this.taskInteractions = new TaskInteractionService(this);
     this.activityWidgets = new ActivityWidgetInteractionService(this);
     this.habitWidgets = new HabitWidgetInteractionService(this);
     this.calendarWidgets = new CalendarWidgetInteractionService(this);
     this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
-    this.mobileDashboard = new MobileDashboardInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
-    this.auroraDesign = new AuroraDesignService();
-    this.auroraInteractions = new AuroraInteractionService(this);
+    this.productDesign = new ProductDesignService();
+    this.productExperience = new ProductExperienceService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
 
@@ -108,24 +118,22 @@ export default class DashFlowPlugin extends Plugin {
       void this.activateDashboard();
     });
 
-    this.addCommand({
-      id: "open-dashboard",
-      name: "打开 Dashboard",
-      callback: () => void this.activateDashboard(),
-    });
+    this.addCommand({ id: "open-dashboard", name: "打开 DashFlow", callback: () => void this.activateDashboard() });
+    this.addCommand({ id: "search-dashflow", name: "搜索任务、项目与习惯", callback: () => new GlobalSearchModal(this).open() });
+    this.addCommand({ id: "new-task", name: "新建任务", callback: () => new TaskEditorModal(this).open() });
+    this.addCommand({ id: "new-project", name: "新建项目", callback: () => new ProjectEditorModal(this).open() });
+    this.addCommand({ id: "ai-plan-today", name: "AI 规划今天", callback: () => new AIPlanModal(this).open() });
 
-    this.addCommand({
-      id: "export-active-dashboard",
-      name: "导出当前 Dashboard JSON",
-      callback: () => this.dashboardTransfer.openExportModal(),
-    });
+    const sections: Array<[ProductSection, string]> = [
+      ["today", "打开 · 今天"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
+      ["calendar", "打开 · 日历"], ["habits", "打开 · 习惯"], ["review", "打开 · 复盘"],
+    ];
+    for (const [section, name] of sections) {
+      this.addCommand({ id: `open-${section}`, name, callback: () => void this.activateSection(section) });
+    }
 
-    this.addCommand({
-      id: "import-dashboard-json",
-      name: "导入 Dashboard JSON",
-      callback: () => this.dashboardTransfer.openImportModal(),
-    });
-
+    this.addCommand({ id: "export-active-dashboard", name: "导出当前 Dashboard JSON", callback: () => this.dashboardTransfer.openExportModal() });
+    this.addCommand({ id: "import-dashboard-json", name: "导入 Dashboard JSON", callback: () => this.dashboardTransfer.openImportModal() });
     this.addCommand({
       id: "reindex-vault",
       name: "重新索引 Vault",
@@ -136,7 +144,7 @@ export default class DashFlowPlugin extends Plugin {
     });
 
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
-    this.auroraDesign.start();
+    this.productDesign.start();
     this.activityService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
@@ -144,36 +152,37 @@ export default class DashFlowPlugin extends Plugin {
     this.habitWidgets.start();
     this.calendarWidgets.start();
     this.weeklyReviewWidgets.start();
-    this.mobileDashboard.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
-    this.auroraInteractions.start();
+    this.productExperience.start();
   }
 
   onunload(): void {
-    this.auroraInteractions?.stop();
+    this.productExperience?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
-    this.mobileDashboard?.stop();
     this.weeklyReviewWidgets?.stop();
     this.calendarWidgets?.stop();
     this.habitWidgets?.stop();
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
     this.activityService?.stop();
-    this.auroraDesign?.stop();
+    this.productDesign?.stop();
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
   }
 
   async activateDashboard(): Promise<void> {
     let leaf = this.app.workspace.getLeavesOfType(VIEW_TYPE)[0];
-
     if (!leaf) {
       leaf = this.app.workspace.getLeaf("tab");
       await leaf.setViewState({ type: VIEW_TYPE, active: true });
     }
-
     await this.app.workspace.revealLeaf(leaf);
+  }
+
+  async activateSection(section: ProductSection): Promise<void> {
+    await this.activateDashboard();
+    this.productExperience.openSection(section);
   }
 
   refreshDashboardViews(): void {
@@ -184,16 +193,10 @@ export default class DashFlowPlugin extends Plugin {
   }
 
   private async loadPluginData(): Promise<void> {
-    const loaded = await this.loadData() as (Partial<DashFlowData> & {
-      activity?: Partial<ActivityStore>;
-    }) | null;
-
+    const loaded = await this.loadData() as (Partial<DashFlowData> & { activity?: Partial<ActivityStore> }) | null;
     this.data = {
       schemaVersion: SCHEMA_VERSION,
-      settings: {
-        ...DEFAULT_SETTINGS,
-        ...(loaded?.settings ?? {}),
-      },
+      settings: { ...DEFAULT_SETTINGS, ...(loaded?.settings ?? {}) },
       dashboards: Array.isArray(loaded?.dashboards) ? loaded.dashboards : [],
       activeDashboardId: loaded?.activeDashboardId ?? "home",
       customTemplates: Array.isArray(loaded?.customTemplates) ? loaded.customTemplates : [],
@@ -207,11 +210,8 @@ export default class DashFlowPlugin extends Plugin {
       this.data.dashboards = [createDefaultDashboard(this.widgetRegistry)];
       this.data.activeDashboardId = "home";
     } else {
-      this.data.dashboards = this.data.dashboards.map((dashboard) =>
-        upgradeLegacyHomeLayout(dashboard, this.widgetRegistry)
-      );
+      this.data.dashboards = this.data.dashboards.map((dashboard) => upgradeLegacyHomeLayout(dashboard, this.widgetRegistry));
     }
-
     await this.savePluginData();
   }
 

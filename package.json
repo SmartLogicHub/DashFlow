@@ -1,7 +1,7 @@
 {
   "name": "dashflow",
-  "version": "0.2.5",
-  "description": "A modular personal dashboard for Obsidian with Aurora UI, task focus, projects, habits, calendar planning, templates, portable dashboard transfer and mobile focus.",
+  "version": "0.3.0",
+  "description": "A purpose-built personal work OS for Obsidian with Today, Inbox, Projects, Calendar, Habits, Review, search and optional AI planning.",
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "node tests/run-layout-tests.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
-  "keywords": ["obsidian", "dashboard", "aurora-ui", "design-system", "visual-polish", "templates", "custom-templates", "import", "export", "tasks", "projects", "habits", "calendar", "agenda", "activity", "heatmap", "weekly-review", "mobile"],
+  "keywords": ["obsidian", "personal-os", "productivity", "tasks", "inbox", "projects", "habits", "calendar", "review", "search", "ai-planning", "dashboard", "templates", "mobile"],
   "devDependencies": {
     "@types/node": "^22.15.17",
     "esbuild": "0.25.5",

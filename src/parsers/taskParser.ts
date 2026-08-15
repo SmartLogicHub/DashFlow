@@ -62,8 +62,8 @@ export function serializeTaskLine(task: Task, input: TaskEditInput): string {
   const body = formatTaskBody({
     text: input.text,
     completedAt: task.completedAt,
-    scheduled: task.scheduled,
-    start: task.start,
+    scheduled: input.scheduled,
+    start: input.start,
     due: input.due,
     priority: input.priority,
     projectId: input.projectId,
