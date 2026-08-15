@@ -1,108 +1,77 @@
-# DashFlow v0.1.7
+# DashFlow v0.1.8
 
-DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 继续以 Markdown / frontmatter 为真实数据源，Widget 和 Dashboard 负责查询、展示和操作。
+DashFlow 是一个建立在 Obsidian Vault 之上的个人工作台。Task / Project / Habit 继续以 Markdown / frontmatter 为真实数据源，Dashboard 负责查询、展示和操作。
+
+## v0.1.8：移动端布局 / 排序模式
+
+这一版把桌面布局和移动端体验拆开：
+
+- 桌面继续使用 12 列自由拖拽 / resize / 自动碰撞重排
+- 900px 以下进入独立移动端模式
+- 移动端改为单列卡片流，不再直接缩放桌面网格
+- 每张卡片支持独立折叠 / 展开
+- 编辑模式下使用 ↑ / ↓ 调整手机排序，触控不依赖拖拽
+- 手机排序独立保存，不会改变桌面卡片位置
+- 支持移动端紧凑模式
+- 支持一键重置手机排序，同时保留桌面布局
+- 新增卡片会自动追加进手机排序；删除卡片会同步清理移动端状态
+- 横竖屏 / 窗口跨过 900px 时自动切换交互模式
+- Calendar / Weekly Review / Habits / Heatmap 在手机上使用独立内容高度，减少嵌套滚动
+- 移动端操作按钮扩大为触控友好的点击区域
+
+移动端状态保存在 Dashboard 自身的插件数据里：
+
+```ts
+mobile: {
+  order: string[];
+  collapsedWidgetIds: string[];
+  compactMode: boolean;
+}
+```
+
+它只保存 UI 偏好，不复制 Task / Project / Habit 业务数据。
 
 ## v0.1.7：Weekly Review
 
-这一版把 Task / Project / Habit / Activity / Calendar 汇总成一个真正的周复盘层，重点回答三个问题：**这周做了什么、现在卡在哪里、下周要看什么**。
+Weekly Review 会把 Task / Project / Habit / Activity / Calendar 汇总成本周复盘：
 
-Weekly Review Widget 支持：
-
-- 本周完成任务数、Activity Score、活跃天数和笔记活动
-- 本周 Habit 总完成率与各 Habit 完成情况
+- 本周完成 / 新建任务
 - Activity Score 与上周对比
-- 汇总逾期与本周仍需处理的任务
-- 活动项目当前进度与 deadline
-- 自动读取下周 Task due / scheduled 与 Project deadline
-- 点击任务直接打开 Task Editor
-- 点击 Habit 直接打开 Habit Editor
-- 点击项目直接打开项目原文
-- 一键复制 Markdown 格式 Weekly Review
-- 周一起始 / 周日起始可配置
-- 待处理、项目、下周关注数量可配置
-- Habit 与 Activity 对比模块可独立开关
-- 多个 Weekly Review Widget 可使用不同配置
-
-Weekly Review 不保存第二份 Task / Project / Habit 数据。它由现有 Domain 与 Activity 派生：
-
-```text
-Task / Project / Habit
-        ↓
-   VaultIndexService
-        ↓
-Project / Calendar / Activity Services
-        ↓
-    WeeklyReviewService
-        ↓
-     Weekly Review
-```
-
-其中 Activity 只从 DashFlow 开始记录后累计；如果本周中途才开始使用 Activity Tracker，Widget 会明确提示本周 Activity 为部分统计。任务、项目和 Habit 本身仍直接读取当前 Vault。
-
-现有用户升级后可以在 **编辑布局 → 添加卡片 → Weekly Review** 中加入；新安装默认 Dashboard 会直接包含一张全宽 Weekly Review。
+- 活跃天数与笔记活动
+- Habit 本周完成率
+- 逾期和本周仍未完成任务
+- 活动项目进度与 deadline
+- 下周 Task due / scheduled 与 Project deadline
+- 一键复制 Markdown 周报
 
 ## v0.1.6：Calendar + Agenda
 
-这一版加入统一时间层，把现有 Domain 里的日期投射到同一张月历：
+统一时间层把以下信息投射到月历：
 
 - Task `📅 due`
 - Task `⏳ scheduled`
 - Project `deadline`
-- Habit `daily / weekdays` 节奏
+- Habit `daily / weekdays`
 
-Calendar Widget 支持 6 周月视图、周一 / 周日起始、月份导航、每日事件标记、选中日期 Agenda、Task / Habit / Project 快捷操作，以及在选中日期直接创建任务。
-
-Calendar 本身不保存第二份业务数据。它只读取 VaultIndexService 中已有的 Task / Project / Habit，然后通过 CalendarService 生成临时 `CalendarEvent`。
+Calendar 本身不保存第二份业务数据，而是运行时由 VaultIndexService 派生 CalendarEvent。
 
 ## v0.1.5：Habit / 长周期任务
 
-Habit 已是正式 Domain，并保持 Markdown source-of-truth：
-
-```yaml
----
-type: habit
-habit_id: workout
-name: 每天运动
-status: active
-frequency: daily
-start: 2026-08-15
-target_days: 30
-habit_log:
-  - 2026-08-15
----
-```
-
-支持 Dashboard 创建 / 编辑、daily / weekdays、每日打卡、历史轨迹、streak、30 天完成率、长期目标进度、暂停 / 完成 / 归档，以及 Heatmap Habit 维度。
+Habit 是正式 Domain，真实打卡保存在 Markdown frontmatter 的 `habit_log` 中。支持 daily / weekdays、历史补打卡、streak、30 天完成率、长期目标进度和暂停 / 完成 / 归档。
 
 ## v0.1.4：Activity Tracker + Heatmap
 
-Activity Tracker 从启用后开始累计新建/修改笔记、任务创建/完成和 Habit 打卡。Heatmap 支持综合活跃度 / Tasks / Habits / Notes 四种统计维度。
+Activity Tracker 从启用后开始累计笔记活动、任务创建 / 完成与 Habit 打卡。Heatmap 支持综合活跃度 / Tasks / Habits / Notes。
 
 > Activity 是派生统计，不会伪造安装前的历史编辑数据。
 
 ## v0.1.3：Task Editor
 
-Dashboard 中可直接创建和编辑任务，修改会写回原始 Markdown。支持标题、完成状态、due date、优先级和项目归属；Calendar 新建任务可以预填选中日期。
+Dashboard 中可直接创建和编辑任务，并写回原始 Markdown。支持标题、完成状态、due date、优先级和项目归属。
 
 ## v0.1.2：Widget 配置系统
 
-每张 Widget 实例都可以独立配置。同一种 Widget 可以添加多张，各自拥有不同筛选和参数。
-
-当前内置 Widget：
-
-| Widget | 主要配置 |
-|---|---|
-| 快速捕捉 | 输入提示文字 |
-| 今日任务 | 包含逾期、显示数量 |
-| 今日进度 | 中央标签 |
-| 项目 | 显示数量 |
-| 即将到期 | 未来天数、显示数量 |
-| Weekly Review | 周起始日、待处理/项目/下周数量、Habit、Activity 对比 |
-| 日历 | 周起始日、数据类型、已完成任务、Agenda 数量 |
-| 长期习惯 | 历史天数、显示数量、进度、暂停状态 |
-| 活跃度 | 天数、统计维度、图例 |
-| 倒计时 | 标题、目标日期 |
-| Vault Pulse | 实例标题 |
+每张 Widget 实例可以独立配置，同一种 Widget 可以添加多张并拥有不同参数。
 
 ## v0.1.1：Layout Engine
 
@@ -114,29 +83,22 @@ Dashboard 中可直接创建和编辑任务，修改会写回原始 Markdown。�
 - 新卡片优先填补可用空位
 - 旧布局重叠自动修复
 - 拖动 / resize 实时重排预览
-- Layout Engine 自动化测试
 
-## 当前功能
+## 当前内置 Widget
 
-- 独立 Dashboard View
-- Widget Registry + WidgetInstance
-- 12 列桌面布局
-- 拖动 / resize / 自动重排 / 持久化
-- Widget 实例配置系统
-- Vault 增量索引
-- Markdown Task 解析、勾选、创建和编辑
-- Project frontmatter + 自动项目进度
-- Habit frontmatter + 每日打卡 / streak / 长期目标
-- Weekly Review + Markdown 复制
-- Calendar + Agenda 时间视图
-- Quick Capture → Inbox
-- Today Tasks / Progress
-- Projects / Upcoming
-- Activity Heatmap
-- Countdown / Vault Pulse
-- Obsidian 亮暗主题适配
-- 移动端单列布局
-- 插件设置页
+| Widget | 主要能力 |
+|---|---|
+| 快速捕捉 | 写入 Inbox |
+| 今日任务 | 今日 + 逾期任务 |
+| 今日进度 | 当日完成比例 |
+| 项目 | 活动项目 + 自动进度 |
+| 即将到期 | 未来任务 |
+| 日历 | 月历 + Agenda |
+| 长期习惯 | 打卡 / streak / 目标 |
+| Weekly Review | 本周复盘 + 下周关注 |
+| 活跃度 | Heatmap |
+| 倒计时 | 目标日期 |
+| Vault Pulse | Vault 统计 |
 
 ## 安装测试版
 
@@ -177,8 +139,6 @@ npm run dev
 - [ ] 完成 Widget Registry #project/dashflow
 ```
 
-Calendar 与 Weekly Review 会读取 `📅` due 和 `⏳` scheduled。
-
 ## Project 格式
 
 ```yaml
@@ -192,8 +152,6 @@ progress_mode: tasks
 ---
 ```
 
-`project_id` 与任务里的 `#project/dashflow` 对应，`deadline` 会进入 Calendar 和 Weekly Review。
-
 ## Habit 格式
 
 ```yaml
@@ -204,14 +162,11 @@ name: 每天运动
 status: active
 frequency: weekdays
 start: 2026-08-15
-end: 2026-09-30
 target_days: 30
 habit_log:
   - 2026-08-17
 ---
 ```
-
-`frequency` 当前支持 `daily` 和 `weekdays`。真实完成记录始终由 `habit_log` 保存。
 
 ## 数据边界
 
@@ -221,11 +176,12 @@ habit_log:
 | Project | Markdown / frontmatter |
 | Habit | Markdown / frontmatter |
 | Habit check-in | `habit_log` frontmatter |
-| CalendarEvent | 运行时由 Domain 派生，不持久化 |
-| Weekly Review | 运行时由 Domain + Activity 派生，不持久化 |
+| CalendarEvent | 运行时派生 |
+| Weekly Review | 运行时聚合 |
 | WidgetDefinition | 插件代码 |
 | WidgetInstance | 插件 `data.json` |
 | Dashboard | 插件 `data.json` |
+| Mobile order / collapse | Dashboard UI 状态 |
 | Activity | 插件 `data.json` 中的派生统计 |
 
 卸载 DashFlow 不会带走用户的 Task / Project / Habit 数据。
@@ -251,17 +207,19 @@ Services
 Widget Registry + Widget Instances
   ↓
 Layout Engine
+  ├── Desktop 12-column grid
+  └── Mobile single-column order
   ↓
 Dashboard View
 ```
 
 ## 下一阶段
 
-1. 移动端排序模式
-2. 多 Dashboard UI
+1. 多 Dashboard UI
+2. Dashboard 模板
 3. Habit 自定义周期 / 提醒
 4. Calendar 周视图 / 更完整 scheduled 编辑
-5. Weekly Review 历史快照 / 保存到笔记
+5. 自定义 Query / Widget
 
 ## CI
 

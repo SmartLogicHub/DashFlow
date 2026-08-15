@@ -157,12 +157,19 @@ export interface DashboardSettings {
   showHeader?: boolean;
 }
 
+export interface DashboardMobileSettings {
+  order: string[];
+  collapsedWidgetIds: string[];
+  compactMode: boolean;
+}
+
 export interface DashboardDefinition {
   id: string;
   name: string;
   icon?: string;
   widgets: WidgetInstance[];
   settings: DashboardSettings;
+  mobile?: DashboardMobileSettings;
   createdAt: number;
   updatedAt: number;
 }
