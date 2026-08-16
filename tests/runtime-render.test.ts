@@ -53,10 +53,31 @@ test("dashboard render lifecycle tracks mounted roots and monotonic render seque
   assert.equal(service.rootCount(), 0);
 });
 
-test("DashboardRenderer coalesces requests to one animation frame and publishes after render", () => {
+test("render profiling distinguishes requests, coalescing and committed render cost", () => {
+  const service = new DashboardRenderService();
+  service.requested(false);
+  service.requested(true);
+  service.requested(true);
+  service.committed(12);
+  service.requested(false);
+  service.committed(8);
+
+  assert.deepEqual(service.metrics(), {
+    requests: 4,
+    commits: 2,
+    coalesced: 2,
+    lastMs: 8,
+    averageMs: 10,
+    maxMs: 12,
+  });
+});
+
+test("DashboardRenderer coalesces requests to one animation frame, profiles commits and publishes after render", () => {
   assert.ok(renderer.includes("window.requestAnimationFrame"));
   assert.ok(renderer.includes("window.cancelAnimationFrame"));
   assert.ok(renderer.includes("this.plugin.dashboardManager.subscribe(() => this.render())"));
+  assert.ok(renderer.includes("this.plugin.dashboardRender.requested(coalesced)"));
+  assert.ok(renderer.includes("this.plugin.dashboardRender.committed(performance.now() - startedAt)"));
   assert.ok(renderer.includes("this.plugin.dashboardRender.rendered(this.container)"));
   assert.ok(renderer.includes("this.plugin.dashboardRender.unmount(this.container)"));
 });
