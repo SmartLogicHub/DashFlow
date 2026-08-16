@@ -25,4 +25,9 @@ export const DEFAULT_SETTINGS: DashFlowSettings = {
   aiMorningBriefingEnabled: false,
   dailyNoteFolder: "",
   dailyNoteDateFormat: "YYYY-MM-DD",
+  quickCaptureTarget: "inbox",
+  dailyCaptureHeading: "## 闪念",
+  contextMorningDashboardId: "home",
+  contextWorkDashboardId: "",
+  contextReviewDashboardId: "",
 };
