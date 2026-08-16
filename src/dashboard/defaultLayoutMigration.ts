@@ -44,6 +44,20 @@ const STUDIO_031_LAYOUT: Record<string, WidgetLayout> = {
   "vault-stats": { x: 0, y: 27, w: 12, h: 2 },
 };
 
+const COMMAND_032_LAYOUT: Record<string, WidgetLayout> = {
+  "quick-capture": { x: 0, y: 0, w: 3, h: 4 },
+  "today-tasks": { x: 3, y: 0, w: 3, h: 4 },
+  progress: { x: 6, y: 0, w: 3, h: 4 },
+  upcoming: { x: 9, y: 0, w: 3, h: 8 },
+  projects: { x: 0, y: 4, w: 9, h: 4 },
+  activity: { x: 0, y: 8, w: 9, h: 4 },
+  countdown: { x: 9, y: 8, w: 3, h: 4 },
+  habits: { x: 0, y: 12, w: 12, h: 4 },
+  calendar: { x: 0, y: 16, w: 12, h: 7 },
+  "weekly-review": { x: 0, y: 23, w: 12, h: 6 },
+  "vault-stats": { x: 0, y: 29, w: 12, h: 2 },
+};
+
 function sameLayout(a: WidgetLayout, b: WidgetLayout): boolean {
   return a.x === b.x && a.y === b.y && a.w === b.w && a.h === b.h;
 }
@@ -66,7 +80,8 @@ function matchesPreset(
 export function usesLegacyHomeLayout(dashboard: DashboardDefinition): boolean {
   return matchesPreset(dashboard, LEGACY_LAYOUT, 14, 58)
     || matchesPreset(dashboard, POLISHED_024_LAYOUT, 12, 56)
-    || matchesPreset(dashboard, STUDIO_031_LAYOUT, 14, 58);
+    || matchesPreset(dashboard, STUDIO_031_LAYOUT, 14, 58)
+    || matchesPreset(dashboard, COMMAND_032_LAYOUT, 8, 44);
 }
 
 export function upgradeLegacyHomeLayout(
