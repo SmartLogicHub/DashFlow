@@ -26,8 +26,17 @@ test("motion system covers entry hover drag numeric feedback and reduced motion"
   assert.ok(motion.includes("@media (prefers-reduced-motion: reduce)"));
 });
 
+test("drag feedback and performance stay scoped to the active card", () => {
+  assert.ok(motion.includes("--df-card-drag-shadow"));
+  assert.ok(motion.includes("will-change: transform"));
+  assert.ok(motion.includes(".dashflow-widget.is-dragging::after"));
+  assert.ok(motion.includes("cursor: grabbing"));
+  assert.equal(motion.includes(".dashflow-widget {\n  will-change"), false);
+});
+
 test("resized cards use container queries for responsive information density", () => {
   assert.ok(motion.includes("container-type: inline-size"));
+  assert.ok(motion.includes("@container (max-width: 220px)"));
   assert.ok(motion.includes("@container (max-width: 250px)"));
   assert.ok(motion.includes("@container (max-width: 280px)"));
   assert.ok(motion.includes("@container (min-width: 520px)"));
