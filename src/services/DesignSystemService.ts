@@ -1,12 +1,15 @@
+import { UI_REFINEMENT_POLISH_STYLES } from "./UiRefinementPolishService";
+import { VISUAL_CONTINUITY_STYLES } from "./VisualContinuityService";
+
 const STYLE_ID = "dashflow-design-system-v043";
 
 /**
  * v0.4.3 consolidation layer.
  *
- * Keep this service presentation-only: no MutationObserver, no event handlers,
- * and no access to Task / Project / Habit data. New visual decisions should
- * land here first while the older v0.4.1/v0.4.2 style services are gradually
- * folded into this single system.
+ * This service is presentation-only: no MutationObserver, no event handlers,
+ * and no access to Task / Project / Habit data. The v0.4.1/v0.4.2 CSS is loaded
+ * here in its original cascade order while rules are gradually folded into the
+ * v0.4.3 tokenized layer below.
  */
 export const DESIGN_SYSTEM_STYLES = `
 .dashflow-view-container {
@@ -50,6 +53,15 @@ export const DESIGN_SYSTEM_STYLES = `
   letter-spacing: -.015em!important;
 }
 
+/* The runtime no longer mutates Hero buttons just to add styling hooks. */
+.dashflow-home-hero-actions > button:nth-child(1) {
+  min-width: 92px;
+}
+
+.dashflow-home-hero-actions > button:nth-child(2) {
+  min-width: 86px;
+}
+
 /* Readability floor: dense metadata can be quiet without becoming tiny. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-progress-ring span,
 .dashflow-command-shell:not(.is-personal-home) .dashflow-project-stat span,
@@ -80,12 +92,18 @@ export const DESIGN_SYSTEM_STYLES = `
 }
 `;
 
+const CONSOLIDATED_STYLES = [
+  VISUAL_CONTINUITY_STYLES,
+  UI_REFINEMENT_POLISH_STYLES,
+  DESIGN_SYSTEM_STYLES,
+].join("\n\n");
+
 export class DesignSystemService {
   start(): void {
     if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement("style");
     style.id = STYLE_ID;
-    style.textContent = DESIGN_SYSTEM_STYLES;
+    style.textContent = CONSOLIDATED_STYLES;
     document.head.appendChild(style);
   }
 
