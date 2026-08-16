@@ -116,6 +116,33 @@ export const PRODUCT_STYLES = `
 .dashflow-project-step { width: 7px; height: 7px; z-index: 1; justify-self: center; border-radius: 50%; background: var(--df-cmd-soft); }
 .dashflow-project-step.is-active { background: var(--df-cmd-text); }
 
+/* When on the Projects tab, display projects in a modern card grid layout. */
+.dashflow-command-shell .dashflow-grid[data-product-section="projects"] {
+  display: block!important;
+}
+.dashflow-command-shell .dashflow-grid[data-product-section="projects"] > .dashflow-widget {
+  min-height: 400px!important;
+}
+.dashflow-command-shell .dashflow-grid[data-product-section="projects"] .dashflow-project-list {
+  display: grid!important;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr))!important;
+  gap: 12px!important;
+  padding: 16px!important;
+}
+.dashflow-command-shell .dashflow-grid[data-product-section="projects"] .dashflow-project-row {
+  border: 1px solid var(--df-cmd-border)!important;
+  border-radius: 10px!important;
+  padding: 14px 16px!important;
+  background: var(--df-cmd-surface)!important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02)!important;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease!important;
+}
+.dashflow-command-shell .dashflow-grid[data-product-section="projects"] .dashflow-project-row:hover {
+  transform: translateY(-2px)!important;
+  border-color: var(--df-cmd-border-strong)!important;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.05)!important;
+}
+
 /* Heatmap and Countdown. */
 .dashflow-command-shell .dashflow-heatmap-grid { gap: 3px!important; }
 .dashflow-command-shell .dashflow-heatmap-cell { border-radius: 2px!important; box-shadow: none!important; }
