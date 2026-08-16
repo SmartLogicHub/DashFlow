@@ -56,7 +56,7 @@ export class QuickAddModal extends Modal {
         this.close();
         new ProjectEditorModal(this.plugin).open();
       }),
-      this.actionButton("repeat-2", "新建习惯", "建立一个长期节奏", () => {
+      this.actionButton("repeat-2", "习惯 / 日更", "习惯或长期任务每日推进", () => {
         this.close();
         new HabitEditorModal(this.plugin).open();
       }),
