@@ -9,6 +9,7 @@ import type { ProductSection } from "./product/navigation";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
 import { AIClient } from "./services/AIClient";
+import { AINewsWidgetInteractionService } from "./services/AINewsWidgetInteractionService";
 import { AIPlanningService } from "./services/AIPlanningService";
 import { CalendarService } from "./services/CalendarService";
 import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInteractionService";
@@ -21,6 +22,7 @@ import { DesignSystemService } from "./services/DesignSystemService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
 import { MorningBriefingService } from "./services/MorningBriefingService";
+import { NewsCurationService } from "./services/NewsCurationService";
 import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService";
 import { PresentationRuntimeService } from "./services/PresentationRuntimeService";
 import { ProductDesignService } from "./services/ProductDesignService";
@@ -42,6 +44,7 @@ import { TaskEditorModal } from "./ui/TaskEditorModal";
 import { WorkflowSettingsModal } from "./ui/WorkflowSettingsModal";
 import { localDate } from "./utils/date";
 import { registerBuiltins } from "./widgets/builtins";
+import { registerIntelligenceWidgets } from "./widgets/intelligence";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
 
 export default class DashFlowPlugin extends Plugin {
@@ -68,6 +71,8 @@ export default class DashFlowPlugin extends Plugin {
   aiClient!: AIClient;
   aiPlanning!: AIPlanningService;
   morningBriefing!: MorningBriefingService;
+  newsCuration!: NewsCurationService;
+  aiNewsWidgets!: AINewsWidgetInteractionService;
   weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
@@ -78,6 +83,7 @@ export default class DashFlowPlugin extends Plugin {
   async onload(): Promise<void> {
     this.widgetRegistry = new WidgetRegistry();
     registerBuiltins(this.widgetRegistry);
+    registerIntelligenceWidgets(this.widgetRegistry);
     await this.loadPluginData();
 
     this.dashboardManager = new DashboardManager(this, this.widgetRegistry);
@@ -131,12 +137,14 @@ export default class DashFlowPlugin extends Plugin {
     this.aiClient = new AIClient(this);
     this.aiPlanning = new AIPlanningService(this);
     this.morningBriefing = new MorningBriefingService(this);
+    this.newsCuration = new NewsCurationService(this);
     this.weRead = new WeReadService(this);
     this.taskInteractions = new TaskInteractionService(this);
     this.activityWidgets = new ActivityWidgetInteractionService(this);
     this.habitWidgets = new HabitWidgetInteractionService(this);
     this.calendarWidgets = new CalendarWidgetInteractionService(this);
     this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
+    this.aiNewsWidgets = new AINewsWidgetInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.contextSwitcher = new ContextSwitcherService(this);
@@ -204,6 +212,7 @@ export default class DashFlowPlugin extends Plugin {
     this.habitWidgets.start();
     this.calendarWidgets.start();
     this.weeklyReviewWidgets.start();
+    this.aiNewsWidgets.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
     this.contextSwitcher.start();
@@ -215,6 +224,7 @@ export default class DashFlowPlugin extends Plugin {
     this.contextSwitcher?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
+    this.aiNewsWidgets?.stop();
     this.weeklyReviewWidgets?.stop();
     this.calendarWidgets?.stop();
     this.habitWidgets?.stop();
