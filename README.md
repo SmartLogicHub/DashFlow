@@ -1,68 +1,67 @@
-# DashFlow v0.3.1
+# DashFlow v0.3.2
 
-DashFlow 是建立在 Obsidian Vault 之上的个人工作系统。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、组织、呈现和直接操作。
+DashFlow 是建立在 Obsidian Vault 之上的个人工作 Dashboard。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
 
-## v0.3.1：Studio UI
+## v0.3.2 · Command Dashboard
 
-这一版继续沿用 v0.3.0 的 Today / Inbox / Projects / Calendar / Habits / Review 产品结构，但把默认界面从“经过包装的 Dashboard Grid”进一步改成真正的应用视图。
+这一版根据真实 Obsidian Dashboard 参考重新确定视觉方向：**不在 Obsidian 里面再造第二套 App 外壳，而是让 Obsidian 自己负责左右侧栏，DashFlow 专注中间工作区。**
 
-设计研究主要参考成熟生产力产品的共同原则：导航应后退、主内容应成为视觉焦点、Today 应是执行面、Quick Capture 应是随手记录入口而不是一张大卡、项目和任务应该直接可操作，而不是展示技术数据。
-
-### Today
-
-- 默认不再渲染 Widget 网格；Today 使用独立 DOM 工作区
-- 黑色重侧栏改成轻量半透明导航面板
-- 删除四张等权 KPI 卡，改为一条低权重的当天上下文信息
-- 顶部增加真正可用的快速输入：输入文字并按 Enter，会直接创建一个计划在今天的任务
-- 今日任务成为唯一主面板；逾期、计划日、项目和优先级通过轻量 metadata 呈现
-- 右侧只保留接下来 7 天、活动项目和今日习惯三个上下文面板
-- 空状态不再占据巨大灰色矩形，会提供明确下一步动作
-
-### Inbox
-
-- 收集箱使用独立处理队列
-- 顶部输入可以直接捕捉想法到 Inbox
-- 任务一旦补充项目、计划日、开始日或截止日，就会离开“未整理”状态
-
-### Projects
-
-- 项目从进度条表单行改成项目 Portfolio Board
-- 卡片展示状态、描述/截止日、下一步数量和进度
-- 点击直接进入项目详情，而不是跳进 Markdown
-
-### Calendar / Habits / Review
-
-这些复杂工作流继续复用已经稳定的 Calendar / Habit / Weekly Review 行为，但放进新的 Studio workflow canvas：
-
-- Calendar 独立全宽
-- Habits + Activity 在宽屏双栏、窄屏自动单列
-- Review 独立纵向工作流
-
-### 高级布局
-
-旧 Dashboard Grid 没有删除。它现在是高级自定义能力：用户点“自定义布局”时仍可编辑 Widget、布局和 Dashboard；正常使用时它不再决定默认产品界面。
-
-## 工作流
+默认界面由五层组成：
 
 ```text
-DashFlow
-├── 今天
-├── 收集箱
-├── 项目
-├── 日历
-├── 习惯
-└── 复盘
+Purple Command Banner
+Vault Pulse
+Dashboard identity + date/time
+Horizontal command bar
+Dense editable widget grid
 ```
 
-## 可选 AI 日计划
+### 视觉与布局
+
+- 紫黑色横幅成为唯一强视觉焦点，Light / Dark 下都保持统一品牌识别
+- Vault Pulse 压缩为终端式状态条，不再使用大 KPI 卡
+- Dashboard 标题、版本和日期时间放在同一信息层
+- 取消 DashFlow 自己的全高左侧导航，不与 Obsidian 文件树和右侧插件栏争夺宽度
+- 横向命令条提供主页、项目、收集箱、日历、习惯、复盘，以及新建任务 / 项目 / 习惯、搜索和可选 AI 规划
+- 默认 Home 恢复 Bento/Grid，但卡片更紧凑、边框更细、留白更少
+- 桌面默认首屏：Quick Capture / TODO / Progress / Upcoming；第二层 Projects；第三层 Activity + Countdown
+- Habit / Calendar / Review 继续作为独立工作流存在，不强塞首屏
+- 编辑布局继续支持拖拽、resize、配置、添加、删除和重置；编辑工具条改成浮动 pill
+- 手机仍然使用单列内容，不做自由 resize
+
+### 工作流
+
+**主页**
+- 快速捕捉直接写入 Inbox
+- TODO 显示今天与逾期任务
+- Progress 使用真实任务数据
+- Upcoming 显示未来截止任务
+- Projects 显示真实项目进度并可进入项目详情
+- Activity 使用真实 Activity 数据
+- Countdown 使用 Widget 配置的目标日期
+
+**收集箱**
+- 顶部输入后按 Enter 即可捕捉
+- 只显示尚未整理的开放任务
+- 点击任务进入完整任务编辑器
+
+**项目**
+- 项目列表、进度、任务完成数
+- 点击进入 Project Detail
+- Project Detail 中可新建已关联项目的下一步任务
+
+**日历 / 习惯 / 复盘**
+- Calendar + Agenda
+- Habit check-in / streak / history
+- Weekly Review + Activity + Vault stats
+
+### 可选 AI 日计划
 
 - 默认兼容 DeepSeek OpenAI Chat Completions API
 - API Key 使用 Obsidian SecretStorage / Keychain
-- 只有用户主动点击 AI 规划才会请求
-- 只发送任务 / 项目 / 习惯的结构化摘要，不发送笔记正文
-- AI 建议不会自动修改 Vault
-
-最低 Obsidian 版本为 **1.11.4**。
+- 只有用户主动点击 AI 规划时才请求
+- 只发送结构化任务 / 项目 / Habit 摘要，不发送笔记正文
+- AI 只给建议，不自动修改 Vault
 
 ## 数据格式
 
@@ -71,8 +70,6 @@ DashFlow
 ```md
 - [ ] 整理发布计划 #project/dashflow ⏳ 2026-08-18 📅 2026-08-20
 ```
-
-DashFlow UI 可以直接编辑：标题、计划日期、开始日期、截止日期、优先级、所属项目和完成状态。
 
 ### Project
 
@@ -102,19 +99,23 @@ habit_log:
 ---
 ```
 
-## 现有能力
+## 核心能力
 
 - Vault 增量索引
-- Task 编辑 / 完成 / 日程 / 项目关联
-- Project 新建 / 编辑 / 详情 / 任务进度
-- Habit 新建 / 编辑 / 打卡 / 连续天数
+- Task 创建 / 编辑 / 完成 / 计划日 / 截止日 / 优先级 / 项目关联
+- Project 创建 / 编辑 / 详情 / 自动任务进度
+- Habit 创建 / 编辑 / 打卡 / streak / 目标
+- Activity Tracker + Heatmap
 - Calendar + Agenda
 - Weekly Review
-- Activity Heatmap
-- 多 Dashboard、模板、自定义模板、导入 / 导出
-- Desktop Grid 高级布局
-- 全局搜索 / 快速新建
+- 多 Dashboard、内置模板、自定义模板、JSON 导入 / 导出
+- Desktop Grid 与移动端排序
+- 全局搜索与快速新建
 - 可选 AI 日计划
+
+## 数据边界
+
+DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。Dashboard 布局、模板与 Activity 派生统计保存在插件数据中；AI API Key 保存在 Obsidian SecretStorage 中。
 
 ## 开发
 
@@ -124,8 +125,4 @@ npm test
 npm run build
 ```
 
-构建输出：`main.js`。CI 同时执行测试、TypeScript build、bundle、`node --check main.js`，并上传插件 artifact。
-
-## 数据边界
-
-DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍然留在 Vault Markdown 中。Dashboard 布局、模板与 Activity 派生统计保存在插件数据中；AI API Key 保存在 Obsidian SecretStorage 中。
+CI 同时执行测试、TypeScript build、production bundle、`node --check main.js`，并上传插件 artifact。
