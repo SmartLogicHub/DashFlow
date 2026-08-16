@@ -1,30 +1,59 @@
 export const PRODUCT_HIERARCHY_RESET_STYLES = `
 /* v0.5.6 product hierarchy reset.
- * One primary navigation, one photographic Home, and tools that only appear
- * when they are relevant. This intentionally overrides older continuity layers
- * that made every section look like a second landing page.
+ * Keep one primary navigation while preserving the full photographic identity
+ * across Home and working sections. Working pages are differentiated by their
+ * content and labels, not by crushing the Hero into a shallow strip.
  */
 
-/* Home is the only photographic surface. Working sections begin immediately
- * with navigation and useful content instead of a shallow cropped banner. */
+/* Every primary section keeps a full-size photographic Hero. Older layers set
+ * working sections to 88px/72px; override that compression here and preserve
+ * the image aspect visually with cover rather than stretching it. */
 .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
-  display: none !important;
-  height: 0 !important;
-  min-height: 0 !important;
-  margin: 0 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  background: none !important;
-  box-shadow: none !important;
+  display: flex !important;
+  position: relative !important;
+  isolation: isolate !important;
+  height: 194px !important;
+  min-height: 194px !important;
+  margin: 0 0 12px !important;
+  padding: 24px 30px !important;
+  align-items: flex-end !important;
+  justify-content: flex-start !important;
+  overflow: hidden !important;
+  border: 1px solid var(--df-home-border, var(--df-cmd-border)) !important;
+  border-radius: var(--df-radius-lg) !important;
+  color: #fff !important;
+  background-color: #0f172a !important;
+  background-image:
+    linear-gradient(90deg, rgba(15, 23, 42, .68) 0%, rgba(15, 23, 42, .34) 55%, rgba(15, 23, 42, .06) 100%),
+    var(--df-ambient-image, var(--df-home-scene)) !important;
+  background-size: cover !important;
+  background-position: center 50% !important;
+  background-repeat: no-repeat !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .06) !important;
 }
-.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::before,
+.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::before {
+  display: block !important;
+  content: "" !important;
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 0 !important;
+  pointer-events: none !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.14)) !important;
+}
 .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after {
-  content: none !important;
-  display: none !important;
+  display: block !important;
+  position: relative !important;
+  z-index: 1 !important;
+  color: rgba(255,255,255,.98) !important;
+  font-size: clamp(22px, 2.2vw, 30px) !important;
+  line-height: 1.05 !important;
+  font-weight: 800 !important;
+  letter-spacing: -.025em !important;
+  text-shadow: 0 2px 14px rgba(0,0,0,.38) !important;
 }
 
-/* Do not request transformed/compressed Unsplash variants for the built-in
- * scenes. User-selected local Vault images already resolve to the original
+/* Do not request resized/quality-reduced Unsplash variants for built-in scenes.
+ * User-selected local Vault images already resolve directly to their original
  * Vault resource and remain untouched. */
 .dashflow-view-container[data-dashflow-theme="alpine"] {
   --df-home-scene: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb");
@@ -103,8 +132,14 @@ export const PRODUCT_HIERARCHY_RESET_STYLES = `
   align-self: start !important;
 }
 
-/* Preserve readable geometry when the window narrows. */
+/* Preserve a real Hero on narrow windows too; reduce padding/font, not the
+ * artwork into a thin strip. */
 @media (max-width: 900px) {
+  .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
+    height: 172px !important;
+    min-height: 172px !important;
+    padding: 20px 22px !important;
+  }
   .dashflow-command-bar {
     gap: 3px !important;
   }
