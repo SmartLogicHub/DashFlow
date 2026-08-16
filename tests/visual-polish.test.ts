@@ -8,6 +8,7 @@ import { registerBuiltins } from "../src/widgets/builtins";
 import { WidgetRegistry } from "../src/widgets/WidgetRegistry";
 
 const design = readFileSync("src/services/ProductDesignService.ts", "utf8");
+const polish = readFileSync("src/services/UiRefinementPolishService.ts", "utf8");
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const settingsSource = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 
@@ -27,17 +28,25 @@ test("Work owns only the center canvas and no longer renders the old purple land
   assert.ok(experience.includes("shell.querySelector(\":scope > .dashflow-product-nav\")?.remove()"));
 });
 
-test("Command Dashboard default Home remains compact and collision free for layout editing", () => {
+test("v0.4.2 final polish flattens Work chrome and makes disconnected Home states recede", () => {
+  assert.ok(polish.includes("Treat the command bar as product navigation"));
+  assert.ok(polish.includes("border-bottom: 1px solid var(--df-cmd-border)!important"));
+  assert.ok(polish.includes("dashflow-home-weread:has(.dashflow-home-weread-mark)"));
+  assert.ok(polish.includes("A disconnected WeRead integration is a setup hint"));
+  assert.ok(polish.includes("grid-template-columns: minmax(0, 1fr) auto!important"));
+});
+
+test("Command Dashboard default Home uses the compact screenshot-driven composition and remains collision free", () => {
   const dashboard = createDefaultDashboard(registry());
   assert.equal(dashboard.settings.gap, 8);
-  assert.equal(dashboard.settings.rowHeight, 44);
-  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "quick-capture")?.layout, { x: 0, y: 0, w: 3, h: 4 });
-  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "today-tasks")?.layout, { x: 3, y: 0, w: 3, h: 4 });
-  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "progress")?.layout, { x: 6, y: 0, w: 3, h: 4 });
-  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "upcoming")?.layout, { x: 9, y: 0, w: 3, h: 8 });
-  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "projects")?.layout, { x: 0, y: 4, w: 9, h: 4 });
-  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "activity")?.layout, { x: 0, y: 8, w: 9, h: 4 });
-  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "countdown")?.layout, { x: 9, y: 8, w: 3, h: 4 });
+  assert.equal(dashboard.settings.rowHeight, 38);
+  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "quick-capture")?.layout, { x: 0, y: 0, w: 3, h: 3 });
+  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "today-tasks")?.layout, { x: 3, y: 0, w: 5, h: 3 });
+  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "progress")?.layout, { x: 8, y: 0, w: 4, h: 3 });
+  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "projects")?.layout, { x: 0, y: 3, w: 8, h: 4 });
+  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "upcoming")?.layout, { x: 8, y: 3, w: 4, h: 4 });
+  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "activity")?.layout, { x: 0, y: 7, w: 8, h: 4 });
+  assert.deepEqual(dashboard.widgets.find((widget) => widget.id === "countdown")?.layout, { x: 8, y: 7, w: 4, h: 4 });
 
   for (let i = 0; i < dashboard.widgets.length; i += 1) {
     for (let j = i + 1; j < dashboard.widgets.length; j += 1) {
@@ -73,8 +82,41 @@ test("untouched v0.3.1 Studio layout migrates without losing widget config", () 
   assert.equal(usesLegacyHomeLayout(dashboard), true);
   const upgraded = upgradeLegacyHomeLayout(dashboard, value);
   assert.equal(upgraded.widgets.find((widget) => widget.id === "today-tasks")?.config.limit, 17);
-  assert.deepEqual(upgraded.widgets.find((widget) => widget.id === "quick-capture")?.layout, { x: 0, y: 0, w: 3, h: 4 });
-  assert.deepEqual(upgraded.widgets.find((widget) => widget.id === "projects")?.layout, { x: 0, y: 4, w: 9, h: 4 });
+  assert.equal(upgraded.settings.rowHeight, 38);
+  assert.deepEqual(upgraded.widgets.find((widget) => widget.id === "quick-capture")?.layout, { x: 0, y: 0, w: 3, h: 3 });
+  assert.deepEqual(upgraded.widgets.find((widget) => widget.id === "projects")?.layout, { x: 0, y: 3, w: 8, h: 4 });
+});
+
+test("untouched v0.4.1 Command layout migrates to the compact v0.4.2 composition", () => {
+  const value = registry();
+  const dashboard = createDefaultDashboard(value);
+  const command041 = {
+    "quick-capture": { x: 0, y: 0, w: 3, h: 4 },
+    "today-tasks": { x: 3, y: 0, w: 3, h: 4 },
+    progress: { x: 6, y: 0, w: 3, h: 4 },
+    upcoming: { x: 9, y: 0, w: 3, h: 8 },
+    projects: { x: 0, y: 4, w: 9, h: 4 },
+    activity: { x: 0, y: 8, w: 9, h: 4 },
+    countdown: { x: 9, y: 8, w: 3, h: 4 },
+    habits: { x: 0, y: 12, w: 12, h: 4 },
+    calendar: { x: 0, y: 16, w: 12, h: 7 },
+    "weekly-review": { x: 0, y: 23, w: 12, h: 6 },
+    "vault-stats": { x: 0, y: 29, w: 12, h: 2 },
+  } as const;
+  dashboard.settings.gap = 8;
+  dashboard.settings.rowHeight = 44;
+  dashboard.widgets = dashboard.widgets.map((widget) => ({
+    ...widget,
+    layout: { ...command041[widget.id as keyof typeof command041] },
+    config: widget.id === "projects" ? { ...widget.config, limit: 3 } : widget.config,
+  }));
+
+  assert.equal(usesLegacyHomeLayout(dashboard), true);
+  const upgraded = upgradeLegacyHomeLayout(dashboard, value);
+  assert.equal(upgraded.settings.rowHeight, 38);
+  assert.equal(upgraded.widgets.find((widget) => widget.id === "projects")?.config.limit, 3);
+  assert.deepEqual(upgraded.widgets.find((widget) => widget.id === "today-tasks")?.layout, { x: 3, y: 0, w: 5, h: 3 });
+  assert.deepEqual(upgraded.widgets.find((widget) => widget.id === "upcoming")?.layout, { x: 8, y: 3, w: 4, h: 4 });
 });
 
 test("older untouched Home layouts still migrate to Command Dashboard", () => {
@@ -98,7 +140,7 @@ test("older untouched Home layouts still migrate to Command Dashboard", () => {
   dashboard.widgets = dashboard.widgets.map((widget) => ({ ...widget, layout: { ...polished024[widget.id as keyof typeof polished024] } }));
   assert.equal(usesLegacyHomeLayout(dashboard), true);
   const upgraded = upgradeLegacyHomeLayout(dashboard, value);
-  assert.deepEqual(upgraded.widgets.find((widget) => widget.id === "today-tasks")?.layout, { x: 3, y: 0, w: 3, h: 4 });
+  assert.deepEqual(upgraded.widgets.find((widget) => widget.id === "today-tasks")?.layout, { x: 3, y: 0, w: 5, h: 3 });
 });
 
 test("settings UI remains grouped for non-technical users", () => {
