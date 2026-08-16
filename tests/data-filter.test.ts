@@ -10,6 +10,7 @@ import {
 
 const registry = readFileSync("src/widgets/data.ts", "utf8");
 const interaction = readFileSync("src/services/DataFilterWidgetInteractionService.ts", "utf8");
+const vaultIndex = readFileSync("src/services/VaultIndexService.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const styles = readFileSync("src/styles/DataFilterStyles.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
@@ -65,10 +66,50 @@ const snapshot: VaultSnapshot = {
   ],
 };
 
+const noteSnapshot: VaultSnapshot = {
+  ...snapshot,
+  notes: 3,
+  noteRecords: [
+    {
+      path: "Journal/2026-08-16.md",
+      name: "2026-08-16",
+      folder: "Journal",
+      tags: ["ai", "daily"],
+      frontmatter: { type: "daily", status: "active", mood: "focused" },
+      taskTotal: 2,
+      taskCompleted: 1,
+      createdAt: Date.parse("2026-08-16T07:00:00"),
+      modifiedAt: Date.parse("2026-08-16T12:00:00"),
+    },
+    {
+      path: "Projects/DashFlow/Architecture.md",
+      name: "Architecture",
+      folder: "Projects/DashFlow",
+      tags: ["work"],
+      frontmatter: { type: "reference", status: "active", area: "work" },
+      taskTotal: 2,
+      taskCompleted: 2,
+      createdAt: Date.parse("2026-08-10T07:00:00"),
+      modifiedAt: Date.parse("2026-08-15T12:00:00"),
+    },
+    {
+      path: "Archive/Old.md",
+      name: "Old",
+      folder: "Archive",
+      tags: ["old"],
+      frontmatter: { status: "archived" },
+      taskTotal: 0,
+      taskCompleted: 0,
+      createdAt: Date.parse("2025-01-01T07:00:00"),
+      modifiedAt: Date.parse("2026-08-14T12:00:00"),
+    },
+  ],
+};
+
 test("default data filter shows active cross-entity results from the live snapshot", () => {
   const view = filterVaultSnapshot(snapshot, DEFAULT_DATA_FILTER_CONFIG, "2026-08-16");
   assert.equal(view.total, 5);
-  assert.deepEqual(view.counts, { task: 3, project: 1, habit: 1 });
+  assert.deepEqual(view.counts, { note: 0, task: 3, project: 1, habit: 1 });
   assert.deepEqual(view.items.map((item) => item.title), [
     "Ship AI filter",
     "Review inbox",
@@ -115,23 +156,71 @@ test("next-seven-days range includes today and excludes later dates", () => {
   assert.deepEqual(view.items.map((item) => item.title), ["Review inbox", "DashFlow"]);
 });
 
+test("Note filter composes folder frontmatter and completed task status", () => {
+  const view = filterVaultSnapshot(noteSnapshot, {
+    ...DEFAULT_DATA_FILTER_CONFIG,
+    entity: "note",
+    state: "all",
+    folder: "Projects",
+    frontmatter: "status=active",
+    noteTaskStatus: "completed",
+    query: "architecture",
+  }, "2026-08-16");
+  assert.equal(view.total, 1);
+  assert.equal(view.items[0]?.kind, "note");
+  assert.equal(view.items[0]?.title, "Architecture");
+});
+
+test("Note filter supports normalized tags, frontmatter key presence and pending tasks", () => {
+  const pending = filterVaultSnapshot(noteSnapshot, {
+    ...DEFAULT_DATA_FILTER_CONFIG,
+    entity: "note",
+    tag: "#AI",
+    frontmatter: "mood",
+    noteTaskStatus: "pending",
+  }, "2026-08-16");
+  assert.deepEqual(pending.items.map((item) => item.title), ["2026-08-16"]);
+
+  const noTasks = filterVaultSnapshot(noteSnapshot, {
+    ...DEFAULT_DATA_FILTER_CONFIG,
+    entity: "note",
+    noteTaskStatus: "none",
+  }, "2026-08-16");
+  assert.deepEqual(noTasks.items.map((item) => item.title), ["Old"]);
+});
+
 test("data filter config normalization rejects unknown modes and caps result count", () => {
   const config = normalizeDataFilterConfig({
     entity: "wrong" as never,
     state: "wrong" as never,
     dateRange: "wrong" as never,
+    noteTaskStatus: "wrong" as never,
     sort: "wrong" as never,
     query: "  hello world  ",
     tag: "  #ai  ",
+    folder: " /Projects/DashFlow/ ",
+    frontmatter: " status=active ",
     limit: 999,
   });
   assert.equal(config.entity, "all");
   assert.equal(config.state, "active");
   assert.equal(config.dateRange, "all");
+  assert.equal(config.noteTaskStatus, "all");
   assert.equal(config.sort, "date");
   assert.equal(config.query, "hello world");
   assert.equal(config.tag, "#ai");
+  assert.equal(config.folder, "Projects/DashFlow");
+  assert.equal(config.frontmatter, "status=active");
   assert.equal(config.limit, 100);
+});
+
+test("VaultIndex derives normalized Note records without replacing Markdown truth", () => {
+  assert.ok(vaultIndex.includes("noteByPath"));
+  assert.ok(vaultIndex.includes("normalizeFrontmatter"));
+  assert.ok(vaultIndex.includes("collectTags"));
+  assert.ok(vaultIndex.includes("taskTotal: tasks.length"));
+  assert.ok(vaultIndex.includes("taskCompleted: tasks.filter"));
+  assert.ok(vaultIndex.includes("noteRecords: [...this.noteByPath.values()]"));
 });
 
 test("Visual Data Filter is a persisted Dashboard widget without a second data store", () => {
@@ -141,15 +230,20 @@ test("Visual Data Filter is a persisted Dashboard widget without a second data s
   assert.ok(main.includes("registerDataWidgets(this.widgetRegistry)"));
   assert.ok(interaction.includes("this.plugin.vaultIndex.getSnapshot()"));
   assert.ok(interaction.includes("dashboardManager.updateWidget"));
+  assert.ok(interaction.includes("筛选文件夹"));
+  assert.ok(interaction.includes("筛选 frontmatter"));
+  assert.ok(interaction.includes("笔记任务状态"));
   assert.equal(interaction.includes("saveData("), false);
   assert.equal(interaction.includes("new MutationObserver"), false);
 });
 
-test("Visual Data Filter reuses existing editors and centralized Design System", () => {
+test("Visual Data Filter reuses existing editors, native note opening and centralized Design System", () => {
   assert.ok(interaction.includes("TaskEditorModal"));
   assert.ok(interaction.includes("ProjectDetailModal"));
   assert.ok(interaction.includes("HabitEditorModal"));
+  assert.ok(interaction.includes("openLinkText(match.item.path"));
   assert.ok(styles.includes("dashflow-data-filter-result"));
+  assert.ok(styles.includes("dashflow-data-filter-advanced"));
   assert.ok(design.includes('import { DATA_FILTER_STYLES }'));
   assert.ok(design.includes("DATA_FILTER_STYLES,"));
   assert.equal(interaction.includes('document.createElement("style")'), false);

@@ -1,17 +1,57 @@
 import { TFile, type App, type Plugin } from "obsidian";
-import type { Habit, Project, Task, VaultSnapshot } from "../models";
+import type { Habit, NoteRecord, Project, Task, VaultSnapshot } from "../models";
 import { parseHabit } from "../parsers/habitParser";
 import { parseProject } from "../parsers/projectParser";
 import { parseTasks } from "../parsers/taskParser";
+
+function normalizeTag(value: string): string {
+  return value.trim().replace(/^#+/, "");
+}
+
+function collectTags(cache: ReturnType<App["metadataCache"]["getFileCache"]>): string[] {
+  const tags = new Set<string>();
+  for (const item of cache?.tags ?? []) {
+    const tag = normalizeTag(item.tag ?? "");
+    if (tag) tags.add(tag);
+  }
+  const frontmatter = cache?.frontmatter as Record<string, unknown> | undefined;
+  const raw = frontmatter?.tags ?? frontmatter?.tag;
+  const values = Array.isArray(raw) ? raw : typeof raw === "string" ? raw.split(/[\s,]+/) : [];
+  for (const value of values) {
+    if (typeof value !== "string") continue;
+    const tag = normalizeTag(value);
+    if (tag) tags.add(tag);
+  }
+  return [...tags];
+}
+
+function normalizeFrontmatter(cache: ReturnType<App["metadataCache"]["getFileCache"]>): Record<string, string> {
+  const frontmatter = cache?.frontmatter as Record<string, unknown> | undefined;
+  const result: Record<string, string> = {};
+  if (!frontmatter) return result;
+  for (const [key, value] of Object.entries(frontmatter)) {
+    if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+      result[key] = String(value).slice(0, 500);
+      continue;
+    }
+    if (Array.isArray(value)) {
+      const scalars = value.filter((item) => ["string", "number", "boolean"].includes(typeof item));
+      if (scalars.length > 0) result[key] = scalars.map(String).join(", ").slice(0, 500);
+    }
+  }
+  return result;
+}
 
 export class VaultIndexService {
   private readonly tasksByPath = new Map<string, Task[]>();
   private readonly projectByPath = new Map<string, Project>();
   private readonly habitByPath = new Map<string, Habit>();
+  private readonly noteByPath = new Map<string, NoteRecord>();
   private readonly listeners = new Set<(snapshot: VaultSnapshot) => void>();
   private snapshot: VaultSnapshot = {
     revision: 0,
     notes: 0,
+    noteRecords: [],
     tasks: [],
     projects: [],
     habits: [],
@@ -68,6 +108,7 @@ export class VaultIndexService {
     this.tasksByPath.clear();
     this.projectByPath.clear();
     this.habitByPath.clear();
+    this.noteByPath.clear();
     const files = this.app.vault.getMarkdownFiles();
     await Promise.all(files.map((file) => this.indexFile(file, false)));
     this.rebuildSnapshot();
@@ -76,9 +117,22 @@ export class VaultIndexService {
   async indexFile(file: TFile, notify = true): Promise<void> {
     try {
       const content = await this.app.vault.cachedRead(file);
-      this.tasksByPath.set(file.path, parseTasks(file.path, content));
+      const tasks = parseTasks(file.path, content);
+      this.tasksByPath.set(file.path, tasks);
 
       const cache = this.app.metadataCache.getFileCache(file);
+      this.noteByPath.set(file.path, {
+        path: file.path,
+        name: file.basename,
+        folder: file.parent?.path ?? "",
+        tags: collectTags(cache),
+        frontmatter: normalizeFrontmatter(cache),
+        taskTotal: tasks.length,
+        taskCompleted: tasks.filter((task) => task.completed).length,
+        createdAt: file.stat.ctime,
+        modifiedAt: file.stat.mtime,
+      });
+
       const project = parseProject(file, cache, this.getProjectTypeValue());
       if (project) this.projectByPath.set(file.path, project);
       else this.projectByPath.delete(file.path);
@@ -97,6 +151,7 @@ export class VaultIndexService {
     this.tasksByPath.delete(path);
     this.projectByPath.delete(path);
     this.habitByPath.delete(path);
+    this.noteByPath.delete(path);
     if (notify && this.initialized) this.scheduleSnapshot();
   }
 
@@ -111,7 +166,8 @@ export class VaultIndexService {
   private rebuildSnapshot(): void {
     this.snapshot = {
       revision: this.snapshot.revision + 1,
-      notes: this.app.vault.getMarkdownFiles().length,
+      notes: this.noteByPath.size,
+      noteRecords: [...this.noteByPath.values()],
       tasks: [...this.tasksByPath.values()].flat(),
       projects: [...this.projectByPath.values()],
       habits: [...this.habitByPath.values()],

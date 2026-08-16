@@ -62,7 +62,9 @@ export const DATA_FILTER_STYLES = `
 }
 
 .dashflow-data-filter-toolbar select,
-.dashflow-data-filter-search input {
+.dashflow-data-filter-search input,
+.dashflow-data-filter-advanced input,
+.dashflow-data-filter-advanced select {
   width: 100%;
   min-width: 0;
   min-height: 30px;
@@ -81,6 +83,12 @@ export const DATA_FILTER_STYLES = `
 .dashflow-data-filter-search {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(110px, .6fr);
+  gap: 6px;
+}
+
+.dashflow-data-filter-advanced {
+  display: grid;
+  grid-template-columns: minmax(110px, .8fr) minmax(145px, 1.1fr) minmax(130px, 1fr);
   gap: 6px;
 }
 
@@ -131,6 +139,7 @@ export const DATA_FILTER_STYLES = `
 }
 .dashflow-data-filter-result-icon svg { width: 13px; height: 13px; }
 
+.dashflow-data-filter-result.is-note .dashflow-data-filter-result-icon { color: var(--text-accent); }
 .dashflow-data-filter-result.is-project .dashflow-data-filter-result-icon { color: var(--interactive-accent); }
 .dashflow-data-filter-result.is-habit .dashflow-data-filter-result-icon { color: var(--color-green, var(--interactive-accent)); }
 
@@ -174,6 +183,10 @@ export const DATA_FILTER_STYLES = `
   color: var(--text-faint);
 }
 
+@container (max-width: 560px) {
+  .dashflow-data-filter-advanced { grid-template-columns: 1fr; }
+}
+
 @container (max-width: 470px) {
   .dashflow-data-filter-segmented { grid-template-columns: 1fr; gap: 4px; }
   .dashflow-data-filter-toolbar { grid-template-columns: 1fr 1fr 30px; }
@@ -184,6 +197,7 @@ export const DATA_FILTER_STYLES = `
 
 @media (max-width: 760px) {
   .dashflow-data-filter-toolbar { grid-template-columns: 1fr 1fr 30px; }
-  .dashflow-data-filter-search { grid-template-columns: 1fr; }
+  .dashflow-data-filter-search,
+  .dashflow-data-filter-advanced { grid-template-columns: 1fr; }
 }
 `;
