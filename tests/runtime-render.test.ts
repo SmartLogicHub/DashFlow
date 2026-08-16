@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { DashboardRenderService } from "../src/services/DashboardRenderService";
 
 const main = readFileSync("src/main.ts", "utf8");
@@ -87,6 +87,7 @@ test("active dashboard decorators no longer observe document.body", () => {
     assert.equal(source.includes("new MutationObserver"), false, name);
     assert.equal(source.includes("observe(document.body"), false, name);
   }
+  assert.equal(existsSync("src/services/AuroraInteractionService.ts"), false, "obsolete Aurora observer service should stay removed");
 });
 
 test("dashboard decorators subscribe to the render lifecycle and stay root-scoped", () => {
