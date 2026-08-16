@@ -2,6 +2,7 @@ import "./layout.test";
 import "./task-format.test";
 import "./activity.test";
 import "./habit.test";
+import "./daily-progress.test";
 import "./calendar.test";
 import "./weekly-review.test";
 import "./mobile-layout.test";

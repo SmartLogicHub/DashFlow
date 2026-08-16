@@ -1,5 +1,5 @@
 import type { CachedMetadata, TFile } from "obsidian";
-import type { Habit, HabitFrequency, HabitStatus } from "../models";
+import type { Habit, HabitFrequency, HabitKind, HabitStatus } from "../models";
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 
@@ -33,6 +33,17 @@ function normalizeDateList(value: unknown): string[] {
   return [...new Set(values.map(normalizeDate).filter((date): date is string => Boolean(date)))].sort();
 }
 
+function normalizeDailyNotes(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const notes: Record<string, string> = {};
+  for (const [date, note] of Object.entries(value as Record<string, unknown>)) {
+    const normalizedDate = normalizeDate(date);
+    const text = String(note ?? "").trim();
+    if (normalizedDate && text) notes[normalizedDate] = text;
+  }
+  return notes;
+}
+
 export function parseHabit(
   file: TFile,
   cache: CachedMetadata | null,
@@ -53,10 +64,15 @@ export function parseHabit(
   const rawFrequency = String(frontmatter.frequency ?? "daily").toLowerCase();
   const frequency: HabitFrequency = rawFrequency === "weekdays" ? "weekdays" : "daily";
 
+  const rawKind = String(frontmatter.habit_kind ?? frontmatter.kind ?? "habit").toLowerCase();
+  const kind: HabitKind = rawKind === "daily-progress" ? "daily-progress" : "habit";
+
   const rawTarget = Number(frontmatter.target_days ?? frontmatter.target);
   const targetDays = Number.isFinite(rawTarget) && rawTarget > 0
     ? Math.round(rawTarget)
     : undefined;
+
+  const linkedProjectId = String(frontmatter.linked_project ?? "").trim() || undefined;
 
   return {
     id: String(frontmatter.habit_id ?? frontmatter.id ?? file.basename),
@@ -64,11 +80,14 @@ export function parseHabit(
     description: frontmatter.description ? String(frontmatter.description) : undefined,
     status,
     frequency,
+    kind,
     start: normalizeDate(frontmatter.start),
     end: normalizeDate(frontmatter.end ?? frontmatter.deadline),
     targetDays,
+    linkedProjectId,
     tags: normalizeTags(frontmatter.tags),
     completedDates: normalizeDateList(frontmatter.habit_log ?? frontmatter.completed_dates),
+    dailyNotes: normalizeDailyNotes(frontmatter.daily_notes),
     source: { path: file.path },
   };
 }
