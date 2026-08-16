@@ -20,41 +20,25 @@ const CONTEXTS: ContextDefinition[] = [
 ];
 
 export class ContextSwitcherService {
-  private unsubscribeDashboard: (() => void) | null = null;
-  private unsubscribeIndex: (() => void) | null = null;
-  private scheduled = false;
+  private unsubscribeRender: (() => void) | null = null;
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
     this.ensureStyles();
-    this.unsubscribeDashboard = this.plugin.dashboardManager.subscribe(() => this.scheduleDecorate());
-    this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.scheduleDecorate());
-    this.plugin.registerEvent(this.plugin.app.workspace.on("layout-change", () => this.scheduleDecorate()));
-    this.plugin.registerEvent(this.plugin.app.workspace.on("active-leaf-change", () => this.scheduleDecorate()));
-    this.scheduleDecorate();
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => this.decorate(root));
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root));
   }
 
   stop(): void {
-    this.unsubscribeDashboard?.();
-    this.unsubscribeDashboard = null;
-    this.unsubscribeIndex?.();
-    this.unsubscribeIndex = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
     document.getElementById(STYLE_ID)?.remove();
     for (const node of document.querySelectorAll(".dashflow-context-switcher")) node.remove();
   }
 
-  scheduleDecorate(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorate();
-    }, 0);
-  }
-
-  private decorate(): void {
-    for (const shell of document.querySelectorAll<HTMLElement>(".dashflow-shell")) {
+  private decorate(root: HTMLElement): void {
+    for (const shell of root.querySelectorAll<HTMLElement>(".dashflow-shell")) {
       this.decorateShell(shell);
     }
   }
@@ -80,7 +64,9 @@ export class ContextSwitcherService {
       switcher.append(tabs, configure);
 
       const dashboardSwitcher = shell.querySelector(".dashflow-dashboard-switcher");
+      const workspace = shell.querySelector(".dashflow-command-workspace");
       if (dashboardSwitcher) dashboardSwitcher.insertAdjacentElement("beforebegin", switcher);
+      else if (workspace) workspace.prepend(switcher);
       else hero.insertAdjacentElement("afterend", switcher);
     }
     this.sync(switcher);
@@ -102,10 +88,7 @@ export class ContextSwitcherService {
         new WorkflowSettingsModal(this.plugin).open();
         return;
       }
-      if (await this.plugin.dashboardManager.setActiveDashboard(dashboardId)) {
-        this.plugin.refreshDashboardViews();
-        this.scheduleDecorate();
-      }
+      await this.plugin.dashboardManager.setActiveDashboard(dashboardId);
     });
     return button;
   }
