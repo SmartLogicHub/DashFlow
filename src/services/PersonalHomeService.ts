@@ -6,6 +6,7 @@ import type { Habit } from "../models";
 import type { ProductSection } from "../product/navigation";
 import { DailyProgressNoteModal } from "../ui/DailyProgressNoteModal";
 import { HabitEditorModal } from "../ui/HabitEditorModal";
+import { MorningBriefingSettingsModal } from "../ui/MorningBriefingSettingsModal";
 import { TaskEditorModal } from "../ui/TaskEditorModal";
 import { QuickAddModal } from "../ui/QuickAddModal";
 import type { WeReadHighlight } from "./WeReadService";
@@ -59,6 +60,9 @@ export class PersonalHomeService {
     const upcomingCount = snapshot.tasks.filter((task) => !task.completed && Boolean(task.due || task.scheduled)).length;
     const streak = activityStreak(this.plugin.data.activity);
 
+    if (this.plugin.morningBriefing.isEnabled()) {
+      page.appendChild(this.renderMorningBriefing());
+    }
     if (this.plugin.data.settings.weReadShowOnHome) {
       page.appendChild(this.renderWeRead());
     }
@@ -107,6 +111,66 @@ export class PersonalHomeService {
     return page;
   }
 
+  private renderMorningBriefing(): HTMLElement {
+    const card = document.createElement("section");
+    card.className = "dashflow-home-card dashflow-home-morning-briefing";
+    const head = document.createElement("div");
+    head.className = "dashflow-home-card-head";
+    head.append(this.text("strong", "AI 晨间简报"), this.text("span", "YESTERDAY → TODAY"));
+    const body = document.createElement("div");
+    body.className = "dashflow-home-morning-body";
+    body.appendChild(this.text("p", "正在整理昨天的记录…"));
+    card.append(head, body);
+    void this.loadMorningBriefing(body, false);
+    return card;
+  }
+
+  private async loadMorningBriefing(body: HTMLElement, force: boolean): Promise<void> {
+    try {
+      const briefing = await this.plugin.morningBriefing.getBriefing(force);
+      if (!body.isConnected) return;
+      body.replaceChildren();
+      const summary = document.createElement("div");
+      summary.className = "dashflow-home-morning-summary";
+      summary.append(this.text("small", `昨日复盘 · ${briefing.sourceDate}`), this.text("p", briefing.summary));
+      const advice = document.createElement("div");
+      advice.className = "dashflow-home-morning-advice";
+      advice.append(this.text("strong", "今日建议"), this.text("p", briefing.advice));
+      const actions = document.createElement("div");
+      actions.className = "dashflow-home-morning-actions";
+      const source = this.text("span", briefing.sourcePath);
+      source.title = briefing.sourcePath;
+      const refresh = document.createElement("button");
+      refresh.type = "button";
+      refresh.textContent = "重新生成";
+      refresh.addEventListener("click", () => {
+        body.replaceChildren(this.text("p", "正在重新生成晨间简报…"));
+        void this.loadMorningBriefing(body, true);
+      });
+      actions.append(source, refresh);
+      body.append(summary, advice, actions);
+    } catch (error) {
+      if (!body.isConnected) return;
+      const message = error instanceof Error ? error.message : String(error);
+      body.replaceChildren();
+      const errorBox = document.createElement("div");
+      errorBox.className = "dashflow-home-morning-error";
+      errorBox.append(this.text("strong", "晨间简报暂时不可用"), this.text("p", message));
+      const actions = document.createElement("div");
+      actions.className = "dashflow-home-morning-actions";
+      const configure = document.createElement("button");
+      configure.type = "button";
+      configure.textContent = "配置晨报";
+      configure.addEventListener("click", () => new MorningBriefingSettingsModal(this.plugin).open());
+      const provider = document.createElement("button");
+      provider.type = "button";
+      provider.textContent = "AI 设置";
+      provider.addEventListener("click", () => this.openSettings());
+      actions.append(configure, provider);
+      body.append(errorBox, actions);
+    }
+  }
+
   private renderFocus(tasks: ReturnType<DashFlowPlugin["taskService"]["focus"]>): HTMLElement {
     const card = document.createElement("section");
     card.className = "dashflow-home-card dashflow-home-focus";
@@ -148,16 +212,16 @@ export class PersonalHomeService {
         checkbox.addEventListener("change", async () => {
           await this.plugin.taskService.toggle(task);
         });
-        const body = document.createElement("button");
-        body.type = "button";
+        const taskBody = document.createElement("button");
+        taskBody.type = "button";
         const meta = [
           task.projectId ? `#${task.projectId}` : "",
           task.scheduled ? `计划 ${task.scheduled}` : "",
           task.due ? `截止 ${task.due}` : "",
         ].filter(Boolean).join(" · ");
-        body.append(this.text("strong", task.text), this.text("small", meta || "未关联项目"));
-        body.addEventListener("click", () => new TaskEditorModal(this.plugin, task).open());
-        row.append(checkbox, body);
+        taskBody.append(this.text("strong", task.text), this.text("small", meta || "未关联项目"));
+        taskBody.addEventListener("click", () => new TaskEditorModal(this.plugin, task).open());
+        row.append(checkbox, taskBody);
         list.appendChild(row);
       }
     }
@@ -233,17 +297,17 @@ export class PersonalHomeService {
       checkbox.setAttribute("aria-label", `${done ? "取消" : "完成"}今日推进 · ${habit.name}`);
       checkbox.addEventListener("change", () => void this.plugin.habitService.toggleDate(habit, today));
 
-      const body = document.createElement("button");
-      body.type = "button";
-      body.className = "dashflow-home-daily-progress-main";
+      const progressBody = document.createElement("button");
+      progressBody.type = "button";
+      progressBody.className = "dashflow-home-daily-progress-main";
       const note = habit.dailyNotes?.[today]?.trim();
       const meta = note
         ? note
         : habit.linkedProjectId
           ? `关联项目 · ${habit.linkedProjectId}`
           : "记录今天实际推进了什么";
-      body.append(this.text("strong", habit.name), this.text("small", meta));
-      body.addEventListener("click", () => new HabitEditorModal(this.plugin, habit).open());
+      progressBody.append(this.text("strong", habit.name), this.text("small", meta));
+      progressBody.addEventListener("click", () => new HabitEditorModal(this.plugin, habit).open());
 
       const noteButton = document.createElement("button");
       noteButton.type = "button";
@@ -253,7 +317,7 @@ export class PersonalHomeService {
       setIcon(noteButton, note ? "notebook-tabs" : "notebook-pen");
       noteButton.addEventListener("click", () => new DailyProgressNoteModal(this.plugin, habit, today).open());
 
-      row.append(checkbox, body, noteButton);
+      row.append(checkbox, progressBody, noteButton);
       list.appendChild(row);
     }
     if (habits.length > 5) {
@@ -475,7 +539,7 @@ export class PersonalHomeService {
       app.setting.openTabById(this.plugin.manifest.id);
       return;
     }
-    new Notice("请打开 Obsidian 设置 → DashFlow → 微信读书，添加 API Key。");
+    new Notice("请打开 Obsidian 设置 → DashFlow。");
   }
 
   private formatUnixDate(timestamp: number): string {
