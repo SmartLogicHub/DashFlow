@@ -35,46 +35,33 @@ const WEEKLY_STYLES = `
 `;
 
 export class WeeklyReviewWidgetInteractionService {
-  private observer: MutationObserver | null = null;
-  private unsubscribeIndex: (() => void) | null = null;
+  private unsubscribeRender: (() => void) | null = null;
   private unsubscribeActivity: (() => void) | null = null;
-  private scheduled = false;
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
     this.ensureStyles();
-    this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.decorate(true));
-    this.unsubscribeActivity = this.plugin.activityService.subscribe(() => this.decorate(true));
-    this.observer = new MutationObserver(() => this.schedule());
-    this.observer.observe(document.body, { childList: true, subtree: true });
-    this.schedule();
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => this.decorate(root, false));
+    this.unsubscribeActivity = this.plugin.activityService.subscribe(() => {
+      this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root, true));
+    });
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root, false));
   }
 
   stop(): void {
-    this.observer?.disconnect();
-    this.observer = null;
-    this.unsubscribeIndex?.();
-    this.unsubscribeIndex = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
     this.unsubscribeActivity?.();
     this.unsubscribeActivity = null;
     document.getElementById(STYLE_ID)?.remove();
   }
 
-  private schedule(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorate(false);
-    }, 0);
-  }
-
-  private decorate(force: boolean): void {
+  private decorate(root: HTMLElement, force: boolean): void {
     const dashboard = this.plugin.dashboardManager.active();
     const widgets = new Map(dashboard.widgets.map((widget) => [widget.id, widget]));
 
-    for (const card of document.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
+    for (const card of root.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
       const widgetId = card.dataset.widgetId;
       const widget = widgetId ? widgets.get(widgetId) : undefined;
       if (!widget || widget.type !== "weekly-review") continue;
