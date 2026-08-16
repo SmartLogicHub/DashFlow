@@ -3,6 +3,7 @@ export type ProjectStatus = "planned" | "active" | "paused" | "completed" | "arc
 export type ProjectProgressMode = "tasks" | "manual";
 export type HabitStatus = "active" | "paused" | "completed" | "archived";
 export type HabitFrequency = "daily" | "weekdays";
+export type HabitKind = "habit" | "daily-progress";
 export type ActivityMetric = "score" | "tasks" | "notes" | "habits";
 export type CalendarEventKind = "task-due" | "task-scheduled" | "project-deadline" | "habit";
 export type CalendarWeekStart = "monday" | "sunday";
@@ -68,11 +69,14 @@ export interface Habit {
   description?: string;
   status: HabitStatus;
   frequency: HabitFrequency;
+  kind?: HabitKind;
   start?: string;
   end?: string;
   targetDays?: number;
+  linkedProjectId?: string;
   tags: string[];
   completedDates: string[];
+  dailyNotes?: Record<string, string>;
   source: SourceLocation;
 }
 
@@ -82,9 +86,11 @@ export interface HabitEditInput {
   description?: string;
   status: HabitStatus;
   frequency: HabitFrequency;
+  kind?: HabitKind;
   start?: string;
   end?: string;
   targetDays?: number;
+  linkedProjectId?: string;
 }
 
 export interface CalendarEvent {
