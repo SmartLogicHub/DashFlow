@@ -1,15 +1,16 @@
+import { INTERACTION_MOTION_STYLES } from "../styles/InteractionMotionStyles";
 import { UI_REFINEMENT_POLISH_STYLES } from "../styles/UiRefinementStyles";
 import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles";
 
-const STYLE_ID = "dashflow-design-system-v043";
+const STYLE_ID = "dashflow-design-system-v044";
 
 /**
- * v0.4.3 consolidation layer.
+ * v0.4.4 design-system layer.
  *
  * This service is presentation-only: no MutationObserver, no event handlers,
  * and no access to Task / Project / Habit data. Earlier visual layers are kept
  * as styles-only modules and loaded here in their original cascade order while
- * rules are gradually folded into the v0.4.3 tokenized layer below.
+ * interaction motion is layered last so card feedback remains consistent.
  */
 export const DESIGN_SYSTEM_STYLES = `
 .dashflow-view-container {
@@ -96,6 +97,7 @@ const CONSOLIDATED_STYLES = [
   VISUAL_CONTINUITY_STYLES,
   UI_REFINEMENT_POLISH_STYLES,
   DESIGN_SYSTEM_STYLES,
+  INTERACTION_MOTION_STYLES,
 ].join("\n\n");
 
 export class DesignSystemService {
