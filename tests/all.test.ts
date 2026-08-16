@@ -26,3 +26,4 @@ import "./weread.test";
 import "./intelligence-core.test";
 import "./workflow-context.test";
 import "./ai-news.test";
+import "./data-filter.test";

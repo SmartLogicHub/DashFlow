@@ -10,6 +10,10 @@ export type CalendarWeekStart = "monday" | "sunday";
 export type HomeTheme = "alpine" | "paper" | "midnight" | "obsidian";
 export type CaptureTarget = "inbox" | "daily-note" | "ask";
 export type ContextMode = "morning" | "work" | "review";
+export type DataFilterEntity = "all" | "task" | "project" | "habit";
+export type DataFilterState = "active" | "completed" | "all";
+export type DataFilterDateRange = "all" | "overdue" | "today" | "next7" | "next30" | "none";
+export type DataFilterSort = "date" | "name" | "type";
 
 export interface SourceLocation {
   path: string;
@@ -303,6 +307,15 @@ export interface AINewsWidgetConfig extends Record<string, unknown> {
   interests: string;
   topK: number;
   refreshHours: number;
+}
+export interface DataFilterWidgetConfig extends Record<string, unknown> {
+  entity: DataFilterEntity;
+  state: DataFilterState;
+  dateRange: DataFilterDateRange;
+  query: string;
+  tag: string;
+  sort: DataFilterSort;
+  limit: number;
 }
 export interface CalendarWidgetConfig extends Record<string, unknown> {
   weekStart: CalendarWeekStart;

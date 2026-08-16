@@ -18,6 +18,7 @@ import { ContextSwitcherService } from "./services/ContextSwitcherService";
 import { DailyNoteService } from "./services/DailyNoteService";
 import { DashboardSwitcherInteractionService } from "./services/DashboardSwitcherInteractionService";
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
+import { DataFilterWidgetInteractionService } from "./services/DataFilterWidgetInteractionService";
 import { DesignSystemService } from "./services/DesignSystemService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
@@ -44,6 +45,7 @@ import { TaskEditorModal } from "./ui/TaskEditorModal";
 import { WorkflowSettingsModal } from "./ui/WorkflowSettingsModal";
 import { localDate } from "./utils/date";
 import { registerBuiltins } from "./widgets/builtins";
+import { registerDataWidgets } from "./widgets/data";
 import { registerIntelligenceWidgets } from "./widgets/intelligence";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
 
@@ -73,6 +75,7 @@ export default class DashFlowPlugin extends Plugin {
   morningBriefing!: MorningBriefingService;
   newsCuration!: NewsCurationService;
   aiNewsWidgets!: AINewsWidgetInteractionService;
+  dataFilterWidgets!: DataFilterWidgetInteractionService;
   weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
@@ -83,6 +86,7 @@ export default class DashFlowPlugin extends Plugin {
   async onload(): Promise<void> {
     this.widgetRegistry = new WidgetRegistry();
     registerBuiltins(this.widgetRegistry);
+    registerDataWidgets(this.widgetRegistry);
     registerIntelligenceWidgets(this.widgetRegistry);
     await this.loadPluginData();
 
@@ -145,6 +149,7 @@ export default class DashFlowPlugin extends Plugin {
     this.calendarWidgets = new CalendarWidgetInteractionService(this);
     this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
     this.aiNewsWidgets = new AINewsWidgetInteractionService(this);
+    this.dataFilterWidgets = new DataFilterWidgetInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.contextSwitcher = new ContextSwitcherService(this);
@@ -213,6 +218,7 @@ export default class DashFlowPlugin extends Plugin {
     this.calendarWidgets.start();
     this.weeklyReviewWidgets.start();
     this.aiNewsWidgets.start();
+    this.dataFilterWidgets.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
     this.contextSwitcher.start();
@@ -224,6 +230,7 @@ export default class DashFlowPlugin extends Plugin {
     this.contextSwitcher?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
+    this.dataFilterWidgets?.stop();
     this.aiNewsWidgets?.stop();
     this.weeklyReviewWidgets?.stop();
     this.calendarWidgets?.stop();
