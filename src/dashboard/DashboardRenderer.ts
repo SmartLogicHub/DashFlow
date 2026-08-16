@@ -22,20 +22,37 @@ import { PLUGIN_VERSION } from "../constants";
 export class DashboardRenderer {
   private editing = false;
   private configuringWidgetId: string | null = null;
-  private readonly unsubscribe: () => void;
+  private frameId: number | null = null;
+  private destroyed = false;
+  private readonly unsubscribeIndex: () => void;
+  private readonly unsubscribeDashboard: () => void;
 
   constructor(
     private readonly plugin: DashFlowPlugin,
     private readonly container: HTMLElement,
   ) {
-    this.unsubscribe = this.plugin.vaultIndex.subscribe(() => this.render());
+    this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.render());
+    this.unsubscribeDashboard = this.plugin.dashboardManager.subscribe(() => this.render());
   }
 
   destroy(): void {
-    this.unsubscribe();
+    this.destroyed = true;
+    this.unsubscribeIndex();
+    this.unsubscribeDashboard();
+    if (this.frameId !== null) window.cancelAnimationFrame(this.frameId);
+    this.frameId = null;
+    this.plugin.dashboardRender.unmount(this.container);
   }
 
   render(): void {
+    if (this.destroyed || this.frameId !== null) return;
+    this.frameId = window.requestAnimationFrame(() => {
+      this.frameId = null;
+      if (!this.destroyed) this.renderNow();
+    });
+  }
+
+  private renderNow(): void {
     const dashboard = this.plugin.dashboardManager.active();
     const snapshot = this.plugin.vaultIndex.getSnapshot();
     this.container.innerHTML = "";
@@ -82,6 +99,8 @@ export class DashboardRenderer {
         this.configuringWidgetId = null;
       }
     }
+
+    this.plugin.dashboardRender.rendered(this.container);
   }
 
   private renderHero(dashboard: DashboardDefinition): HTMLElement {
