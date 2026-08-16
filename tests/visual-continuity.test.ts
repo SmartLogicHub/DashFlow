@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 
-const continuity = readFileSync("src/services/VisualContinuityService.ts", "utf8");
+const continuity = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
 
@@ -12,7 +12,7 @@ test("Hero action labels remain in the consolidated visual cascade", () => {
   assert.ok(design.includes("VISUAL_CONTINUITY_STYLES"));
 });
 
-test("legacy continuity still provides the shared photographic frame before v0.4.3 compacts it", () => {
+test("continuity styles provide the shared photographic frame before v0.4.3 compacts it", () => {
   assert.ok(continuity.includes("dashflow-command-shell:not(.is-personal-home) > .dashflow-hero"));
   assert.ok(continuity.includes("height: 194px!important"));
   assert.ok(continuity.includes("min-height: 194px!important"));
@@ -23,7 +23,7 @@ test("legacy continuity still provides the shared photographic frame before v0.4
   }
 });
 
-test("VisualContinuityService runtime is not part of the plugin lifecycle anymore", () => {
+test("legacy VisualContinuityService runtime is not part of the plugin lifecycle", () => {
   assert.equal(main.includes('import { VisualContinuityService }'), false);
   assert.equal(main.includes("new VisualContinuityService()"), false);
   assert.equal(main.includes("visualContinuity.start()"), false);

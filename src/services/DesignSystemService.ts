@@ -1,5 +1,5 @@
-import { UI_REFINEMENT_POLISH_STYLES } from "./UiRefinementPolishService";
-import { VISUAL_CONTINUITY_STYLES } from "./VisualContinuityService";
+import { UI_REFINEMENT_POLISH_STYLES } from "../styles/UiRefinementStyles";
+import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles";
 
 const STYLE_ID = "dashflow-design-system-v043";
 
@@ -7,9 +7,9 @@ const STYLE_ID = "dashflow-design-system-v043";
  * v0.4.3 consolidation layer.
  *
  * This service is presentation-only: no MutationObserver, no event handlers,
- * and no access to Task / Project / Habit data. The v0.4.1/v0.4.2 CSS is loaded
- * here in its original cascade order while rules are gradually folded into the
- * v0.4.3 tokenized layer below.
+ * and no access to Task / Project / Habit data. Earlier visual layers are kept
+ * as styles-only modules and loaded here in their original cascade order while
+ * rules are gradually folded into the v0.4.3 tokenized layer below.
  */
 export const DESIGN_SYSTEM_STYLES = `
 .dashflow-view-container {

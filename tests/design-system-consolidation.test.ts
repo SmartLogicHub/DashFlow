@@ -6,8 +6,8 @@ const main = readFileSync("src/main.ts", "utf8");
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const runtime = readFileSync("src/services/PresentationRuntimeService.ts", "utf8");
-const polishStyles = readFileSync("src/services/UiRefinementPolishService.ts", "utf8");
-const continuityStyles = readFileSync("src/services/VisualContinuityService.ts", "utf8");
+const polishStyles = readFileSync("src/styles/UiRefinementStyles.ts", "utf8");
+const continuityStyles = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
 
 test("legacy visual runtimes are no longer started by the plugin", () => {
   assert.equal(main.includes("UiRefinementPolishService"), false);
@@ -32,8 +32,8 @@ test("legacy visual layers are styles-only modules", () => {
 });
 
 test("v0.4.3 design system owns the full final CSS cascade", () => {
-  assert.ok(design.includes('import { UI_REFINEMENT_POLISH_STYLES } from "./UiRefinementPolishService"'));
-  assert.ok(design.includes('import { VISUAL_CONTINUITY_STYLES } from "./VisualContinuityService"'));
+  assert.ok(design.includes('import { UI_REFINEMENT_POLISH_STYLES } from "../styles/UiRefinementStyles"'));
+  assert.ok(design.includes('import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles"'));
   assert.ok(design.includes("VISUAL_CONTINUITY_STYLES,"));
   assert.ok(design.includes("UI_REFINEMENT_POLISH_STYLES,"));
   assert.ok(design.includes("DESIGN_SYSTEM_STYLES,"));

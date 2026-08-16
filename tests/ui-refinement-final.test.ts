@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 
-const polish = readFileSync("src/services/UiRefinementPolishService.ts", "utf8");
-const continuity = readFileSync("src/services/VisualContinuityService.ts", "utf8");
+const polish = readFileSync("src/styles/UiRefinementStyles.ts", "utf8");
+const continuity = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
 const runtime = readFileSync("src/services/PresentationRuntimeService.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");

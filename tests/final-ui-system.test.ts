@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 
-const visual = readFileSync("src/services/VisualContinuityService.ts", "utf8");
+const visual = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const home = readFileSync("src/services/PersonalHomeDesignService.ts", "utf8");
 const habit = readFileSync("src/ui/HabitEditorModal.ts", "utf8");

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 
-const continuity = readFileSync("src/services/VisualContinuityService.ts", "utf8");
+const continuity = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
 const detail = readFileSync("src/ui/ProjectDetailModal.ts", "utf8");
 
 test("Project detail keeps a structured modal layout instead of a flat text stack", () => {
