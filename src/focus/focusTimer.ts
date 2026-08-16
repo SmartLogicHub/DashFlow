@@ -28,7 +28,9 @@ export const DEFAULT_FOCUS_STATE: FocusTimerState = {
 const MODES: FocusMode[] = ["focus", "short-break", "long-break"];
 
 function boundedMinutes(value: unknown, fallback: number): number {
-  return Math.max(1, Math.min(180, Math.round(Number(value) || fallback)));
+  const number = Number(value);
+  if (!Number.isFinite(number) || number <= 0) return fallback;
+  return Math.min(180, Math.max(1, Math.round(number)));
 }
 
 export function normalizeFocusConfig(value: Partial<FocusWidgetConfig> | null | undefined): FocusWidgetConfig {
