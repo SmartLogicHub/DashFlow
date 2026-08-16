@@ -16,6 +16,13 @@ export type VaultSearchHit =
   | { kind: "project"; project: Project }
   | { kind: "habit"; habit: Habit };
 
+export interface VaultQueryCounts {
+  pendingTasks: number;
+  completedTasks: number;
+  datedOpenTasks: number;
+  activeProjects: number;
+}
+
 interface SearchRow<T> {
   item: T;
   searchText: string;
@@ -69,6 +76,7 @@ export class VaultQueryService {
   private allProjects: Project[] = [];
   private activeHabits: Habit[] = [];
   private activeAndPausedHabits: Habit[] = [];
+  private counts: VaultQueryCounts = { pendingTasks: 0, completedTasks: 0, datedOpenTasks: 0, activeProjects: 0 };
   private taskSearchRows: Array<SearchRow<Task>> = [];
   private projectSearchRows: Array<SearchRow<Project>> = [];
   private habitSearchRows: Array<SearchRow<Habit>> = [];
@@ -82,6 +90,11 @@ export class VaultQueryService {
   getRevision(): number {
     this.ensureRevision();
     return this.revision;
+  }
+
+  getCounts(): VaultQueryCounts {
+    this.ensureRevision();
+    return this.counts;
   }
 
   todayTasks(today: string): Task[] {
@@ -176,10 +189,12 @@ export class VaultQueryService {
     const hasQuery = normalized.length > 0;
     const results: VaultSearchHit[] = [];
 
+    let taskCount = 0;
     for (const row of this.taskSearchRows) {
       if (!matchesSearch(row.searchText, normalized)) continue;
       results.push({ kind: "task", task: row.item });
-      if (results.filter((item) => item.kind === "task").length >= (hasQuery ? 18 : 7)) break;
+      taskCount += 1;
+      if (taskCount >= (hasQuery ? 18 : 7)) break;
     }
 
     let projectCount = 0;
@@ -222,7 +237,15 @@ export class VaultQueryService {
     this.snapshot = snapshot;
     this.revision = snapshot.revision;
     this.projectTaskStats = new Map();
+    let pendingTasks = 0;
+    let completedTasks = 0;
+    let datedOpenTasks = 0;
     for (const task of snapshot.tasks) {
+      if (task.completed) completedTasks += 1;
+      else {
+        pendingTasks += 1;
+        if (task.due || task.scheduled) datedOpenTasks += 1;
+      }
       if (!task.projectId) continue;
       let stats = this.projectTaskStats.get(task.projectId);
       if (!stats) {
@@ -246,6 +269,12 @@ export class VaultQueryService {
     this.activeAndPausedHabits = snapshot.habits
       .filter((habit) => habit.status === "active" || habit.status === "paused")
       .sort((a, b) => a.name.localeCompare(b.name));
+    this.counts = {
+      pendingTasks,
+      completedTasks,
+      datedOpenTasks,
+      activeProjects: this.activeProjects.length,
+    };
 
     this.taskSearchRows = snapshot.tasks
       .filter((task) => !task.completed)
