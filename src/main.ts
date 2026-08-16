@@ -16,6 +16,7 @@ import { DashboardSwitcherInteractionService } from "./services/DashboardSwitche
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
+import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService";
 import { ProductDesignService } from "./services/ProductDesignService";
 import { ProductExperienceService } from "./services/ProductExperienceService";
 import { ProjectService } from "./services/ProjectService";
@@ -28,6 +29,7 @@ import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
 import { AIPlanModal } from "./ui/AIPlanModal";
 import { GlobalSearchModal } from "./ui/GlobalSearchModal";
 import { ProjectEditorModal } from "./ui/ProjectEditorModal";
+import { QuickAddModal } from "./ui/QuickAddModal";
 import { TaskEditorModal } from "./ui/TaskEditorModal";
 import { localDate } from "./utils/date";
 import { registerBuiltins } from "./widgets/builtins";
@@ -54,6 +56,7 @@ export default class DashFlowPlugin extends Plugin {
   taskInteractions!: TaskInteractionService;
   aiPlanning!: AIPlanningService;
   productDesign!: ProductDesignService;
+  personalHomeDesign!: PersonalHomeDesignService;
   productExperience!: ProductExperienceService;
 
   async onload(): Promise<void> {
@@ -110,6 +113,7 @@ export default class DashFlowPlugin extends Plugin {
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.productDesign = new ProductDesignService();
+    this.personalHomeDesign = new PersonalHomeDesignService();
     this.productExperience = new ProductExperienceService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
@@ -119,13 +123,14 @@ export default class DashFlowPlugin extends Plugin {
     });
 
     this.addCommand({ id: "open-dashboard", name: "打开 DashFlow", callback: () => void this.activateDashboard() });
+    this.addCommand({ id: "quick-add", name: "快速添加", callback: () => new QuickAddModal(this).open() });
     this.addCommand({ id: "search-dashflow", name: "搜索任务、项目与习惯", callback: () => new GlobalSearchModal(this).open() });
     this.addCommand({ id: "new-task", name: "新建任务", callback: () => new TaskEditorModal(this).open() });
     this.addCommand({ id: "new-project", name: "新建项目", callback: () => new ProjectEditorModal(this).open() });
     this.addCommand({ id: "ai-plan-today", name: "AI 规划今天", callback: () => new AIPlanModal(this).open() });
 
     const sections: Array<[ProductSection, string]> = [
-      ["today", "打开 · 今天"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
+      ["today", "打开 · 主页"], ["work", "打开 · 工作台"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
       ["calendar", "打开 · 日历"], ["habits", "打开 · 习惯"], ["review", "打开 · 复盘"],
     ];
     for (const [section, name] of sections) {
@@ -145,6 +150,7 @@ export default class DashFlowPlugin extends Plugin {
 
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
     this.productDesign.start();
+    this.personalHomeDesign.start();
     this.activityService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
@@ -167,6 +173,7 @@ export default class DashFlowPlugin extends Plugin {
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
     this.activityService?.stop();
+    this.personalHomeDesign?.stop();
     this.productDesign?.stop();
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
   }

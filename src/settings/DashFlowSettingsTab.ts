@@ -1,5 +1,7 @@
 import { Notice, PluginSettingTab, SecretComponent, Setting, type App } from "obsidian";
 import type DashFlowPlugin from "../main";
+import type { HomeTheme } from "../models";
+import { HeroImagePickerModal } from "../ui/HeroImagePickerModal";
 
 export class DashFlowSettingsTab extends PluginSettingTab {
   constructor(app: App, private readonly dashFlow: DashFlowPlugin) {
@@ -14,8 +16,96 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     const hero = containerEl.createDiv("dashflow-settings-hero");
     hero.createEl("h2", { text: "DashFlow 设置" });
     hero.createEl("p", {
-      text: "设置收集位置、项目与习惯目录，以及可选的 AI 日计划。日常使用不需要理解 Markdown 协议。",
+      text: "把首页做成自己的 Personal OS；工作台继续承担高密度任务、项目和复盘。",
     });
+
+    const appearance = this.panel(containerEl, "Personal OS · 外观", "Hero 默认使用主题渐变；也可以直接选择 Vault 里的本地图片，不请求网络资源。");
+    const preview = appearance.createDiv("dashflow-home-theme-preview");
+    preview.createEl("strong", { text: this.dashFlow.data.settings.homeHeroTitle || "我的成长" });
+    preview.createEl("span", { text: this.dashFlow.data.settings.homeHeroSubtitle || "把输入变成理解，把理解变成行动。" });
+
+    new Setting(appearance)
+      .setName("主题")
+      .setDesc("Alpine 冷蓝灰最接近风景型个人主页；Paper 更温暖，Midnight 更沉浸，Obsidian 完全跟随当前主题。")
+      .addDropdown((dropdown) => dropdown
+        .addOption("alpine", "Alpine · 冷蓝灰")
+        .addOption("paper", "Paper · 暖纸张")
+        .addOption("midnight", "Midnight · 深夜")
+        .addOption("obsidian", "Obsidian · 跟随主题")
+        .setValue(this.dashFlow.data.settings.homeTheme)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.homeTheme = value as HomeTheme;
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }));
+
+    new Setting(appearance)
+      .setName("Hero 图片")
+      .setDesc("推荐低饱和雪山、湖泊、森林、海岸或极简建筑。优先点“选择图片”从 Vault 中挑选；留空时使用主题渐变。")
+      .addText((text) => text
+        .setPlaceholder("Assets/hero/mountain.jpg")
+        .setValue(this.dashFlow.data.settings.homeHeroImagePath)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.homeHeroImagePath = value.trim();
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }))
+      .addButton((button) => button
+        .setButtonText("选择图片")
+        .onClick(() => {
+          new HeroImagePickerModal(this.dashFlow, async (path) => {
+            this.dashFlow.data.settings.homeHeroImagePath = path;
+            await this.dashFlow.savePluginData();
+            this.dashFlow.refreshDashboardViews();
+            this.display();
+          }).open();
+        }))
+      .addExtraButton((button) => button
+        .setIcon("rotate-ccw")
+        .setTooltip("恢复主题渐变")
+        .onClick(async () => {
+          this.dashFlow.data.settings.homeHeroImagePath = "";
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+          this.display();
+        }));
+
+    new Setting(appearance)
+      .setName("Hero 标题")
+      .setDesc("这是个人主页的主标题，不是技术版本信息。")
+      .addText((text) => text
+        .setPlaceholder("我的成长")
+        .setValue(this.dashFlow.data.settings.homeHeroTitle)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.homeHeroTitle = value.trim() || "我的成长";
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }));
+
+    new Setting(appearance)
+      .setName("Hero 副标题")
+      .setDesc("一句简短的个人原则或当下阶段主题。")
+      .addText((text) => text
+        .setPlaceholder("把输入变成理解，把理解变成行动。")
+        .setValue(this.dashFlow.data.settings.homeHeroSubtitle)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.homeHeroSubtitle = value.trim() || "把输入变成理解，把理解变成行动。";
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }));
+
+    new Setting(appearance)
+      .setName("图片遮罩")
+      .setDesc("图片越复杂，遮罩应该越高，保证标题在浅色和深色照片上都清晰。")
+      .addSlider((slider) => slider
+        .setLimits(20, 70, 1)
+        .setDynamicTooltip()
+        .setValue(this.dashFlow.data.settings.homeHeroOverlay)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.homeHeroOverlay = value;
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }));
 
     const workflow = this.panel(containerEl, "工作流", "决定新内容保存到哪里；已有 Markdown 数据不会被移动。");
     new Setting(workflow)
@@ -99,7 +189,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
 
     new Setting(ai)
       .setName("模型")
-      .setDesc("DeepSeek 当前推荐 deepseek-v4-flash；需要更强能力时可改为 deepseek-v4-pro。")
+      .setDesc("填写所用服务支持的模型名称。")
       .addText((text) => text
         .setPlaceholder("deepseek-v4-flash")
         .setValue(this.dashFlow.data.settings.aiModel)
