@@ -1,8 +1,114 @@
-# DashFlow v0.5.4
+# DashFlow v0.5.5
 
 DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project / Habit / Daily Progress 继续以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、筛选、展示和直接操作。
 
-> v0.5.4 完成 DashFlow Intelligence & Workflow 路线：新增时间戳驱动的 **Focus** 与默认不自动联网的 **Magic Embed**，并延续 v0.5.3.1 的完整 Note Visual Data Filter、v0.5.2 AI News、v0.5.1 Quick Capture / Context Switcher 和 v0.5.0 Intelligence Core。
+> v0.5.5 是一轮 **Query & Performance Optimization**：不增加第二套数据库，不改变 Markdown 数据格式，而是把 `VaultIndex → Query → Dashboard / Search / Filter / Calendar / Review` 收敛成 revision-aware 的内存查询链路，让 Vault 变大后仍保持稳定响应。
+
+## v0.5.5 · Query & Performance Optimization
+
+### 受控 Vault 索引
+
+旧实现首次索引 / 手动重建时会对所有 Markdown 文件一次性 `Promise.all`。小 Vault 没问题，但几千个文件时会同时制造大量 `cachedRead()` 和解析任务。
+
+v0.5.5 改为固定并发 worker：
+
+```text
+Markdown files
+      │
+      ├─ worker 1
+      ├─ worker 2
+      ├─ ...
+      └─ worker 8
+             │
+             ▼
+        VaultSnapshot
+```
+
+默认最多 8 个文件同时进入读取 / 解析，降低启动瞬间的 I/O 峰值。
+
+Obsidian 一次真实编辑还可能连续产生 `modify + metadata changed` 等事件。DashFlow 现在会按文件路径做短时间合并，同一个文件在 24ms 窗口内只保留最后一次待索引任务；显式 Task / Project / Habit 写入仍可直接要求立即索引。
+
+### Revision-aware Query Layer
+
+`VaultSnapshot.revision` 继续是单调递增的索引版本。v0.5.5 新增 `VaultQueryService`，把 revision 作为所有派生查询的统一失效边界：
+
+```text
+Vault events
+    │
+    ▼
+VaultIndexService
+    │
+    └─ VaultSnapshot revision N
+                 │
+        ┌────────┴────────┐
+        │ VaultQuery     │ Filter candidate index
+        │                │ Calendar cache
+        ▼                ▼
+Today / Focus / Projects / Search / Visual Data Filter / Calendar / Review
+
+Vault change → revision N+1 → 当前 revision 的派生缓存整体失效
+```
+
+派生缓存只存在内存，不写入 Vault，也不写入插件专有查询数据库。
+
+### Task / Project / Habit
+
+同一个 revision 内：
+
+- Today / Focus / Overdue / Upcoming 不再反复扫描并排序全部 Task。
+- Project → Task 使用一次构建的 `Map<projectId, tasks>`。
+- task-derived Project progress 使用同一份项目任务统计，不再为每张项目卡扫描全部 Task。
+- Active Project / Habit 集合只排序一次并复用。
+- Dashboard 旧调用即使显式传入“当前 snapshot.tasks”，也会自动识别并走共享查询缓存；自定义测试数组仍保持原来的纯计算行为。
+
+### Global Search
+
+Global Search 不再每输入一个字符都重新创建三类实体的标准化搜索文本：
+
+- 当前 revision 先预构建 Task / Project / Habit 的 lowercase searchable rows。
+- 查询字符串统一 trim / lowercase / collapse whitespace。
+- 最近查询结果使用有界内存缓存。
+- Vault revision 变化后自动清空。
+
+### Visual Data Filter
+
+Visual Data Filter 输入框仍然即时预览，但昂贵的候选标准化现在只对每个 `VaultSnapshot` 做一次：
+
+- `DataFilterMatch`
+- searchable text
+- normalized tags `Set`
+- normalized folder
+- Note frontmatter lowercase `Map`
+
+这些派生结构通过 `WeakMap<VaultSnapshot, DataFilterIndex>` 与 snapshot 生命周期绑定；旧 snapshot 不再被引用后可以自然 GC，不形成第二份持久数据。
+
+### Calendar / Weekly Review
+
+Calendar 会按 `revision + 日期区间 + 显示开关` 缓存事件展开结果。相同月份 / 周区间重复渲染时，不再重复：
+
+- 扫描全部 Task / Project
+- 对每个 active Habit 逐日展开 schedule
+- 重复排序 CalendarEvent
+
+缓存最多保留 32 个 Calendar query；revision 改变后整体清空。Weekly Review 复用 Project progress 与 Calendar cache，因此也会同步受益。
+
+### 有界缓存与大数据回归
+
+- 动态 Query cache 最多 64 个 key。
+- Calendar cache 最多 32 个 query。
+- Data Filter candidate index 与 snapshot 使用 WeakMap 绑定。
+- 测试包含 12,000 Task + 200 Project 的合成 snapshot，验证项目索引、搜索与日期查询语义。
+- 回归测试不使用脆弱的“CI 必须低于 X ms”阈值，而是锁定缓存复用、revision 失效、索引结构与并发上限。
+
+### 数据兼容
+
+- `SCHEMA_VERSION` 仍为 `7`。
+- Task / Project / Habit / Daily Progress Markdown 格式不变。
+- Dashboard / Widget config 格式不变。
+- 没有持久化 query database。
+- 升级后不需要迁移 Vault 或 `data.json`。
+
+这套 revision/in-memory-index 思路参考了 Dataview 等成熟 Obsidian 查询项目的索引模式，但 DashFlow 只借鉴“索引 revision 作为下游失效边界”的架构原则，仍使用自己的轻量 TypeScript / Obsidian 实现。
 
 ## v0.5.4 · Focus & Safe Extensibility
 
@@ -58,16 +164,6 @@ Magic Embed 用于在 Dashboard 中按需嵌入 Web 页面，同时把“可扩�
 - `referrerPolicy="no-referrer"`
 - 外部链接使用 `noopener noreferrer`
 - 不提供 `eval`、`new Function`、用户 JavaScript 配置或任意代码注入入口
-
-```text
-Magic Embed
-┌──────────────────────────────────────────────┐
-│ example.com                                  │
-│ 嵌入内容尚未联网加载。                       │
-│                                              │
-│ [加载嵌入内容]   在浏览器打开                │
-└──────────────────────────────────────────────┘
-```
 
 ## v0.5.3.1 · Complete Visual Data Filter
 
@@ -294,6 +390,8 @@ DashFlow 不把 Task / Project / Habit / Daily Progress 锁进专有数据库。
 - AI Morning Briefing / AI News 缓存
 - UI state
 
+Query / Filter / Calendar 的 v0.5.5 性能缓存只存在内存，不进入 `data.json`。
+
 安全原则：
 
 - AI / 微信读书 API Key 使用 Obsidian SecretStorage / Keychain
@@ -304,7 +402,7 @@ DashFlow 不把 Task / Project / Habit / Daily Progress 锁进专有数据库。
 
 ## Roadmap implementation policy
 
-本轮 0.5 路线参考了成熟 Obsidian / TypeScript 项目的架构与 UX 思路，包括 auto-news、news-digest、Dataview / Datacore、statusbar-pomo-obsidian、ObsidianCustomFrames 等；DashFlow 按自己的 Markdown-first、Widget、Design System 和 service 架构重新实现，没有引入第二套数据库或无关框架。
+DashFlow 的新能力优先研究成熟 Obsidian / TypeScript 项目的架构与 UX，再按自己的 Markdown-first、Widget、Design System 和 service 架构重新实现。0.5 路线参考过 auto-news、news-digest、Dataview / Datacore、statusbar-pomo-obsidian、ObsidianCustomFrames 等项目，但不把外部框架或数据库直接拼进 DashFlow。
 
 ## 开发
 
