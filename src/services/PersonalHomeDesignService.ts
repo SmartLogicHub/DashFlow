@@ -15,7 +15,7 @@ export const PERSONAL_HOME_STYLES = `
   --df-home-accent-soft: rgba(2, 132, 199, 0.08);
   --df-home-reading: #ffffff;
   --df-home-reading-2: #f8fafc;
-  --df-home-scene: url("https://images.unsplash.com/photo-1486870591958-9b9d0d1dda99?auto=format&fit=crop&w=2400&q=82");
+  --df-home-scene: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=2400&q=82");
   --df-cmd-bg: #f8fafc;
   --df-cmd-surface: #ffffff;
   --df-cmd-soft: #f1f5f9;
@@ -100,7 +100,7 @@ export const PERSONAL_HOME_STYLES = `
   height:194px!important;
   min-height: 194px!important;
   margin: 0 0 12px!important;
-  padding: 24px 28px!important;
+  padding: 24px 30px!important;
   display: flex!important;
   align-items: flex-end!important;
   justify-content: flex-start!important;
@@ -108,12 +108,12 @@ export const PERSONAL_HOME_STYLES = `
   border: 1px solid var(--df-home-border)!important;
   border-radius: 14px!important;
   color: #fff!important;
-  background-color: #111827!important;
+  background-color: #0f172a!important;
   background-image:
-    linear-gradient(90deg, rgba(8, 15, 26, calc(var(--df-home-overlay, 0.32) + 0.44)) 0%, rgba(8, 15, 26, calc(var(--df-home-overlay, 0.32) + 0.20)) 54%, rgba(8, 15, 26, 0.08) 100%),
+    linear-gradient(90deg, rgba(15, 23, 42, 0.74) 0%, rgba(15, 23, 42, 0.40) 56%, rgba(15, 23, 42, 0.08) 100%),
     var(--df-home-image, var(--df-home-scene))!important;
   background-size: cover!important;
-  background-position: center 48%!important;
+  background-position: center 50%!important;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06)!important;
 }
 .dashflow-command-shell.is-personal-home .dashflow-hero::before {
@@ -122,15 +122,15 @@ export const PERSONAL_HOME_STYLES = `
 }
 .dashflow-command-shell.is-personal-home .dashflow-hero > * { position: relative; z-index: 1; }
 .dashflow-home-hero-content { width: min(660px, 85%); display: flex; flex-direction: column; align-items: flex-start; text-align: left; }
-.dashflow-home-hero-date { margin-bottom: 7px; color: rgba(255, 255, 255, 0.88); font-size: 11px; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; }
+.dashflow-home-hero-date { margin-bottom: 7px; color: rgba(255, 255, 255, 0.95); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
 .dashflow-command-shell.is-personal-home .dashflow-hero h1 {
-  margin: 0!important; color: #fff!important; font-size: clamp(26px, 4vw, 38px)!important; line-height: 1.1!important; font-weight: 750!important; letter-spacing: -0.035em!important; text-shadow: 0 2px 14px rgba(0, 0, 0, 0.35)!important;
+  margin: 0!important; color: #fff!important; font-size: clamp(28px, 4.2vw, 40px)!important; line-height: 1.1!important; font-weight: 800!important; letter-spacing: -0.035em!important; text-shadow: 0 2px 14px rgba(0, 0, 0, 0.40)!important;
 }
-.dashflow-command-shell.is-personal-home .dashflow-hero p { margin: 7px 0 0!important; max-width: 540px; color: rgba(255, 255, 255, 0.92)!important; font-size: 12.5px!important; line-height: 1.5!important; letter-spacing: 0!important; text-transform: none!important; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.30)!important; }
-.dashflow-home-hero-actions { margin-top: 13px; display: flex; gap: 8px; flex-wrap: wrap; }
-.dashflow-home-hero-actions button { height: 31px; padding: 0 13px; border: 1px solid rgba(255, 255, 255, 0.28)!important; border-radius: 7px!important; color: #fff!important; background: rgba(15, 23, 42, 0.32)!important; box-shadow: none!important; backdrop-filter: blur(10px); font-size: 11.5px; font-weight: 600; cursor: pointer; transition: background 150ms ease, transform 150ms ease; }
-.dashflow-home-hero-actions button.is-primary { color: #0f172a!important; background: #ffffff!important; border-color: #ffffff!important; }
-.dashflow-home-hero-actions button:hover { transform: translateY(-1px); background: rgba(15, 23, 42, 0.48)!important; }
+.dashflow-command-shell.is-personal-home .dashflow-hero p { margin: 7px 0 0!important; max-width: 540px; color: rgba(255, 255, 255, 0.94)!important; font-size: 13px!important; line-height: 1.5!important; letter-spacing: 0!important; text-transform: none!important; text-shadow: 0 1px 6px rgba(0, 0, 0, 0.35)!important; }
+.dashflow-home-hero-actions { margin-top: 14px; display: flex; gap: 8px; flex-wrap: wrap; }
+.dashflow-home-hero-actions button { height: 32px; padding: 0 14px; border: 1px solid rgba(255, 255, 255, 0.32)!important; border-radius: 7px!important; color: #fff!important; background: rgba(15, 23, 42, 0.36)!important; box-shadow: none!important; backdrop-filter: blur(10px); font-size: 11.5px; font-weight: 650; cursor: pointer; transition: background 140ms ease, transform 140ms ease; }
+.dashflow-home-hero-actions button.is-primary { color: #0f172a!important; background: #ffffff!important; border-color: #ffffff!important; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15)!important; }
+.dashflow-home-hero-actions button:hover { transform: translateY(-1px); background: rgba(15, 23, 42, 0.52)!important; }
 .dashflow-home-hero-actions button.is-primary:hover { background: #f8fafc!important; }
 .dashflow-home-hero-actions button:active { transform: translateY(0); }
 
@@ -151,11 +151,11 @@ export const PERSONAL_HOME_STYLES = `
 .dashflow-home-card-head > strong { color: var(--df-home-text); font-size: 12.5px; font-weight: 700; }
 .dashflow-home-card-head > span, .dashflow-home-card-actions > span { color: var(--df-home-muted); font-size: 10px; font-weight: 650; letter-spacing: 0.06em; }
 .dashflow-home-card-actions { display: flex; align-items: center; gap: 8px; }
-.dashflow-home-card-actions button { width: 26px; height: 26px; padding: 0; display: grid; place-items: center; border: 0!important; border-radius: 6px!important; color: var(--df-home-muted)!important; background: transparent!important; box-shadow: none!important; cursor: pointer; transition: color 150ms ease, background 150ms ease; }
+.dashflow-home-card-actions button { width: 26px; height: 26px; padding: 0; display: grid; place-items: center; border: 0!important; border-radius: 6px!important; color: var(--df-home-muted)!important; background: transparent!important; box-shadow: none!important; cursor: pointer; transition: color 140ms ease, background 140ms ease; }
 .dashflow-home-card-actions button:hover { color: var(--df-home-text)!important; background: var(--df-home-surface-2)!important; }
 .dashflow-home-card-actions svg { width: 13.5px; height: 13.5px; }
 
-/* Real WeRead highlight. Light-harmonious reading card, never a dark heavy patch in light mode. */
+/* Real WeRead highlight. Light-harmonious reading card. */
 .dashflow-home-weread {
   overflow: hidden;
   border: 1px solid var(--df-home-border);
@@ -174,10 +174,10 @@ export const PERSONAL_HOME_STYLES = `
 .dashflow-home-weread-copy { min-width: 0; display: flex; flex-direction: column; gap: 3px; }
 .dashflow-home-weread-copy small { color: var(--df-home-muted); font-size: 10.5px; font-weight: 600; }
 .dashflow-home-weread-copy blockquote { margin: 0; padding: 0; border: 0; color: var(--df-home-text); font-size: 13px; line-height: 1.55; font-style: normal; font-weight: 550; }
-.dashflow-home-weread-copy p { margin: 0; color: var(--df-home-faint); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+.dashflow-home-weread-copy p { margin: 0; color: var(--df-home-muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
 .dashflow-home-weread-copy strong { color: var(--df-home-text); font-size: 12.5px; }
 .dashflow-home-weread-actions { display: flex; align-items: center; gap: 6px; }
-.dashflow-home-weread-actions button, .dashflow-home-weread-body > button { height: 28px; padding: 0 10px; border: 1px solid var(--df-home-border); border-radius: 6px; color: var(--df-home-muted); background: var(--df-home-surface); font-size: 11px; font-weight: 600; cursor: pointer; transition: background 150ms ease, color 150ms ease, border-color 150ms ease; }
+.dashflow-home-weread-actions button, .dashflow-home-weread-body > button { height: 28px; padding: 0 10px; border: 1px solid var(--df-home-border); border-radius: 6px; color: var(--df-home-muted); background: var(--df-home-surface); font-size: 11px; font-weight: 600; cursor: pointer; transition: background 140ms ease, color 140ms ease, border-color 140ms ease; }
 .dashflow-home-weread-actions button:hover, .dashflow-home-weread-body > button:hover { background: var(--df-home-surface-2); color: var(--df-home-text); border-color: var(--df-home-border-strong); }
 .dashflow-home-weread-loading { color: var(--df-home-muted); font-size: 11.5px; margin: 0; padding: 6px 0; }
 
@@ -189,41 +189,41 @@ export const PERSONAL_HOME_STYLES = `
 .dashflow-home-focus-row:hover { background: var(--df-home-surface-2); border-radius: 6px; }
 .dashflow-home-focus-row input[type="checkbox"] { margin: 0; accent-color: var(--df-home-accent); cursor: pointer; }
 .dashflow-home-focus-row button { min-width: 0; padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
-.dashflow-home-focus-row strong { color: var(--df-home-text); font-size: 12px; font-weight: 600; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dashflow-home-focus-row small { color: var(--df-home-muted); font-size: 10px; font-variant-numeric: tabular-nums; }
+.dashflow-home-focus-row strong { color: var(--df-home-text); font-size: 12.5px; font-weight: 650; line-height: 1.35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dashflow-home-focus-row small { color: var(--df-home-muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
 .dashflow-home-focus-row.is-urgent strong { color: #b91c1c; }
 .dashflow-home-focus-row.is-high strong { color: #b45309; }
 
 .dashflow-home-status { padding: 13px 15px; display: flex; flex-direction: column; justify-content: space-between; gap: 12px; }
 .dashflow-home-status-lead { display: flex; align-items: baseline; gap: 12px; }
-.dashflow-home-status-lead strong { font-size: 30px; font-weight: 750; line-height: 1; letter-spacing: -0.04em; color: var(--df-home-text); font-variant-numeric: tabular-nums; }
+.dashflow-home-status-lead strong { font-size: 32px; font-weight: 800; line-height: 1; letter-spacing: -0.04em; color: var(--df-home-text); font-variant-numeric: tabular-nums; }
 .dashflow-home-status-lead > div { display: flex; flex-direction: column; gap: 1px; }
-.dashflow-home-status-lead span { color: var(--df-home-muted); font-size: 10px; font-weight: 650; letter-spacing: 0.04em; text-transform: uppercase; }
-.dashflow-home-status-lead small { color: var(--df-home-faint); font-size: 10.5px; font-variant-numeric: tabular-nums; }
+.dashflow-home-status-lead span { color: var(--df-home-muted); font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; }
+.dashflow-home-status-lead small { color: var(--df-home-muted); font-size: 11px; font-variant-numeric: tabular-nums; }
 .dashflow-home-status-track { height: 5px; border-radius: 99px; background: var(--df-home-surface-2); overflow: hidden; }
 .dashflow-home-status-track span { display: block; height: 100%; border-radius: inherit; background: var(--df-home-accent); transition: width 300ms ease; }
 .dashflow-home-status-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 10px; border-top: 1px solid var(--df-home-border); }
 .dashflow-home-metric { display: flex; flex-direction: column; gap: 2px; }
-.dashflow-home-metric span { color: var(--df-home-muted); font-size: 9.5px; font-weight: 650; letter-spacing: 0.05em; }
-.dashflow-home-metric strong { color: var(--df-home-text); font-size: 13px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dashflow-home-metric span { color: var(--df-home-muted); font-size: 10px; font-weight: 650; letter-spacing: 0.05em; }
+.dashflow-home-metric strong { color: var(--df-home-text); font-size: 13.5px; font-weight: 750; font-variant-numeric: tabular-nums; }
 
 /* Growth areas: 2-column navigation rows. Areas are navigation rows. */
 .dashflow-home-areas { display: flex; flex-direction: column; gap: 7px; }
 .dashflow-home-section-head { display: flex; align-items: baseline; justify-content: space-between; padding: 2px 2px 0; }
-.dashflow-home-section-head strong { color: var(--df-home-text); font-size: 12.5px; font-weight: 700; }
-.dashflow-home-section-head span { color: var(--df-home-faint); font-size: 10px; font-weight: 600; letter-spacing: 0.05em; }
+.dashflow-home-section-head strong { color: var(--df-home-text); font-size: 13px; font-weight: 750; }
+.dashflow-home-section-head span { color: var(--df-home-muted); font-size: 10.5px; font-weight: 600; letter-spacing: 0.05em; }
 .dashflow-home-area-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
 .dashflow-home-area {
-  min-height: 48px; padding: 9px 13px; display: grid; grid-template-columns: 20px 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; border: 1px solid var(--df-home-border); border-radius: 9px; background: var(--df-home-surface); color: var(--df-home-text); cursor: pointer; text-align: left; transition: transform 140ms ease, border-color 140ms ease, background 140ms ease; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  min-height: 50px; padding: 10px 14px; display: grid; grid-template-columns: 20px 24px minmax(0, 1fr) auto; gap: 10px; align-items: center; border: 1px solid var(--df-home-border); border-radius: 9px; background: var(--df-home-surface); color: var(--df-home-text); cursor: pointer; text-align: left; transition: transform 140ms ease, border-color 140ms ease, background 140ms ease; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 .dashflow-home-area:hover { transform: translateY(-1px); border-color: var(--df-home-border-strong); background: var(--df-home-surface-2); }
-.dashflow-home-area-number { color: var(--df-home-faint); font-size: 10px; font-weight: 700; font-variant-numeric: tabular-nums; }
-.dashflow-home-area-icon { width: 22px; height: 22px; border-radius: 6px; display: grid; place-items: center; background: var(--df-home-surface-2); color: var(--df-home-accent); }
-.dashflow-home-area-icon svg { width: 13px; height: 13px; }
-.dashflow-home-area-copy { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
-.dashflow-home-area-copy strong { color: var(--df-home-text); font-size: 12px; font-weight: 650; }
-.dashflow-home-area-copy small { color: var(--df-home-muted); font-size: 10px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
-.dashflow-home-area-action { color: var(--df-home-muted); font-size: 10.5px; font-weight: 600; white-space: nowrap; opacity: 0.85; transition: opacity 140ms ease, color 140ms ease; }
+.dashflow-home-area-number { color: var(--df-home-muted); font-size: 10.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dashflow-home-area-icon { width: 24px; height: 24px; border-radius: 6px; display: grid; place-items: center; background: var(--df-home-surface-2); color: var(--df-home-accent); }
+.dashflow-home-area-icon svg { width: 14px; height: 14px; }
+.dashflow-home-area-copy { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.dashflow-home-area-copy strong { color: var(--df-home-text); font-size: 12.5px; font-weight: 650; }
+.dashflow-home-area-copy small { color: var(--df-home-muted); font-size: 10.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dashflow-home-area-action { color: var(--df-home-muted); font-size: 11px; font-weight: 600; white-space: nowrap; opacity: 0.85; transition: opacity 140ms ease, color 140ms ease; }
 .dashflow-home-area:hover .dashflow-home-area-action { opacity: 1; color: var(--df-home-text); }
 
 /* Bottom split: Activity strip & Recent notes. */
@@ -237,18 +237,18 @@ export const PERSONAL_HOME_STYLES = `
 .dashflow-home-activity-strip span:hover { transform: scale(1.2); }
 
 .dashflow-home-recent-list { padding: 4px 12px 8px; display: flex; flex-direction: column; }
-.dashflow-home-recent-row { min-height: 33px; padding: 4px 2px; display: grid; grid-template-columns: 15px minmax(0, 1fr) auto; gap: 8px; align-items: center; border-bottom: 1px solid color-mix(in srgb, var(--df-home-border) 60%, transparent); color: var(--df-home-muted); cursor: pointer; text-align: left; border: 0; background: transparent; width: 100%; transition: background 120ms ease; }
+.dashflow-home-recent-row { min-height: 34px; padding: 5px 3px; display: grid; grid-template-columns: 16px minmax(0, 1fr) auto; gap: 9px; align-items: center; border-bottom: 1px solid color-mix(in srgb, var(--df-home-border) 60%, transparent); color: var(--df-home-muted); cursor: pointer; text-align: left; border: 0; background: transparent; width: 100%; transition: background 120ms ease; }
 .dashflow-home-recent-row:last-child { border-bottom: 0; }
 .dashflow-home-recent-row:hover { background: var(--df-home-surface-2); border-radius: 5px; color: var(--df-home-text); }
-.dashflow-home-recent-row svg { width: 13px; height: 13px; color: var(--df-home-faint); }
-.dashflow-home-recent-row strong { color: var(--df-home-text); font-size: 11.5px; font-weight: 550; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dashflow-home-recent-row time { color: var(--df-home-faint); font-size: 10px; font-variant-numeric: tabular-nums; }
+.dashflow-home-recent-row svg { width: 13.5px; height: 13.5px; color: var(--df-home-muted); }
+.dashflow-home-recent-row strong { color: var(--df-home-text); font-size: 12px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dashflow-home-recent-row time { color: var(--df-home-muted); font-size: 10.5px; font-variant-numeric: tabular-nums; }
 
 /* Compact Empty state. */
 .dashflow-home-empty { min-height: 72px; padding: 12px 6px; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.dashflow-home-empty strong { display: block; color: var(--df-home-text); font-size: 12px; font-weight: 650; }
-.dashflow-home-empty p { margin: 2px 0 0; color: var(--df-home-muted); font-size: 11px; }
-.dashflow-home-empty button { height: 28px; padding: 0 11px; border: 1px solid var(--df-home-border); border-radius: 6px; color: var(--df-home-muted); background: var(--df-home-surface); font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 150ms ease; }
+.dashflow-home-empty strong { display: block; color: var(--df-home-text); font-size: 12.5px; font-weight: 650; }
+.dashflow-home-empty p { margin: 2px 0 0; color: var(--df-home-muted); font-size: 11.5px; }
+.dashflow-home-empty button { height: 28px; padding: 0 11px; border: 1px solid var(--df-home-border); border-radius: 6px; color: var(--df-home-text); background: var(--df-home-surface); font-size: 11px; font-weight: 600; cursor: pointer; white-space: nowrap; transition: background 140ms ease; }
 .dashflow-home-empty button:hover { background: var(--df-home-surface-2); color: var(--df-home-text); }
 
 @media (max-width: 860px) {

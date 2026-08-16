@@ -75,21 +75,21 @@ export class ProductExperienceService {
     window.setTimeout(() => {
       this.scheduled = false;
       this.decorateSafely(force);
-    }, 0);
+    }, 16);
   }
 
-  private decorateSafely(_force = false): void {
+  private decorateSafely(force = false): void {
     this.observer?.disconnect();
     try {
       for (const shell of document.querySelectorAll<HTMLElement>(".dashflow-shell")) {
-        this.decorateShell(shell);
+        this.decorateShell(shell, force);
       }
     } finally {
       this.observer?.observe(document.body, OBSERVE_OPTIONS);
     }
   }
 
-  private decorateShell(shell: HTMLElement): void {
+  private decorateShell(shell: HTMLElement, force = false): void {
     shell.classList.add("dashflow-command-shell");
     shell.classList.remove("dashflow-studio-shell", "dashflow-product-shell");
     shell.querySelector(":scope > .dashflow-product-nav")?.remove();
@@ -122,14 +122,14 @@ export class ProductExperienceService {
     this.decorateProgressWidget(grid);
     this.decorateProjectWidget(grid);
     this.decorateTaskPriorityBadges(grid);
-    this.clearSyntheticPage(grid);
 
     if (editing) {
+      this.clearSyntheticPage(grid);
       this.restoreAllWidgets(grid);
       return;
     }
 
-    this.applySection(grid, this.activeSection);
+    this.applySection(grid, this.activeSection, force);
   }
 
   private applyTheme(shell: HTMLElement, home: boolean): void {
@@ -468,7 +468,7 @@ export class ProductExperienceService {
     }
   }
 
-  private applySection(grid: HTMLElement, section: ProductSection): void {
+  private applySection(grid: HTMLElement, section: ProductSection, force = false): void {
     const dashboard = this.plugin.dashboardManager.active();
     grid.dataset.productSection = section;
     grid.style.removeProperty("display");
@@ -479,16 +479,26 @@ export class ProductExperienceService {
     if (section === "today") {
       for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget")) this.setCardVisible(card, false);
       grid.style.setProperty("display", "block", "important");
-      grid.appendChild(this.personalHome.render());
+      const currentHome = grid.querySelector<HTMLElement>(":scope > .dashflow-personal-home");
+      if (!currentHome || force) {
+        this.clearSyntheticPage(grid);
+        grid.appendChild(this.personalHome.render());
+      }
       return;
     }
 
     if (section === "inbox") {
       for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget")) this.setCardVisible(card, false);
       grid.style.setProperty("display", "block", "important");
-      grid.appendChild(this.renderInboxPage());
+      const currentInbox = grid.querySelector<HTMLElement>(":scope > .dashflow-command-inbox");
+      if (!currentInbox || force) {
+        this.clearSyntheticPage(grid);
+        grid.appendChild(this.renderInboxPage());
+      }
       return;
     }
+
+    this.clearSyntheticPage(grid);
 
     for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget[data-widget-id]")) {
       const id = card.dataset.widgetId ?? "";

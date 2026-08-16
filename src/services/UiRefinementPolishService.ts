@@ -30,6 +30,7 @@ export const UI_REFINEMENT_POLISH_STYLES = `
 .dashflow-home-weread:has(.dashflow-home-weread-mark) {
   color: var(--df-home-text)!important;
   border: 1px solid var(--df-home-border)!important;
+  border-radius: 12px!important;
   background: var(--df-home-surface)!important;
   box-shadow: none!important;
 }
@@ -93,19 +94,28 @@ export const UI_REFINEMENT_POLISH_STYLES = `
  * from ProductDesignService + PersonalHomeDesignService. Do not override them here.
  */
 
+.dashflow-command-shell:not(.is-personal-home) .dashflow-command-button {
+  height: 29px!important;
+  padding: 0 9px!important;
+}
+
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget {
-  border-color: color-mix(in srgb, var(--df-cmd-border) 78%, transparent)!important;
-  border-radius: 10px!important;
+  border: 1px solid var(--df-cmd-border)!important;
+  border-radius: 12px!important;
+  background: var(--df-cmd-surface)!important;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget-header {
   height: 36px!important;
   padding: 0 11px!important;
-  border-bottom-color: color-mix(in srgb, var(--df-cmd-border) 58%, transparent)!important;
+  border-bottom: 1px solid var(--df-cmd-border)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget-header strong {
-  font-size: 12px!important;
+  font-size: 12.5px!important;
+  font-weight: 700!important;
+  color: var(--df-cmd-text)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget-icon {
@@ -113,6 +123,7 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   height: 20px!important;
   color: var(--df-cmd-muted)!important;
   background: var(--df-cmd-soft)!important;
+  border-radius: 6px!important;
 }
 
 /* Empty states should read like a single line of information, not a poster. */
@@ -123,11 +134,15 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   align-items: center!important;
   justify-content: flex-start!important;
   text-align: left!important;
+  color: var(--df-cmd-muted)!important;
+  font-size: 11.5px!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget-kicker {
   min-height: 26px!important;
   padding: 7px 11px 3px!important;
+  color: var(--df-cmd-muted)!important;
+  font-weight: 650!important;
 }
 
 /* Quick Capture remains useful, but no longer dominates an entire quadrant. */
@@ -142,27 +157,35 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   min-height: 42px!important;
   padding: 5px 3px!important;
   resize: none!important;
+  color: var(--df-cmd-text)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-capture-footer {
   min-height: 28px!important;
 }
 
-/* Renderer has two project-row children: content + statistics. */
+/* Compact project rows: clean 2-column layout. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-project-row {
   grid-template-columns: minmax(0, 1fr) auto!important;
   gap: 16px!important;
-  min-height: 42px!important;
-  padding: 5px 2px!important;
+  min-height: 44px!important;
+  padding: 6px 4px!important;
+  border-bottom: 1px solid color-mix(in srgb, var(--df-cmd-border) 65%, transparent)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-project-main {
   min-width: 0!important;
 }
 
+.dashflow-command-shell:not(.is-personal-home) .dashflow-project-name {
+  font-size: 12.5px!important;
+  font-weight: 650!important;
+  color: var(--df-cmd-text)!important;
+}
+
 .dashflow-command-shell:not(.is-personal-home) .dashflow-project-bar {
-  height: 3px!important;
-  margin-top: 7px!important;
+  height: 4px!important;
+  margin-top: 6px!important;
   border-radius: 999px!important;
   background: var(--df-cmd-soft)!important;
 }
@@ -180,34 +203,57 @@ export const UI_REFINEMENT_POLISH_STYLES = `
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-project-stat strong {
-  font-size: 11.5px!important;
+  font-size: 12px!important;
+  font-weight: 700!important;
+  color: var(--df-cmd-text)!important;
 }
 
-/* Progress and countdown become factual supporting metrics. */
+.dashflow-command-shell:not(.is-personal-home) .dashflow-project-stat span {
+  font-size: 10px!important;
+  color: var(--df-cmd-muted)!important;
+}
+
+/* Progress and countdown: refined, balanced metrics. */
+.dashflow-command-shell:not(.is-personal-home) .dashflow-progress-metric {
+  border: 0!important;
+  background: transparent!important;
+  gap: 6px!important;
+}
+
 .dashflow-command-shell:not(.is-personal-home) .dashflow-progress-ring {
-  width: 60px!important;
-  height: 60px!important;
+  width: 68px!important;
+  height: 68px!important;
+}
+
+.dashflow-command-shell:not(.is-personal-home) .dashflow-progress-ring strong {
+  font-size: 16px!important;
+  font-weight: 750!important;
+  color: var(--df-cmd-text)!important;
+}
+
+.dashflow-command-shell:not(.is-personal-home) .dashflow-progress-ring span {
+  font-size: 9.5px!important;
+  font-weight: 700!important;
+  color: var(--df-cmd-muted)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-progress-pair {
-  gap: 8px!important;
-}
-
-.dashflow-command-shell:not(.is-personal-home) .dashflow-progress-metric {
-  gap: 5px!important;
+  gap: 12px!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-countdown strong,
 .dashflow-command-shell:not(.is-personal-home) .dashflow-countdown-value {
-  font-size: 48px!important;
+  font-size: 44px!important;
   line-height: 0.95!important;
+  font-weight: 800!important;
+  color: var(--df-cmd-text)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-countdown {
   gap: 4px!important;
 }
 
-/* Activity should occupy its row without looking like a blank report canvas. */
+/* Activity heatmap. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-heatmap-grid {
   gap: 2px!important;
 }
@@ -216,7 +262,16 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   border-radius: 2px!important;
 }
 
+@media (max-width: 980px) {
+  .dashflow-command-shell:not(.is-personal-home) {
+    width: calc(100% - 20px)!important;
+  }
+}
+
 @media (max-width: 760px) {
+  .dashflow-command-shell:not(.is-personal-home) .dashflow-command-bar {
+    border-bottom: 0!important;
+  }
   .dashflow-home-weread:has(.dashflow-home-weread-mark) .dashflow-home-weread-body {
     grid-template-columns: 34px minmax(0, 1fr)!important;
   }
@@ -230,7 +285,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   .dashflow-command-shell *,
   .dashflow-personal-home * {
     transition: none!important;
-    animation: none!important;
   }
 }
 `;
