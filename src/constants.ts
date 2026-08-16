@@ -2,7 +2,7 @@ import type { DashFlowSettings } from "./models";
 
 export const VIEW_TYPE = "dashflow-dashboard";
 export const SCHEMA_VERSION = 7 as const;
-export const PLUGIN_VERSION = "0.4.6";
+export const PLUGIN_VERSION = "0.5.0";
 
 export const DEFAULT_SETTINGS: DashFlowSettings = {
   inboxPath: "DashFlow/Inbox.md",
@@ -22,4 +22,7 @@ export const DEFAULT_SETTINGS: DashFlowSettings = {
   aiBaseUrl: "https://api.deepseek.com",
   aiModel: "deepseek-v4-flash",
   aiSecretId: "",
+  aiMorningBriefingEnabled: false,
+  dailyNoteFolder: "",
+  dailyNoteDateFormat: "YYYY-MM-DD",
 };
