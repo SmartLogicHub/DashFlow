@@ -1,7 +1,7 @@
 {
   "name": "dashflow",
-  "version": "0.4.6",
-  "description": "A Personal OS for Obsidian with flexible dashboards, integrated daily progress, tasks, projects, habits, calendar, review, search and optional AI planning.",
+  "version": "0.5.0",
+  "description": "A Personal OS for Obsidian with AI Morning Briefing, flexible dashboards, Daily Progress, tasks, projects, habits, calendar, review, search and optional AI planning.",
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "node tests/run-layout-tests.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
-  "keywords": ["obsidian", "personal-os", "personal-dashboard", "productivity", "tasks", "projects", "habits", "daily-progress", "calendar", "review", "weread", "search", "ai-planning", "dashboard", "templates", "countdown", "mobile"],
+  "keywords": ["obsidian", "personal-os", "personal-dashboard", "productivity", "tasks", "projects", "habits", "daily-progress", "calendar", "review", "weread", "search", "ai", "morning-briefing", "ollama", "ai-planning", "dashboard", "templates", "countdown", "mobile"],
   "devDependencies": {
     "@types/node": "^22.15.17",
     "esbuild": "0.25.5",
