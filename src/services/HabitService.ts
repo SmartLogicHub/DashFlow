@@ -3,6 +3,7 @@ import type { Habit, HabitEditInput } from "../models";
 import { localDate } from "../utils/date";
 import type { ActivityService } from "./ActivityService";
 import type { VaultIndexService } from "./VaultIndexService";
+import type { VaultQueryService } from "./VaultQueryService";
 
 function sanitizeId(value: string): string {
   return value
@@ -60,9 +61,11 @@ export class HabitService {
     private readonly activity: ActivityService,
     private readonly getHabitFolder: () => string,
     private readonly getHabitTypeValue: () => string,
+    private readonly query?: VaultQueryService,
   ) {}
 
   active(includePaused = false): Habit[] {
+    if (this.query) return this.query.getActiveHabits(includePaused);
     return this.index.getSnapshot().habits
       .filter((habit) => habit.status === "active" || (includePaused && habit.status === "paused"))
       .sort((a, b) => a.name.localeCompare(b.name));
