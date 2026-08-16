@@ -11,13 +11,13 @@ import type {
 } from "../models";
 import {
   DEFAULT_DATA_FILTER_CONFIG,
-  filterVaultSnapshot,
   normalizeDataFilterConfig,
   type DataFilterMatch,
 } from "../filter/dataFilter";
 import { HabitEditorModal } from "../ui/HabitEditorModal";
 import { ProjectDetailModal } from "../ui/ProjectDetailModal";
 import { TaskEditorModal } from "../ui/TaskEditorModal";
+import { localDate } from "../utils/date";
 
 const ENTITY_OPTIONS: Array<[DataFilterEntity, string]> = [
   ["all", "全部"], ["note", "笔记"], ["task", "任务"], ["project", "项目"], ["habit", "习惯"],
@@ -36,41 +36,25 @@ const NOTE_TASK_OPTIONS: Array<[DataFilterTaskStatus, string]> = [
 ];
 
 export class DataFilterWidgetInteractionService {
-  private unsubscribeDashboard: (() => void) | null = null;
-  private unsubscribeIndex: (() => void) | null = null;
-  private scheduled = false;
+  private unsubscribeRender: (() => void) | null = null;
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
-    this.unsubscribeDashboard = this.plugin.dashboardManager.subscribe(() => this.schedule());
-    this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.schedule());
-    this.plugin.registerEvent(this.plugin.app.workspace.on("layout-change", () => this.schedule()));
-    this.plugin.registerEvent(this.plugin.app.workspace.on("active-leaf-change", () => this.schedule()));
-    this.schedule();
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => this.decorate(root));
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root));
   }
 
   stop(): void {
-    this.unsubscribeDashboard?.();
-    this.unsubscribeDashboard = null;
-    this.unsubscribeIndex?.();
-    this.unsubscribeIndex = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
   }
 
-  schedule(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorate();
-    }, 0);
-  }
-
-  private decorate(): void {
+  private decorate(root: HTMLElement): void {
     const dashboard = this.plugin.dashboardManager.active();
     const widgets = new Map(dashboard.widgets.map((widget) => [widget.id, widget]));
     const revision = this.plugin.vaultIndex.getSnapshot().revision;
-    for (const card of document.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
+    for (const card of root.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
       const id = card.dataset.widgetId;
       const widget = id ? widgets.get(id) : undefined;
       if (!widget || widget.type !== "data-filter") continue;
@@ -131,7 +115,7 @@ export class DataFilterWidgetInteractionService {
     results.className = "dashflow-data-filter-results";
 
     const renderPreview = (): void => {
-      const preview = filterVaultSnapshot(this.plugin.vaultIndex.getSnapshot(), {
+      const preview = this.plugin.vaultQuery.filterData({
         ...config,
         query: query.value,
         tag: tag.value,
@@ -140,7 +124,7 @@ export class DataFilterWidgetInteractionService {
         noteTaskStatus: noteTaskStatus.value as DataFilterTaskStatus,
         dateRange: dateSelect.value as DataFilterDateRange,
         sort: sortSelect.value as DataFilterSort,
-      });
+      }, localDate());
       summary.textContent = `${preview.total} 条 · 笔记 ${preview.counts.note} · 任务 ${preview.counts.task} · 项目 ${preview.counts.project} · 习惯 ${preview.counts.habit}`;
       results.replaceChildren();
       if (preview.items.length === 0) {
@@ -262,7 +246,6 @@ export class DataFilterWidgetInteractionService {
       ...widget,
       config: normalizeDataFilterConfig({ ...(widget.config as Partial<DataFilterWidgetConfig>), ...patch }),
     }));
-    this.schedule();
   }
 
   private async replaceConfig(
@@ -274,6 +257,5 @@ export class DataFilterWidgetInteractionService {
       ...widget,
       config: { ...config },
     }));
-    this.schedule();
   }
 }
