@@ -23,6 +23,7 @@ test("v0.4.3 design system owns the full final CSS cascade", () => {
   assert.ok(design.includes("UI_REFINEMENT_POLISH_STYLES,"));
   assert.ok(design.includes("DESIGN_SYSTEM_STYLES,"));
   assert.equal(design.includes("new MutationObserver"), false);
+  assert.equal(design.includes(".observe("), false);
   assert.equal(design.includes("addEventListener("), false);
   assert.equal(design.includes("TaskService"), false);
   assert.equal(design.includes("ProjectService"), false);
@@ -30,7 +31,8 @@ test("v0.4.3 design system owns the full final CSS cascade", () => {
 });
 
 test("presentation runtime is event-driven instead of DOM-observer-driven", () => {
-  assert.equal(runtime.includes("MutationObserver"), false);
+  assert.equal(runtime.includes("new MutationObserver"), false);
+  assert.equal(runtime.includes(".observe("), false);
   assert.ok(runtime.includes('workspace.on("layout-change", this.syncAmbientImage)'));
   assert.ok(runtime.includes('document.addEventListener("click", this.handleDocumentClick)'));
   assert.ok(runtime.includes("focusTodayWidget"));
