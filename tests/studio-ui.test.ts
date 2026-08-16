@@ -5,32 +5,47 @@ import { readFileSync } from "node:fs";
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const design = readFileSync("src/services/ProductDesignService.ts", "utf8");
 
-test("Studio UI renders Today, Inbox and Projects as purpose-built views instead of the widget grid", () => {
-  assert.ok(experience.includes('CUSTOM_SECTIONS = new Set<ProductSection>(["today", "inbox", "projects"])'));
-  assert.ok(experience.includes('grid.style.display = "none"'));
-  assert.ok(experience.includes("dashflow-studio-stage"));
-  assert.ok(experience.includes("renderQuickAdd(today)"));
-  assert.equal(experience.includes("dashflow-today-summary-item"), false);
+test("Command Dashboard uses horizontal navigation instead of an internal full-height app sidebar", () => {
+  assert.ok(experience.includes("COMMAND_SECTIONS"));
+  assert.ok(experience.includes("dashflow-command-bar"));
+  assert.ok(experience.includes("dashflow-command-nav"));
+  assert.ok(experience.includes("dashflow-command-actions"));
+  assert.ok(experience.includes("dashflow-product-nav\")?.remove()"));
+  assert.equal(design.includes("grid-template-columns: 176px minmax(0, 1fr)"), false);
 });
 
-test("Studio UI replaces the heavy black sidebar with a quiet theme-aware navigation surface", () => {
-  assert.ok(design.includes("dashflow-studio-nav"));
-  assert.ok(design.includes("color-mix(in srgb, var(--df-st-surface) 78%, transparent)"));
-  assert.ok(design.includes("grid-template-columns: 176px minmax(0, 1fr)"));
-  assert.equal(design.includes("--df-v3-sidebar: #11131a"), false);
+test("Home is a compact editable dashboard rather than a synthetic Today application screen", () => {
+  assert.ok(experience.includes("HOME_WIDGET_TYPES"));
+  for (const type of ["quick-capture", "tasks", "progress", "projects", "upcoming", "heatmap", "countdown"]) {
+    assert.ok(experience.includes(`\"${type}\"`), type);
+  }
+  assert.equal(experience.includes("dashflow-focus-panel"), false);
 });
 
-test("Today uses one focus surface and contextual rail instead of equal-weight KPI cards", () => {
-  assert.ok(experience.includes("dashflow-focus-panel"));
-  assert.ok(experience.includes("dashflow-studio-context-rail"));
-  assert.ok(experience.includes("dashflow-day-context"));
-  assert.ok(design.includes("Metrics are context, not four equal KPI cards"));
+test("Reference styling uses one dark purple hero, terminal-like pulse and dense card chrome", () => {
+  assert.ok(design.includes("Reference-style purple command banner"));
+  assert.ok(design.includes("Pulse strip: narrow, data-dense"));
+  assert.ok(design.includes("Dense dashboard grid"));
+  assert.ok(design.includes("border-radius: 7px !important"));
+  assert.ok(design.includes("height: 34px !important"));
 });
 
-test("Projects use an interactive portfolio board and mobile navigation becomes a bottom bar", () => {
-  assert.ok(experience.includes("dashflow-project-board"));
+test("Reference dashboard enhancements use real data instead of decorative fake metrics", () => {
+  assert.ok(experience.includes("activityStreak(this.plugin.data.activity)"));
+  assert.ok(experience.includes('this.progressMetric("TODAY"'));
+  assert.ok(experience.includes('this.progressMetric("ALL TASKS"'));
   assert.ok(experience.includes("ProjectDetailModal"));
-  assert.ok(design.includes("grid-template-columns:repeat(2,minmax(0,1fr))"));
-  assert.ok(design.includes("position:fixed"));
-  assert.ok(design.includes("bottom:10px"));
+  assert.ok(experience.includes("dashflow-task-priority"));
+});
+
+test("hidden workflow cards remain hidden even when responsive CSS changes grid layout", () => {
+  assert.ok(experience.includes('card.style.setProperty("display", "none", "important")'));
+  assert.ok(experience.includes('card.style.removeProperty("display")'));
+});
+
+test("Inbox remains a real processing workflow instead of a decorative dashboard card", () => {
+  assert.ok(experience.includes("renderInboxPage"));
+  assert.ok(experience.includes("inboxTasks("));
+  assert.ok(experience.includes("captureService.capture"));
+  assert.ok(experience.includes("TaskEditorModal"));
 });

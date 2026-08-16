@@ -1,16 +1,10 @@
 import { normalizePath, setIcon } from "obsidian";
 import type DashFlowPlugin from "../main";
-import type { Habit, Project, Task } from "../models";
-import { habitCompletedOn, habitCurrentStreak, habitScheduledOn } from "../habits/habitMath";
-import { formatTaskBody } from "../parsers/taskParser";
-import {
-  PRODUCT_SECTIONS,
-  inboxTasks,
-  sectionDefinition,
-  sectionWidgetTypes,
-  type ProductSection,
-} from "../product/navigation";
-import { addDays, localDate } from "../utils/date";
+import type { Task } from "../models";
+import { activityStreak } from "../activity/activityMath";
+import { PLUGIN_VERSION } from "../constants";
+import { inboxTasks, type ProductSection } from "../product/navigation";
+import { localDate } from "../utils/date";
 import { AIPlanModal } from "../ui/AIPlanModal";
 import { GlobalSearchModal } from "../ui/GlobalSearchModal";
 import { HabitEditorModal } from "../ui/HabitEditorModal";
@@ -19,8 +13,25 @@ import { ProjectEditorModal } from "../ui/ProjectEditorModal";
 import { TaskEditorModal } from "../ui/TaskEditorModal";
 
 const OBSERVE_OPTIONS: MutationObserverInit = { childList: true, subtree: true };
-const CUSTOM_SECTIONS = new Set<ProductSection>(["today", "inbox", "projects"]);
-const PRIORITY_ORDER: Record<Task["priority"], number> = { urgent: 0, high: 1, normal: 2, low: 3 };
+
+const COMMAND_SECTIONS: Array<{ id: ProductSection; label: string; icon: string }> = [
+  { id: "today", label: "主页", icon: "home" },
+  { id: "projects", label: "全部项目", icon: "layout-grid" },
+  { id: "inbox", label: "收集箱", icon: "inbox" },
+  { id: "calendar", label: "日历", icon: "calendar-days" },
+  { id: "habits", label: "习惯", icon: "repeat-2" },
+  { id: "review", label: "复盘", icon: "bar-chart-3" },
+];
+
+const HOME_WIDGET_TYPES = new Set([
+  "quick-capture",
+  "tasks",
+  "progress",
+  "projects",
+  "upcoming",
+  "heatmap",
+  "countdown",
+]);
 
 export class ProductExperienceService {
   private observer: MutationObserver | null = null;
@@ -62,679 +73,502 @@ export class ProductExperienceService {
     }, 0);
   }
 
-  private decorateSafely(force = false): void {
+  private decorateSafely(_force = false): void {
     this.observer?.disconnect();
     try {
       for (const shell of document.querySelectorAll<HTMLElement>(".dashflow-shell")) {
-        this.decorateShell(shell, force);
+        this.decorateShell(shell);
       }
     } finally {
       this.observer?.observe(document.body, OBSERVE_OPTIONS);
     }
   }
 
-  private decorateShell(shell: HTMLElement, force: boolean): void {
-    shell.classList.add("dashflow-product-shell", "dashflow-studio-shell");
-    const grid = shell.querySelector<HTMLElement>(".dashflow-grid");
+  private decorateShell(shell: HTMLElement): void {
+    shell.classList.add("dashflow-command-shell");
+    shell.classList.remove("dashflow-studio-shell", "dashflow-product-shell");
+    shell.querySelector(":scope > .dashflow-product-nav")?.remove();
+    shell.querySelector(":scope > .dashflow-studio-stage")?.remove();
+
     const hero = shell.querySelector<HTMLElement>(".dashflow-hero");
-    if (!grid || !hero) return;
+    const pulse = shell.querySelector<HTMLElement>(".dashflow-pulse");
+    const title = shell.querySelector<HTMLElement>(".dashflow-section-title");
+    const grid = shell.querySelector<HTMLElement>(".dashflow-grid");
+    if (!hero || !pulse || !title || !grid) return;
+
+    hero.classList.remove("dashflow-product-hidden");
+    pulse.classList.remove("dashflow-product-hidden");
+    title.classList.remove("dashflow-product-hidden");
+    grid.classList.remove("dashflow-product-hidden");
 
     const editing = grid.classList.contains("is-editing");
     shell.classList.toggle("is-layout-editing", editing);
-    const nav = this.ensureNavigation(shell);
-    this.moveWorkspaceSwitcher(shell, nav);
-    this.moveEditButton(shell, nav, editing);
 
-    shell.querySelector<HTMLElement>(".dashflow-pulse")?.classList.add("dashflow-product-hidden");
-    shell.querySelector<HTMLElement>(".dashflow-section-title")?.classList.add("dashflow-product-hidden");
+    this.decorateHero(hero);
+    this.decoratePulse(pulse);
+    this.decorateTitle(shell, title, editing);
+    const commandBar = this.ensureCommandBar(shell, title);
+    this.moveDashboardSwitcher(shell, commandBar);
+    this.syncCommandBar(commandBar, editing ? null : this.activeSection);
+    this.annotateWidgets(grid);
+    this.decorateProgressWidget(grid);
+    this.decorateProjectWidget(grid);
+    this.decorateTaskPriorityBadges(grid);
+    this.clearSyntheticPage(grid);
 
     if (editing) {
-      nav.classList.add("is-editing");
-      this.removeStudioStage(shell);
-      hero.classList.remove("dashflow-product-hidden");
-      grid.classList.remove("dashflow-product-hidden");
-      grid.style.display = "";
       this.restoreAllWidgets(grid);
-      this.syncNavigation(nav, null);
       return;
     }
 
-    nav.classList.remove("is-editing");
-    hero.classList.add("dashflow-product-hidden");
-    this.syncNavigation(nav, this.activeSection);
-    this.renderStage(shell, grid, force);
+    this.applySection(grid, this.activeSection);
   }
 
-  private ensureNavigation(shell: HTMLElement): HTMLElement {
-    let nav = shell.querySelector<HTMLElement>(":scope > .dashflow-product-nav");
-    if (nav) return nav;
-
-    nav = document.createElement("aside");
-    nav.className = "dashflow-product-nav dashflow-studio-nav";
-
-    const brand = document.createElement("div");
-    brand.className = "dashflow-product-brand";
-    const mark = document.createElement("div");
-    mark.className = "dashflow-product-brand-mark";
-    setIcon(mark, "sparkles");
-    const brandCopy = document.createElement("div");
-    brandCopy.append(this.text("strong", "DashFlow"), this.text("span", "WORKSPACE"));
-    brand.append(mark, brandCopy);
-
-    const list = document.createElement("nav");
-    list.className = "dashflow-product-nav-list";
-    for (const section of PRODUCT_SECTIONS) {
-      const button = document.createElement("button");
-      button.type = "button";
-      button.className = "dashflow-product-nav-item";
-      button.dataset.section = section.id;
-      button.title = section.label;
-      const icon = document.createElement("span");
-      icon.className = "dashflow-product-nav-icon";
-      setIcon(icon, section.icon);
-      const label = this.text("span", section.label);
-      label.className = "dashflow-product-nav-text";
-      const badge = document.createElement("span");
-      badge.className = "dashflow-product-nav-badge";
-      button.append(icon, label, badge);
-      button.addEventListener("click", () => this.openSection(section.id));
-      list.appendChild(button);
-    }
-
-    const workspace = document.createElement("div");
-    workspace.className = "dashflow-sidebar-workspace";
-
-    const footer = document.createElement("div");
-    footer.className = "dashflow-product-nav-footer";
-
-    nav.append(brand, list, workspace, footer);
-    shell.prepend(nav);
-    return nav;
+  private decorateHero(hero: HTMLElement): void {
+    const eyebrow = hero.querySelector<HTMLElement>(".dashflow-eyebrow");
+    const heading = hero.querySelector<HTMLElement>("h1");
+    const description = hero.querySelector<HTMLElement>("p");
+    if (eyebrow) eyebrow.textContent = "DASHFLOW · SECOND BRAIN";
+    if (heading) heading.textContent = "Obsidian · Personal Dashboard";
+    if (description) description.textContent = "WHERE TASKS, NOTES, AND PROJECTS CONVERGE.";
   }
 
-  private syncNavigation(nav: HTMLElement, section: ProductSection | null): void {
-    const inboxCount = inboxTasks(
-      this.plugin.vaultIndex.getSnapshot().tasks,
-      normalizePath(this.plugin.data.settings.inboxPath),
-    ).length;
-    for (const button of nav.querySelectorAll<HTMLElement>(".dashflow-product-nav-item")) {
-      const active = section !== null && button.dataset.section === section;
-      button.classList.toggle("is-active", active);
-      if (active) button.setAttribute("aria-current", "page");
-      else button.removeAttribute("aria-current");
-      const badge = button.querySelector<HTMLElement>(".dashflow-product-nav-badge");
-      if (badge) badge.textContent = button.dataset.section === "inbox" && inboxCount > 0 ? String(inboxCount) : "";
-    }
-  }
-
-  private moveWorkspaceSwitcher(shell: HTMLElement, nav: HTMLElement): void {
-    const switcher = shell.querySelector<HTMLElement>(".dashflow-dashboard-switcher");
-    const mount = nav.querySelector<HTMLElement>(".dashflow-sidebar-workspace");
-    if (switcher && mount && switcher.parentElement !== mount) mount.appendChild(switcher);
-  }
-
-  private moveEditButton(shell: HTMLElement, nav: HTMLElement, editing: boolean): void {
-    const button = shell.querySelector<HTMLButtonElement>(".dashflow-edit-button");
-    const footer = nav.querySelector<HTMLElement>(".dashflow-product-nav-footer");
-    if (!button || !footer) return;
-    button.textContent = editing ? "完成布局" : "自定义布局";
-    button.classList.add("dashflow-product-customize");
-    if (button.parentElement !== footer) footer.appendChild(button);
-  }
-
-  private renderStage(shell: HTMLElement, grid: HTMLElement, force: boolean): void {
-    let stage = shell.querySelector<HTMLElement>(":scope > .dashflow-studio-stage");
-    if (!stage) {
-      stage = document.createElement("main");
-      stage.className = "dashflow-studio-stage";
-      const nav = shell.querySelector(":scope > .dashflow-product-nav");
-      nav?.insertAdjacentElement("afterend", stage);
-    }
-
-    const signature = this.renderSignature();
-    if (!force && stage.dataset.signature === signature && stage.dataset.section === this.activeSection) return;
-    stage.dataset.signature = signature;
-    stage.dataset.section = this.activeSection;
-    stage.replaceChildren();
-    stage.appendChild(this.renderStudioHeader());
-
-    if (CUSTOM_SECTIONS.has(this.activeSection)) {
-      grid.classList.add("dashflow-product-hidden");
-      grid.style.display = "none";
-      if (this.activeSection === "today") stage.appendChild(this.renderToday());
-      else if (this.activeSection === "inbox") stage.appendChild(this.renderInbox());
-      else stage.appendChild(this.renderProjects());
-      return;
-    }
-
-    grid.classList.remove("dashflow-product-hidden");
-    this.prepareWidgetWorkflow(grid, this.activeSection);
-  }
-
-  private renderSignature(): string {
+  private decoratePulse(pulse: HTMLElement): void {
     const snapshot = this.plugin.vaultIndex.getSnapshot();
-    const taskBits = snapshot.tasks.map((task) => [task.id, task.completed ? 1 : 0, task.due ?? "", task.scheduled ?? "", task.projectId ?? ""].join(":"));
-    const projectBits = snapshot.projects.map((project) => [project.id, project.status, project.deadline ?? ""].join(":"));
-    const today = localDate();
-    const habitBits = snapshot.habits.map((habit) => [habit.id, habit.status, habit.completedDates.includes(today) ? 1 : 0].join(":"));
-    return `${this.activeSection}|${taskBits.join("|")}|${projectBits.join("|")}|${habitBits.join("|")}`;
+    const pending = snapshot.tasks.filter((task) => !task.completed).length;
+    const today = this.plugin.taskService.today(snapshot.tasks).filter((task) => !task.completed).length;
+    const streak = activityStreak(this.plugin.data.activity);
+    const items: Array<[string, number | null]> = [
+      ["VAULT PULSE", null],
+      ["NOTES", snapshot.notes],
+      ["PENDING", pending],
+      ["TODAY", today],
+      ["STREAK", streak],
+    ];
+
+    pulse.replaceChildren();
+    items.forEach(([label, value], index) => {
+      const span = document.createElement("span");
+      if (index === 0) span.className = "dashflow-pulse-label";
+      if (value !== null) span.appendChild(this.text("strong", String(value)));
+      span.appendChild(document.createTextNode(label));
+      pulse.appendChild(span);
+    });
   }
 
-  private renderStudioHeader(): HTMLElement {
-    const definition = sectionDefinition(this.activeSection);
-    const header = document.createElement("header");
-    header.className = "dashflow-studio-header";
+  private decorateTitle(shell: HTMLElement, title: HTMLElement, editing: boolean): void {
+    const editButton = shell.querySelector<HTMLButtonElement>(".dashflow-edit-button");
+    const dashboard = this.plugin.dashboardManager.active();
 
     const copy = document.createElement("div");
-    copy.className = "dashflow-studio-header-copy";
-    const crumb = this.text("div", "DASHFLOW");
-    crumb.className = "dashflow-studio-crumb";
-    const titleRow = document.createElement("div");
-    titleRow.className = "dashflow-studio-title-row";
-    const title = this.text("h1", definition.title);
-    const date = this.text("span", new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" }).format(new Date()));
-    date.className = "dashflow-studio-date";
-    titleRow.append(title, date);
-    const description = this.text("p", definition.description);
-    copy.append(crumb, titleRow, description);
+    copy.className = "dashflow-command-title-copy";
+    const eyebrow = this.text("span", "SECOND BRAIN");
+    eyebrow.className = "dashflow-command-eyebrow";
+    const heading = this.text("strong", dashboard.name === "Home" ? "MY DASHBOARD" : dashboard.name);
+    heading.className = "dashflow-command-title";
+    const meta = this.text("small", `Obsidian · Personal Dashboard · v${PLUGIN_VERSION}`);
+    meta.className = "dashflow-command-meta";
+    copy.append(eyebrow, heading, meta);
+
+    const right = document.createElement("div");
+    right.className = "dashflow-command-title-right";
+    const now = new Date();
+    const date = this.text("strong", new Intl.DateTimeFormat("zh-CN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(now));
+    const weekday = this.text("small", new Intl.DateTimeFormat("zh-CN", {
+      weekday: "long",
+      month: "short",
+      day: "numeric",
+    }).format(now));
+    const dateWrap = document.createElement("div");
+    dateWrap.className = "dashflow-command-date";
+    dateWrap.append(date, weekday);
+    right.appendChild(dateWrap);
+
+    if (editButton) {
+      editButton.textContent = editing ? "完成" : "布局";
+      editButton.title = editing ? "完成布局编辑" : "编辑 Dashboard 布局";
+      editButton.classList.add("dashflow-command-layout-button");
+      right.appendChild(editButton);
+    }
+
+    title.replaceChildren(copy, right);
+  }
+
+  private ensureCommandBar(shell: HTMLElement, title: HTMLElement): HTMLElement {
+    let bar = shell.querySelector<HTMLElement>(":scope > .dashflow-command-bar");
+    if (bar) return bar;
+
+    bar = document.createElement("div");
+    bar.className = "dashflow-command-bar";
+
+    const nav = document.createElement("nav");
+    nav.className = "dashflow-command-nav";
+    for (const section of COMMAND_SECTIONS) {
+      const button = this.commandButton(section.icon, section.label);
+      button.dataset.section = section.id;
+      button.addEventListener("click", () => this.openSection(section.id));
+      nav.appendChild(button);
+    }
 
     const actions = document.createElement("div");
-    actions.className = "dashflow-studio-actions";
-    const search = this.iconAction("search", "搜索");
-    search.addEventListener("click", () => new GlobalSearchModal(this.plugin).open());
-    actions.appendChild(search);
+    actions.className = "dashflow-command-actions";
 
-    if (this.activeSection === "today" && this.plugin.data.settings.aiEnabled) {
-      const ai = this.iconAction("sparkles", "AI 规划");
+    const task = this.commandButton("square-plus", "新建任务");
+    task.addEventListener("click", () => new TaskEditorModal(this.plugin).open());
+    const project = this.commandButton("folder-plus", "新建项目");
+    project.addEventListener("click", () => new ProjectEditorModal(this.plugin).open());
+    const habit = this.commandButton("circle-plus", "新建习惯");
+    habit.classList.add("is-secondary-action");
+    habit.addEventListener("click", () => new HabitEditorModal(this.plugin).open());
+    const search = this.commandButton("search", "搜索");
+    search.classList.add("is-icon-action");
+    search.addEventListener("click", () => new GlobalSearchModal(this.plugin).open());
+
+    actions.append(task, project, habit, search);
+    if (this.plugin.data.settings.aiEnabled) {
+      const ai = this.commandButton("sparkles", "AI 规划");
+      ai.classList.add("is-secondary-action");
       ai.addEventListener("click", () => new AIPlanModal(this.plugin).open());
       actions.appendChild(ai);
     }
 
-    const primary = this.primaryActionForSection(this.activeSection);
-    if (primary) actions.appendChild(primary);
-    header.append(copy, actions);
-    return header;
+    const workspace = document.createElement("div");
+    workspace.className = "dashflow-command-workspace";
+    bar.append(nav, workspace, actions);
+    title.insertAdjacentElement("afterend", bar);
+    return bar;
   }
 
-  private primaryActionForSection(section: ProductSection): HTMLButtonElement | null {
-    if (section === "projects") {
-      const button = this.primaryAction("plus", "新建项目");
-      button.addEventListener("click", () => new ProjectEditorModal(this.plugin).open());
-      return button;
+  private moveDashboardSwitcher(shell: HTMLElement, bar: HTMLElement): void {
+    const switcher = shell.querySelector<HTMLElement>(".dashflow-dashboard-switcher");
+    const workspace = bar.querySelector<HTMLElement>(".dashflow-command-workspace");
+    if (switcher && workspace && switcher.parentElement !== workspace) workspace.appendChild(switcher);
+  }
+
+  private syncCommandBar(bar: HTMLElement, section: ProductSection | null): void {
+    const inboxCount = inboxTasks(
+      this.plugin.vaultIndex.getSnapshot().tasks,
+      normalizePath(this.plugin.data.settings.inboxPath),
+    ).length;
+
+    for (const button of bar.querySelectorAll<HTMLButtonElement>(".dashflow-command-button[data-section]")) {
+      const active = section !== null && button.dataset.section === section;
+      button.classList.toggle("is-active", active);
+      if (active) button.setAttribute("aria-current", "page");
+      else button.removeAttribute("aria-current");
+
+      let badge = button.querySelector<HTMLElement>(".dashflow-command-badge");
+      if (button.dataset.section === "inbox" && inboxCount > 0) {
+        if (!badge) {
+          badge = document.createElement("span");
+          badge.className = "dashflow-command-badge";
+          button.appendChild(badge);
+        }
+        badge.textContent = String(inboxCount);
+      } else {
+        badge?.remove();
+      }
     }
-    if (section === "habits") {
-      const button = this.primaryAction("plus", "新建习惯");
-      button.addEventListener("click", () => new HabitEditorModal(this.plugin).open());
-      return button;
-    }
-    if (section === "review") return null;
-    const button = this.primaryAction("plus", section === "today" ? "添加任务" : "新建任务");
-    button.addEventListener("click", () => new TaskEditorModal(this.plugin, undefined, section === "today" ? { scheduled: localDate() } : {}).open());
+  }
+
+  private commandButton(iconName: string, label: string): HTMLButtonElement {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "dashflow-command-button";
+    const icon = document.createElement("span");
+    icon.className = "dashflow-command-icon";
+    setIcon(icon, iconName);
+    const text = this.text("span", label);
+    text.className = "dashflow-command-label";
+    button.append(icon, text);
     return button;
   }
 
-  private renderToday(): HTMLElement {
-    const snapshot = this.plugin.vaultIndex.getSnapshot();
-    const today = localDate();
-    const focus = this.focusTasks(snapshot.tasks, today);
-    const upcoming = snapshot.tasks
-      .filter((task) => !task.completed && Boolean(task.due) && (task.due as string) > today && (task.due as string) <= addDays(today, 7))
-      .sort((a, b) => (a.due ?? "9999").localeCompare(b.due ?? "9999") || PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority])
-      .slice(0, 5);
-    const activeProjects = this.plugin.projectService.active().slice(0, 4);
-    const habits = this.plugin.habitService.active().filter((habit) => habitScheduledOn(habit, today)).slice(0, 5);
-
-    const page = document.createElement("div");
-    page.className = "dashflow-studio-page dashflow-studio-today";
-    page.appendChild(this.renderQuickAdd(today));
-
-    const context = document.createElement("div");
-    context.className = "dashflow-day-context";
-    const overdue = focus.filter((task) => Boolean(task.due) && (task.due as string) < today).length;
-    const doneHabits = habits.filter((habit) => habitCompletedOn(habit, today)).length;
-    context.append(
-      this.contextStat("今日焦点", String(focus.length)),
-      this.contextStat("逾期", String(overdue), overdue > 0),
-      this.contextStat("活动项目", String(this.plugin.projectService.active().length)),
-      this.contextStat("习惯", `${doneHabits}/${habits.length}`),
-    );
-    page.appendChild(context);
-
-    const layout = document.createElement("div");
-    layout.className = "dashflow-studio-today-layout";
-
-    const focusPanel = this.surface("dashflow-focus-panel");
-    const focusHead = this.surfaceHead("今日焦点", focus.length > 0 ? `${focus.length} 项` : "保持清爽");
-    focusPanel.appendChild(focusHead);
-    if (focus.length === 0) {
-      focusPanel.appendChild(this.emptyState(
-        "今天没有必须处理的任务",
-        "留白也是一种计划。可以添加一个真正重要的下一步，或者从收集箱里挑一件。",
-        [
-          ["添加今天任务", () => new TaskEditorModal(this.plugin, undefined, { scheduled: today }).open()],
-          ["查看收集箱", () => this.openSection("inbox")],
-        ],
-      ));
-    } else {
-      const list = document.createElement("div");
-      list.className = "dashflow-studio-task-list";
-      for (const task of focus) list.appendChild(this.taskRow(task, today));
-      focusPanel.appendChild(list);
+  private annotateWidgets(grid: HTMLElement): void {
+    const dashboard = this.plugin.dashboardManager.active();
+    const typeById = new Map(dashboard.widgets.map((widget) => [widget.id, widget.type]));
+    for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget[data-widget-id]")) {
+      const id = card.dataset.widgetId ?? "";
+      const type = typeById.get(id);
+      if (type) card.dataset.widgetType = type;
     }
-
-    const rail = document.createElement("aside");
-    rail.className = "dashflow-studio-context-rail";
-    rail.append(
-      this.renderUpcomingPanel(upcoming),
-      this.renderProjectPanel(activeProjects),
-      this.renderHabitPanel(habits, today),
-    );
-    layout.append(focusPanel, rail);
-    page.appendChild(layout);
-    return page;
   }
 
-  private renderQuickAdd(today: string): HTMLElement {
+  private decorateProgressWidget(grid: HTMLElement): void {
+    const card = grid.querySelector<HTMLElement>(":scope > .dashflow-widget[data-widget-type=\"progress\"]");
+    const body = card?.querySelector<HTMLElement>(".dashflow-widget-body");
+    if (!body) return;
+
+    const snapshot = this.plugin.vaultIndex.getSnapshot();
+    const todayTasks = this.plugin.taskService.today(snapshot.tasks);
+    const todayCompleted = todayTasks.filter((task) => task.completed).length;
+    const todayProgress = todayTasks.length === 0 ? 0 : Math.round((todayCompleted / todayTasks.length) * 100);
+    const allCompleted = snapshot.tasks.filter((task) => task.completed).length;
+    const allProgress = snapshot.tasks.length === 0 ? 0 : Math.round((allCompleted / snapshot.tasks.length) * 100);
+    const signature = `${todayCompleted}/${todayTasks.length}|${allCompleted}/${snapshot.tasks.length}`;
+    if (body.dataset.commandProgress === signature) return;
+    body.dataset.commandProgress = signature;
+
+    const wrap = document.createElement("div");
+    wrap.className = "dashflow-progress-wrap";
+    const pair = document.createElement("div");
+    pair.className = "dashflow-progress-pair";
+    pair.append(
+      this.progressMetric("TODAY", todayProgress, `${todayCompleted} / ${todayTasks.length} 已完成`),
+      this.progressMetric("ALL TASKS", allProgress, `${allCompleted} / ${snapshot.tasks.length} 已完成`),
+    );
+    wrap.appendChild(pair);
+    body.replaceChildren(wrap);
+  }
+
+  private progressMetric(label: string, progress: number, caption: string): HTMLElement {
+    const metric = document.createElement("div");
+    metric.className = "dashflow-progress-metric";
+    const ring = document.createElement("div");
+    ring.className = "dashflow-progress-ring";
+    ring.style.setProperty("--dashflow-progress", `${progress * 3.6}deg`);
+    const center = document.createElement("div");
+    center.append(this.text("strong", `${progress}%`), this.text("span", label));
+    ring.appendChild(center);
+    const meta = this.text("div", caption);
+    meta.className = "dashflow-progress-caption";
+    metric.append(ring, meta);
+    return metric;
+  }
+
+  private decorateProjectWidget(grid: HTMLElement): void {
+    const card = grid.querySelector<HTMLElement>(":scope > .dashflow-widget[data-widget-type=\"projects\"]");
+    if (!card) return;
+    const projects = this.plugin.projectService.active();
+    const rows = [...card.querySelectorAll<HTMLButtonElement>(".dashflow-project-row")];
+    if (rows.length === 0) {
+      const empty = card.querySelector<HTMLElement>(".dashflow-empty");
+      if (empty) empty.textContent = "还没有正在推进的项目。点击上方「新建项目」开始。";
+      return;
+    }
+
+    rows.forEach((row, index) => {
+      const project = projects[index];
+      if (!project) return;
+      const progress = this.plugin.projectService.progress(project);
+      row.dataset.commandProjectId = project.id;
+      if (row.dataset.commandDetail !== "1") {
+        row.dataset.commandDetail = "1";
+        row.addEventListener("click", (event) => {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          new ProjectDetailModal(this.plugin, project.id).open();
+        }, { capture: true });
+      }
+
+      let steps = row.querySelector<HTMLElement>(".dashflow-project-steps");
+      if (!steps) {
+        steps = document.createElement("div");
+        steps.className = "dashflow-project-steps";
+        const stat = row.querySelector(".dashflow-project-stat");
+        row.insertBefore(steps, stat ?? null);
+      }
+      steps.replaceChildren();
+      for (let step = 0; step < 5; step += 1) {
+        const node = document.createElement("span");
+        node.className = `dashflow-project-step${progress >= step * 25 ? " is-active" : ""}`;
+        steps.appendChild(node);
+      }
+    });
+  }
+
+  private decorateTaskPriorityBadges(grid: HTMLElement): void {
+    const snapshot = this.plugin.vaultIndex.getSnapshot();
+    const byText = new Map<string, Task[]>();
+    for (const task of snapshot.tasks) {
+      const list = byText.get(task.text) ?? [];
+      list.push(task);
+      byText.set(task.text, list);
+    }
+
+    for (const row of grid.querySelectorAll<HTMLElement>(".dashflow-task")) {
+      if (row.querySelector(".dashflow-task-priority")) continue;
+      const textElement = row.querySelector<HTMLElement>(":scope > span:not(.dashflow-task-priority)");
+      const text = textElement?.textContent?.trim();
+      if (!text) continue;
+      const task = byText.get(text)?.find((item) => !item.completed) ?? byText.get(text)?.[0];
+      if (!task || task.priority === "normal") continue;
+      const label = task.priority === "urgent" ? "重要紧急" : task.priority === "high" ? "重要" : "低优先";
+      const badge = this.text("span", label);
+      badge.className = `dashflow-task-priority is-${task.priority}`;
+      const time = row.querySelector("time");
+      row.insertBefore(badge, time ?? null);
+    }
+  }
+
+  private applySection(grid: HTMLElement, section: ProductSection): void {
+    const dashboard = this.plugin.dashboardManager.active();
+    grid.dataset.productSection = section;
+    grid.style.gridTemplateColumns = `repeat(${dashboard.settings.columns}, minmax(0, 1fr))`;
+    grid.style.gridAutoRows = `${dashboard.settings.rowHeight}px`;
+    grid.style.gap = `${dashboard.settings.gap}px`;
+
+    if (section === "inbox") {
+      for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget")) this.setCardVisible(card, false);
+      grid.appendChild(this.renderInboxPage());
+      return;
+    }
+
+    for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget[data-widget-id]")) {
+      const id = card.dataset.widgetId ?? "";
+      const widget = dashboard.widgets.find((item) => item.id === id);
+      if (!widget) continue;
+      const type = widget.type;
+
+      if (section === "today") {
+        const visible = HOME_WIDGET_TYPES.has(type);
+        this.setCardVisible(card, visible);
+        if (visible) this.applySavedLayout(card, widget.layout);
+        continue;
+      }
+
+      if (section === "projects") {
+        const visible = type === "projects";
+        this.setCardVisible(card, visible);
+        if (visible) this.applySectionLayout(card, 1, 1, 12, 8);
+        continue;
+      }
+
+      if (section === "calendar") {
+        const visible = type === "calendar";
+        this.setCardVisible(card, visible);
+        if (visible) this.applySectionLayout(card, 1, 1, 12, 10);
+        continue;
+      }
+
+      if (section === "habits") {
+        const visible = type === "habits" || type === "heatmap";
+        this.setCardVisible(card, visible);
+        if (type === "habits") this.applySectionLayout(card, 1, 1, 8, 7);
+        if (type === "heatmap") this.applySectionLayout(card, 9, 1, 4, 7);
+        continue;
+      }
+
+      const visible = type === "weekly-review" || type === "heatmap" || type === "vault-stats";
+      this.setCardVisible(card, visible);
+      if (type === "weekly-review") this.applySectionLayout(card, 1, 1, 12, 8);
+      if (type === "heatmap") this.applySectionLayout(card, 1, 9, 12, 5);
+      if (type === "vault-stats") this.applySectionLayout(card, 1, 14, 12, 3);
+    }
+  }
+
+  private setCardVisible(card: HTMLElement, visible: boolean): void {
+    if (visible) card.style.removeProperty("display");
+    else card.style.setProperty("display", "none", "important");
+  }
+
+  private applySavedLayout(card: HTMLElement, layout: { x: number; y: number; w: number; h: number }): void {
+    card.style.gridColumn = `${layout.x + 1} / span ${layout.w}`;
+    card.style.gridRow = `${layout.y + 1} / span ${layout.h}`;
+  }
+
+  private applySectionLayout(card: HTMLElement, column: number, row: number, width: number, height: number): void {
+    card.style.gridColumn = `${column} / span ${width}`;
+    card.style.gridRow = `${row} / span ${height}`;
+  }
+
+  private restoreAllWidgets(grid: HTMLElement): void {
+    const dashboard = this.plugin.dashboardManager.active();
+    grid.removeAttribute("data-product-section");
+    for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget[data-widget-id]")) {
+      const id = card.dataset.widgetId ?? "";
+      const widget = dashboard.widgets.find((item) => item.id === id);
+      if (!widget) continue;
+      card.style.removeProperty("display");
+      this.applySavedLayout(card, widget.layout);
+    }
+  }
+
+  private clearSyntheticPage(grid: HTMLElement): void {
+    for (const page of grid.querySelectorAll(":scope > .dashflow-command-page")) page.remove();
+  }
+
+  private renderInboxPage(): HTMLElement {
+    const page = document.createElement("section");
+    page.className = "dashflow-command-page dashflow-command-inbox";
+    page.style.gridColumn = "1 / -1";
+    page.style.gridRow = "1 / span 9";
+
+    const header = document.createElement("div");
+    header.className = "dashflow-command-page-head";
+    const copy = document.createElement("div");
+    copy.append(this.text("small", "INBOX · PROCESS QUEUE"), this.text("h2", "待整理"));
+    const open = document.createElement("button");
+    open.type = "button";
+    open.textContent = "打开 Inbox.md";
+    open.addEventListener("click", () => void this.plugin.app.workspace.openLinkText(this.plugin.data.settings.inboxPath, "", false));
+    header.append(copy, open);
+
     const composer = document.createElement("div");
-    composer.className = "dashflow-studio-composer";
+    composer.className = "dashflow-command-inbox-composer";
     const icon = document.createElement("span");
-    icon.className = "dashflow-studio-composer-icon";
     setIcon(icon, "plus");
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = "快速添加今天的任务…";
-    input.setAttribute("aria-label", "快速添加今天的任务");
-    const hint = this.text("span", "Enter");
-    hint.className = "dashflow-key-hint";
-    input.addEventListener("keydown", async (event) => {
-      if (event.key !== "Enter" || !input.value.trim()) return;
-      event.preventDefault();
-      const body = formatTaskBody({ text: input.value.trim(), scheduled: today, priority: "normal" });
-      const ok = await this.plugin.captureService.capture(body);
-      if (ok) {
-        input.value = "";
-        this.plugin.refreshDashboardViews();
-      }
-    });
-    composer.append(icon, input, hint);
-    return composer;
-  }
-
-  private focusTasks(tasks: Task[], today: string): Task[] {
-    const seen = new Set<string>();
-    return tasks
-      .filter((task) => !task.completed && (task.due === today || task.scheduled === today || (Boolean(task.due) && (task.due as string) < today)))
-      .filter((task) => {
-        if (seen.has(task.id)) return false;
-        seen.add(task.id);
-        return true;
-      })
-      .sort((a, b) => {
-        const aOverdue = Boolean(a.due) && (a.due as string) < today ? 0 : 1;
-        const bOverdue = Boolean(b.due) && (b.due as string) < today ? 0 : 1;
-        return aOverdue - bOverdue
-          || PRIORITY_ORDER[a.priority] - PRIORITY_ORDER[b.priority]
-          || (a.due ?? a.scheduled ?? "9999").localeCompare(b.due ?? b.scheduled ?? "9999")
-          || a.text.localeCompare(b.text);
-      });
-  }
-
-  private taskRow(task: Task, today: string): HTMLElement {
-    const row = document.createElement("div");
-    row.className = "dashflow-studio-task-row";
-    if (task.due && task.due < today) row.classList.add("is-overdue");
-    row.dataset.priority = task.priority;
-
-    const check = document.createElement("button");
-    check.type = "button";
-    check.className = "dashflow-studio-task-check";
-    check.setAttribute("aria-label", `完成 ${task.text}`);
-    check.addEventListener("click", async () => {
-      await this.plugin.taskService.toggle(task);
-      this.plugin.refreshDashboardViews();
-    });
-
-    const main = document.createElement("button");
-    main.type = "button";
-    main.className = "dashflow-studio-task-main";
-    const title = this.text("span", task.text);
-    title.className = "dashflow-studio-task-title";
-    const meta = document.createElement("span");
-    meta.className = "dashflow-studio-task-meta";
-    const project = task.projectId ? this.plugin.vaultIndex.getSnapshot().projects.find((item) => item.id === task.projectId) : undefined;
-    if (project) meta.appendChild(this.metaChip(project.name));
-    if (task.due && task.due < today) meta.appendChild(this.metaChip(`逾期 · ${task.due}`, "danger"));
-    else if (task.due) meta.appendChild(this.metaChip(`截止 ${task.due}`));
-    else if (task.scheduled) meta.appendChild(this.metaChip("今天计划"));
-    main.append(title, meta);
-    main.addEventListener("click", () => new TaskEditorModal(this.plugin, task).open());
-
-    const edit = this.iconAction("chevron-right", "编辑");
-    edit.classList.add("dashflow-studio-row-action");
-    edit.addEventListener("click", () => new TaskEditorModal(this.plugin, task).open());
-    row.append(check, main, edit);
-    return row;
-  }
-
-  private renderUpcomingPanel(tasks: Task[]): HTMLElement {
-    const panel = this.surface("dashflow-mini-panel");
-    panel.appendChild(this.surfaceHead("接下来", "7 天"));
-    if (tasks.length === 0) {
-      panel.appendChild(this.miniEmpty("未来 7 天没有硬截止。"));
-      return panel;
-    }
-    const list = document.createElement("div");
-    list.className = "dashflow-mini-list";
-    for (const task of tasks) {
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = "dashflow-mini-row";
-      const day = task.due ? task.due.slice(5).replace("-", "/") : "";
-      row.append(this.text("span", task.text), this.text("small", day));
-      row.addEventListener("click", () => new TaskEditorModal(this.plugin, task).open());
-      list.appendChild(row);
-    }
-    panel.appendChild(list);
-    return panel;
-  }
-
-  private renderProjectPanel(projects: Project[]): HTMLElement {
-    const panel = this.surface("dashflow-mini-panel");
-    panel.appendChild(this.surfaceHead("项目", `${projects.length} 活动`));
-    if (projects.length === 0) {
-      panel.appendChild(this.miniEmpty("没有正在推进的项目。"));
-      return panel;
-    }
-    const list = document.createElement("div");
-    list.className = "dashflow-mini-list";
-    for (const project of projects) {
-      const progress = this.plugin.projectService.progress(project);
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = "dashflow-mini-project";
-      const copy = document.createElement("span");
-      copy.className = "dashflow-mini-project-copy";
-      copy.append(this.text("strong", project.name), this.text("small", project.deadline ? `截止 ${project.deadline}` : "无截止日期"));
-      const progressEl = this.text("span", `${progress}%`);
-      progressEl.className = "dashflow-mini-project-progress";
-      row.append(copy, progressEl);
-      row.addEventListener("click", () => new ProjectDetailModal(this.plugin, project.id).open());
-      list.appendChild(row);
-    }
-    panel.appendChild(list);
-    return panel;
-  }
-
-  private renderHabitPanel(habits: Habit[], today: string): HTMLElement {
-    const panel = this.surface("dashflow-mini-panel dashflow-mini-habits");
-    const completed = habits.filter((habit) => habitCompletedOn(habit, today)).length;
-    panel.appendChild(this.surfaceHead("习惯", habits.length > 0 ? `${completed}/${habits.length}` : "今天"));
-    if (habits.length === 0) {
-      panel.appendChild(this.miniEmpty("今天没有安排习惯。"));
-      return panel;
-    }
-    const list = document.createElement("div");
-    list.className = "dashflow-mini-list";
-    for (const habit of habits) {
-      const done = habitCompletedOn(habit, today);
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = `dashflow-mini-habit${done ? " is-done" : ""}`;
-      const check = document.createElement("span");
-      check.className = "dashflow-mini-habit-check";
-      if (done) setIcon(check, "check");
-      const copy = document.createElement("span");
-      copy.className = "dashflow-mini-habit-copy";
-      copy.append(this.text("strong", habit.name), this.text("small", `${habitCurrentStreak(habit, today)} 天连续`));
-      row.append(check, copy);
-      row.addEventListener("click", async () => {
-        await this.plugin.habitService.toggleDate(habit, today);
-        this.plugin.refreshDashboardViews();
-      });
-      list.appendChild(row);
-    }
-    panel.appendChild(list);
-    return panel;
-  }
-
-  private renderInbox(): HTMLElement {
-    const page = document.createElement("div");
-    page.className = "dashflow-studio-page dashflow-studio-inbox";
-    page.appendChild(this.renderInboxComposer());
-    const tasks = inboxTasks(
-      this.plugin.vaultIndex.getSnapshot().tasks,
-      normalizePath(this.plugin.data.settings.inboxPath),
-    );
-    const panel = this.surface("dashflow-inbox-surface");
-    panel.appendChild(this.surfaceHead("待整理", tasks.length === 0 ? "全部清空" : `${tasks.length} 项`));
-    if (tasks.length === 0) {
-      panel.appendChild(this.emptyState(
-        "收集箱是空的",
-        "想到的事先记下来。等你准备处理时，再决定项目、时间和优先级。",
-        [["添加一条", () => new TaskEditorModal(this.plugin).open()]],
-      ));
-    } else {
-      const list = document.createElement("div");
-      list.className = "dashflow-inbox-list dashflow-studio-task-list";
-      for (const task of tasks) {
-        const row = this.taskRow(task, localDate());
-        row.classList.add("is-inbox");
-        list.appendChild(row);
-      }
-      panel.appendChild(list);
-    }
-    page.appendChild(panel);
-    return page;
-  }
-
-  private renderInboxComposer(): HTMLElement {
-    const composer = document.createElement("div");
-    composer.className = "dashflow-studio-composer dashflow-inbox-composer";
-    const icon = document.createElement("span");
-    icon.className = "dashflow-studio-composer-icon";
-    setIcon(icon, "inbox");
-    const input = document.createElement("input");
-    input.type = "text";
-    input.placeholder = "先记下来，不用现在整理…";
-    const hint = this.text("span", "Enter");
-    hint.className = "dashflow-key-hint";
+    input.placeholder = "先记录下来，按 Enter 收集…";
     input.addEventListener("keydown", async (event) => {
       if (event.key !== "Enter" || !input.value.trim()) return;
       event.preventDefault();
       const ok = await this.plugin.captureService.capture(input.value.trim());
       if (ok) {
         input.value = "";
-        this.plugin.refreshDashboardViews();
+        this.schedule(true);
       }
     });
+    const hint = this.text("span", "ENTER");
     composer.append(icon, input, hint);
-    return composer;
-  }
 
-  private renderProjects(): HTMLElement {
-    const projects = this.plugin.projectService.all().filter((project) => project.status !== "archived");
-    const page = document.createElement("div");
-    page.className = "dashflow-studio-page dashflow-studio-projects";
-
-    const toolbar = document.createElement("div");
-    toolbar.className = "dashflow-project-toolbar";
-    const active = projects.filter((project) => project.status === "active").length;
-    const planned = projects.filter((project) => project.status === "planned").length;
-    toolbar.append(
-      this.contextStat("活动", String(active)),
-      this.contextStat("计划", String(planned)),
-      this.contextStat("全部", String(projects.length)),
+    const tasks = inboxTasks(
+      this.plugin.vaultIndex.getSnapshot().tasks,
+      normalizePath(this.plugin.data.settings.inboxPath),
     );
-    page.appendChild(toolbar);
-
-    if (projects.length === 0) {
-      const panel = this.surface("dashflow-project-empty");
-      panel.appendChild(this.emptyState(
-        "还没有项目",
-        "项目应该代表一个需要多步推进的结果。创建后，可以在详情里持续添加下一步行动。",
-        [["创建第一个项目", () => new ProjectEditorModal(this.plugin).open()]],
-      ));
-      page.appendChild(panel);
-      return page;
+    const list = document.createElement("div");
+    list.className = "dashflow-command-inbox-list";
+    if (tasks.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "dashflow-command-empty";
+      const mark = document.createElement("span");
+      setIcon(mark, "inbox");
+      empty.append(mark, this.text("strong", "收集箱已经清空"), this.text("p", "新的想法先记下来，处理时再决定项目、日期和优先级。"));
+      list.appendChild(empty);
+    } else {
+      for (const task of tasks) list.appendChild(this.renderInboxTask(task));
     }
 
-    const grid = document.createElement("div");
-    grid.className = "dashflow-project-board";
-    projects.forEach((project, index) => grid.appendChild(this.projectCard(project, index)));
-    page.appendChild(grid);
+    page.append(header, composer, list);
     return page;
   }
 
-  private projectCard(project: Project, index: number): HTMLElement {
-    const card = document.createElement("button");
-    card.type = "button";
-    card.className = `dashflow-project-tile tone-${index % 4}`;
-    const progress = this.plugin.projectService.progress(project);
-    const tasks = this.plugin.projectService.tasks(project);
-    const open = tasks.filter((task) => !task.completed).length;
-
-    const top = document.createElement("div");
-    top.className = "dashflow-project-tile-top";
-    const status = this.text("span", project.status === "active" ? "进行中" : project.status === "planned" ? "计划" : project.status === "paused" ? "暂停" : "完成");
-    status.className = `dashflow-project-status is-${project.status}`;
+  private renderInboxTask(task: Task): HTMLElement {
+    const row = document.createElement("div");
+    row.className = "dashflow-command-inbox-row";
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.checked = task.completed;
+    checkbox.addEventListener("change", async () => {
+      await this.plugin.taskService.toggle(task);
+      this.schedule(true);
+    });
+    const main = document.createElement("button");
+    main.type = "button";
+    main.append(this.text("strong", task.text), this.text("small", "未整理 · 点击补充项目或日期"));
+    main.addEventListener("click", () => new TaskEditorModal(this.plugin, task).open());
     const arrow = document.createElement("span");
-    arrow.className = "dashflow-project-arrow";
-    setIcon(arrow, "arrow-up-right");
-    top.append(status, arrow);
-
-    const title = this.text("h3", project.name);
-    const description = this.text("p", project.description?.trim() || (project.deadline ? `截止 ${project.deadline}` : "没有设置截止日期"));
-    const meta = document.createElement("div");
-    meta.className = "dashflow-project-tile-meta";
-    meta.append(this.text("span", `${open} 个下一步`), this.text("strong", `${progress}%`));
-    const track = document.createElement("div");
-    track.className = "dashflow-project-tile-track";
-    const fill = document.createElement("span");
-    fill.style.width = `${progress}%`;
-    track.appendChild(fill);
-
-    card.append(top, title, description, meta, track);
-    card.addEventListener("click", () => new ProjectDetailModal(this.plugin, project.id).open());
-    return card;
-  }
-
-  private prepareWidgetWorkflow(grid: HTMLElement, section: ProductSection): void {
-    const dashboard = this.plugin.dashboardManager.active();
-    const typeById = new Map(dashboard.widgets.map((widget) => [widget.id, widget.type]));
-    const allowed = new Set(sectionWidgetTypes(section));
-    grid.dataset.productSection = section;
-    grid.style.display = "grid";
-    grid.style.gridAutoRows = "auto";
-
-    for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget[data-widget-id]")) {
-      const id = card.dataset.widgetId ?? "";
-      const type = typeById.get(id) ?? card.dataset.widgetType ?? "";
-      if (type) card.dataset.widgetType = type;
-      if (!allowed.has(type)) {
-        card.style.display = "none";
-        continue;
-      }
-      card.style.display = "";
-      card.style.gridRow = "auto";
-      if (section === "habits") {
-        card.style.gridColumn = type === "habits" ? "1 / span 7" : "8 / span 5";
-      } else {
-        card.style.gridColumn = "1 / -1";
-      }
-    }
-  }
-
-  private restoreAllWidgets(grid: HTMLElement): void {
-    for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget")) {
-      card.style.display = "";
-      card.style.gridColumn = "";
-      card.style.gridRow = "";
-    }
-    grid.removeAttribute("data-product-section");
-  }
-
-  private removeStudioStage(shell: HTMLElement): void {
-    shell.querySelector(":scope > .dashflow-studio-stage")?.remove();
-  }
-
-  private surface(extraClass = ""): HTMLElement {
-    const section = document.createElement("section");
-    section.className = `dashflow-studio-surface ${extraClass}`.trim();
-    return section;
-  }
-
-  private surfaceHead(title: string, meta: string): HTMLElement {
-    const head = document.createElement("div");
-    head.className = "dashflow-studio-surface-head";
-    head.append(this.text("h2", title), this.text("span", meta));
-    return head;
-  }
-
-  private contextStat(label: string, value: string, danger = false): HTMLElement {
-    const item = document.createElement("div");
-    item.className = `dashflow-context-stat${danger ? " is-danger" : ""}`;
-    item.append(this.text("strong", value), this.text("span", label));
-    return item;
-  }
-
-  private metaChip(label: string, tone = "default"): HTMLElement {
-    const chip = this.text("span", label);
-    chip.className = `dashflow-studio-chip is-${tone}`;
-    return chip;
-  }
-
-  private miniEmpty(text: string): HTMLElement {
-    const empty = this.text("p", text);
-    empty.className = "dashflow-mini-empty";
-    return empty;
-  }
-
-  private emptyState(title: string, description: string, actions: Array<[string, () => void]> = []): HTMLElement {
-    const empty = document.createElement("div");
-    empty.className = "dashflow-studio-empty";
-    const icon = document.createElement("div");
-    icon.className = "dashflow-studio-empty-icon";
-    setIcon(icon, "check");
-    const copy = document.createElement("div");
-    copy.className = "dashflow-studio-empty-copy";
-    copy.append(this.text("strong", title), this.text("p", description));
-    empty.append(icon, copy);
-    if (actions.length > 0) {
-      const row = document.createElement("div");
-      row.className = "dashflow-studio-empty-actions";
-      actions.forEach(([label, handler], index) => {
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = index === 0 ? "is-primary" : "";
-        button.textContent = label;
-        button.addEventListener("click", handler);
-        row.appendChild(button);
-      });
-      empty.appendChild(row);
-    }
-    return empty;
-  }
-
-  private iconAction(iconName: string, label: string): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "dashflow-studio-icon-action";
-    button.title = label;
-    button.setAttribute("aria-label", label);
-    const icon = document.createElement("span");
-    setIcon(icon, iconName);
-    button.appendChild(icon);
-    return button;
-  }
-
-  private primaryAction(iconName: string, label: string): HTMLButtonElement {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "dashflow-studio-primary-action";
-    const icon = document.createElement("span");
-    setIcon(icon, iconName);
-    button.append(icon, this.text("span", label));
-    return button;
+    setIcon(arrow, "chevron-right");
+    row.append(checkbox, main, arrow);
+    return row;
   }
 
   private text<K extends keyof HTMLElementTagNameMap>(tag: K, value: string): HTMLElementTagNameMap[K] {
