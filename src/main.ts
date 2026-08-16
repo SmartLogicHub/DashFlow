@@ -17,6 +17,7 @@ import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInter
 import { CaptureService } from "./services/CaptureService";
 import { ContextSwitcherService } from "./services/ContextSwitcherService";
 import { DailyNoteService } from "./services/DailyNoteService";
+import { DashboardRenderService } from "./services/DashboardRenderService";
 import { DashboardSwitcherInteractionService } from "./services/DashboardSwitcherInteractionService";
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
 import { DataFilterWidgetInteractionService } from "./services/DataFilterWidgetInteractionService";
@@ -60,6 +61,7 @@ export default class DashFlowPlugin extends Plugin {
   data!: DashFlowData;
   widgetRegistry!: WidgetRegistry;
   dashboardManager!: DashboardManager;
+  dashboardRender!: DashboardRenderService;
   dashboardSwitcher!: DashboardSwitcherInteractionService;
   dashboardTransfer!: DashboardTransferInteractionService;
   contextSwitcher!: ContextSwitcherService;
@@ -104,6 +106,7 @@ export default class DashFlowPlugin extends Plugin {
     await this.loadPluginData();
 
     this.dashboardManager = new DashboardManager(this, this.widgetRegistry);
+    this.dashboardRender = new DashboardRenderService();
     this.vaultIndex = new VaultIndexService(
       this.app,
       this,
