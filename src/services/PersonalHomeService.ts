@@ -117,12 +117,12 @@ export class PersonalHomeService {
       const empty = document.createElement("div");
       empty.className = "dashflow-home-empty";
       const copy = document.createElement("div");
-      copy.append(this.text("strong", "今天没有硬截止"), this.text("p", "选一个真正重要的下一步，或者先把脑中的事收集下来。"));
-      const capture = document.createElement("button");
-      capture.type = "button";
-      capture.textContent = "快速添加";
-      capture.addEventListener("click", () => new QuickAddModal(this.plugin).open());
-      empty.append(copy, capture);
+      copy.append(this.text("strong", "✨ 今日专注已达成"), this.text("p", "暂无紧急待办 · 选一个真正重要的下一步，或享受属于你的专注时光。"));
+      const quick = document.createElement("button");
+      quick.type = "button";
+      quick.textContent = "快速添加";
+      quick.addEventListener("click", () => new QuickAddModal(this.plugin).open());
+      empty.append(copy, quick);
       list.appendChild(empty);
     } else {
       for (const task of tasks) {

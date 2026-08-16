@@ -619,7 +619,7 @@ export class ProductExperienceService {
       empty.className = "dashflow-command-empty";
       const mark = document.createElement("span");
       setIcon(mark, "inbox");
-      empty.append(mark, this.text("strong", "收集箱已经清空"), this.text("p", "新的想法先记下来，处理时再决定项目、日期和优先级。"));
+      empty.append(mark, this.text("strong", "🍃 收集箱已归零"), this.text("p", "所有思绪与灵感已妥善安放 · 有新的想法随时按 Enter 快速收集。"));
       list.appendChild(empty);
     } else {
       for (const task of tasks) list.appendChild(this.renderInboxTask(task));

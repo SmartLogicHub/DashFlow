@@ -174,7 +174,18 @@ export const PRODUCT_STYLES = `
 .dashflow-command-shell .dashflow-habit-row,
 .dashflow-command-shell .dashflow-calendar-day,
 .dashflow-command-shell .dashflow-weekly-project-row { border-radius: 6px!important; box-shadow: none!important; }
-.dashflow-command-shell .dashflow-calendar-day { border-color: var(--df-cmd-border)!important; }
+.dashflow-command-shell .dashflow-calendar-day { border-color: var(--df-cmd-border)!important; transition: transform 120ms ease, border-color 120ms ease, background 120ms ease; }
+.dashflow-command-shell .dashflow-calendar-day:hover { transform: translateY(-1px); border-color: var(--df-cmd-border-strong)!important; }
+.dashflow-command-shell .dashflow-calendar-day.is-today {
+  position: relative;
+  border: 1.5px solid var(--df-cmd-cyan)!important;
+  background: color-mix(in srgb, var(--df-cmd-cyan) 10%, var(--df-cmd-surface))!important;
+  box-shadow: 0 0 10px color-mix(in srgb, var(--df-cmd-cyan) 20%, transparent)!important;
+}
+.dashflow-command-shell .dashflow-calendar-day.is-today .dashflow-calendar-day-number {
+  color: var(--df-cmd-cyan)!important;
+  font-weight: 800!important;
+}
 .dashflow-command-shell .dashflow-calendar-day.is-selected { border-color: var(--df-cmd-purple)!important; background: color-mix(in srgb, var(--df-cmd-purple) 7%, var(--df-cmd-surface))!important; }
 .dashflow-command-shell .dashflow-weekly-project-row { border: 0!important; border-bottom: 1px solid color-mix(in srgb, var(--df-cmd-border) 65%, transparent)!important; background: transparent!important; }
 .dashflow-command-shell .dashflow-stats-grid { height: 100%; display: grid; grid-template-columns: repeat(4, 1fr); }
@@ -182,6 +193,37 @@ export const PRODUCT_STYLES = `
 .dashflow-command-shell .dashflow-stat:last-child { border-right: 0; }
 .dashflow-command-shell .dashflow-stat strong { color: var(--df-cmd-text)!important; font-size: 20px!important; font-weight: 750!important; font-variant-numeric: tabular-nums; }
 .dashflow-command-shell .dashflow-stat span { color: var(--df-cmd-muted)!important; font-size: 10px!important; font-weight: 600; letter-spacing: 0.05em; }
+
+/* Habit streak & keyboard badges. */
+.dashflow-habit-streak {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 1px 6px;
+  border-radius: 99px;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #ea580c;
+  background: color-mix(in srgb, #f97316 12%, transparent);
+  border: 1px solid color-mix(in srgb, #f97316 22%, transparent);
+}
+.dashflow-kbd {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border: 1px solid var(--df-cmd-border-strong);
+  border-bottom-width: 2px;
+  border-radius: 4px;
+  background: var(--df-cmd-surface);
+  color: var(--df-cmd-muted);
+  font-family: var(--font-monospace, monospace);
+  font-size: 9.5px;
+  font-weight: 700;
+  line-height: 1;
+}
 
 /* Floating Layout Edit Bar. */
 .dashflow-command-shell .dashflow-resize-handle { border-radius: 50%!important; }
