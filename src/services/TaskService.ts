@@ -101,7 +101,7 @@ export class TaskService {
 
   today(tasks?: Task[]): Task[] {
     const today = localDate();
-    if (!tasks && this.query) return this.query.todayTasks(today);
+    if (this.usesCurrentSnapshot(tasks)) return this.query?.todayTasks(today) ?? [];
     return (tasks ?? this.index.getSnapshot().tasks)
       .filter((task) => task.due === today || task.scheduled === today)
       .sort(sortTasks);
@@ -109,7 +109,7 @@ export class TaskService {
 
   focus(tasks?: Task[]): Task[] {
     const today = localDate();
-    if (!tasks && this.query) return this.query.focusTasks(today);
+    if (this.usesCurrentSnapshot(tasks)) return this.query?.focusTasks(today) ?? [];
     const byId = new Map<string, Task>();
     for (const task of tasks ?? this.index.getSnapshot().tasks) {
       if (task.completed) continue;
@@ -126,7 +126,7 @@ export class TaskService {
 
   overdue(tasks?: Task[]): Task[] {
     const today = localDate();
-    if (!tasks && this.query) return this.query.overdueTasks(today);
+    if (this.usesCurrentSnapshot(tasks)) return this.query?.overdueTasks(today) ?? [];
     return (tasks ?? this.index.getSnapshot().tasks)
       .filter((task) => !task.completed && Boolean(task.due) && (task.due as string) < today)
       .sort(sortTasks);
@@ -134,7 +134,7 @@ export class TaskService {
 
   upcoming(days = 7, tasks?: Task[]): Task[] {
     const start = localDate();
-    if (!tasks && this.query) return this.query.upcomingTasks(start, days);
+    if (this.usesCurrentSnapshot(tasks)) return this.query?.upcomingTasks(start, days) ?? [];
     const end = addDays(start, days);
     return (tasks ?? this.index.getSnapshot().tasks)
       .filter((task) => {
@@ -147,6 +147,11 @@ export class TaskService {
         );
       })
       .sort(sortTasks);
+  }
+
+  private usesCurrentSnapshot(tasks: Task[] | undefined): boolean {
+    if (!this.query) return false;
+    return !tasks || tasks === this.index.getSnapshot().tasks;
   }
 
   private findTaskLine(lines: string[], task: Task): number {
