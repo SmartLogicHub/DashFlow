@@ -77,6 +77,18 @@ export class ActivityService {
     this.changed();
   }
 
+  recordFocusSession(sessionId: string, minutes: number, date = localDate()): void {
+    const id = sessionId.trim();
+    if (!id) return;
+    const day = this.ensureDate(date);
+    day.completedFocusSessionKeys ??= [];
+    if (day.completedFocusSessionKeys.includes(id)) return;
+    day.completedFocusSessionKeys.push(id);
+    day.focusSessions = (day.focusSessions ?? 0) + 1;
+    day.focusMinutes = (day.focusMinutes ?? 0) + Math.max(1, Math.round(minutes));
+    this.changed();
+  }
+
   setHabitCompleted(habitId: string, date: string, completed: boolean): void {
     const day = this.ensureDate(date);
     const key = stableHash(habitId);
@@ -165,11 +177,14 @@ export class ActivityService {
     day.tasksCreated ??= 0;
     day.tasksCompleted ??= 0;
     day.habitsCompleted ??= 0;
+    day.focusSessions ??= 0;
+    day.focusMinutes ??= 0;
     day.createdNoteKeys ??= [];
     day.modifiedNoteKeys ??= [];
     day.createdTaskKeys ??= [];
     day.completedTaskKeys ??= [];
     day.completedHabitKeys ??= [];
+    day.completedFocusSessionKeys ??= [];
     return day;
   }
 
