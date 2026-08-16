@@ -244,17 +244,17 @@ export default class DashFlowPlugin extends Plugin {
     this.dataFilterWidgets.start();
     this.focusWidgets.start();
     this.magicEmbedWidgets.start();
+    this.productExperience.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
     this.contextSwitcher.start();
-    this.productExperience.start();
   }
 
   onunload(): void {
-    this.productExperience?.stop();
     this.contextSwitcher?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
+    this.productExperience?.stop();
     this.magicEmbedWidgets?.stop();
     this.focusWidgets?.stop();
     this.dataFilterWidgets?.stop();
