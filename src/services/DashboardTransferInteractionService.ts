@@ -36,21 +36,13 @@ const TRANSFER_STYLES = `
 `;
 
 export class DashboardTransferInteractionService {
-  private observer: MutationObserver | null = null;
-  private scheduled = false;
-
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
     this.ensureStyles();
-    this.observer = new MutationObserver(() => this.schedule());
-    this.observer.observe(document.body, { childList: true, subtree: true });
-    this.schedule();
   }
 
   stop(): void {
-    this.observer?.disconnect();
-    this.observer = null;
     document.getElementById(STYLE_ID)?.remove();
     this.closeModal();
     for (const button of document.querySelectorAll(".dashflow-dashboard-transfer-injected")) button.remove();
@@ -202,17 +194,8 @@ export class DashboardTransferInteractionService {
     }
   }
 
-  private schedule(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorateManagerActions();
-    }, 0);
-  }
-
-  private decorateManagerActions(): void {
-    for (const actions of document.querySelectorAll<HTMLElement>(".dashflow-dashboard-manager-actions")) {
+  decorateManagerActions(root: ParentNode): void {
+    for (const actions of root.querySelectorAll<HTMLElement>(".dashflow-dashboard-manager-actions")) {
       if (actions.dataset.dashboardTransfer === "true") continue;
       actions.dataset.dashboardTransfer = "true";
       const exportButton = this.button("导出当前", "导出当前工作台 JSON");
