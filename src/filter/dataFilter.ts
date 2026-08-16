@@ -43,6 +43,7 @@ const STATES: DataFilterState[] = ["active", "completed", "all"];
 const DATE_RANGES: DataFilterDateRange[] = ["all", "overdue", "today", "next7", "next30", "none"];
 const SORTS: DataFilterSort[] = ["date", "name", "type"];
 const TASK_STATUSES: DataFilterTaskStatus[] = ["all", "has-tasks", "pending", "completed", "none"];
+const SNAPSHOT_INDEX_CACHE = new WeakMap<VaultSnapshot, DataFilterIndex>();
 
 export const DEFAULT_DATA_FILTER_CONFIG: DataFilterWidgetConfig = {
   entity: "all",
@@ -279,5 +280,10 @@ export function filterVaultSnapshot(
   rawConfig: Partial<DataFilterWidgetConfig> | null | undefined,
   today = localDate(),
 ): DataFilterView {
-  return filterDataFilterIndex(buildDataFilterIndex(snapshot), rawConfig, today);
+  let index = SNAPSHOT_INDEX_CACHE.get(snapshot);
+  if (!index) {
+    index = buildDataFilterIndex(snapshot);
+    SNAPSHOT_INDEX_CACHE.set(snapshot, index);
+  }
+  return filterDataFilterIndex(index, rawConfig, today);
 }
