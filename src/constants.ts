@@ -22,4 +22,7 @@ export const DEFAULT_SETTINGS: DashFlowSettings = {
   aiBaseUrl: "https://api.deepseek.com",
   aiModel: "deepseek-v4-flash",
   aiSecretId: "",
+  aiMorningBriefingEnabled: false,
+  dailyNoteFolder: "",
+  dailyNoteDateFormat: "YYYY-MM-DD",
 };
