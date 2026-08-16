@@ -2,7 +2,10 @@ import { Notice, setIcon, type App } from "obsidian";
 import { activityRange, activityStreak } from "../activity/activityMath";
 import { habitCompletedOn, habitScheduledOn } from "../habits/habitMath";
 import type DashFlowPlugin from "../main";
+import type { Habit } from "../models";
 import type { ProductSection } from "../product/navigation";
+import { DailyProgressNoteModal } from "../ui/DailyProgressNoteModal";
+import { HabitEditorModal } from "../ui/HabitEditorModal";
 import { TaskEditorModal } from "../ui/TaskEditorModal";
 import { QuickAddModal } from "../ui/QuickAddModal";
 import type { WeReadHighlight } from "./WeReadService";
@@ -44,8 +47,13 @@ export class PersonalHomeService {
     const snapshot = this.plugin.vaultIndex.getSnapshot();
     const focus = this.plugin.taskService.focus(snapshot.tasks).slice(0, 5);
     const todayTasks = this.plugin.taskService.today(snapshot.tasks);
-    const scheduledHabits = snapshot.habits.filter((habit) => habit.status === "active" && habitScheduledOn(habit, today));
+    const activeScheduled = snapshot.habits.filter(
+      (habit) => habit.status === "active" && habitScheduledOn(habit, today),
+    );
+    const scheduledHabits = activeScheduled.filter((habit) => habit.kind !== "daily-progress");
     const completedHabits = scheduledHabits.filter((habit) => habitCompletedOn(habit, today));
+    const scheduledDailyProgress = activeScheduled.filter((habit) => habit.kind === "daily-progress");
+    const completedDailyProgress = scheduledDailyProgress.filter((habit) => habitCompletedOn(habit, today));
     const activeProjects = this.plugin.projectService.active();
     const openTasks = snapshot.tasks.filter((task) => !task.completed).length;
     const upcomingCount = snapshot.tasks.filter((task) => !task.completed && Boolean(task.due || task.scheduled)).length;
@@ -64,6 +72,8 @@ export class PersonalHomeService {
         todayTasks.filter((task) => task.completed).length,
         completedHabits.length,
         scheduledHabits.length,
+        completedDailyProgress.length,
+        scheduledDailyProgress.length,
         activeProjects.length,
         streak,
       ),
@@ -78,7 +88,7 @@ export class PersonalHomeService {
     areaList.className = "dashflow-home-area-list";
     const summaries = [
       `${activeProjects.length} 个活动项目 · ${openTasks} 个待办`,
-      `${scheduledHabits.length} 个今日习惯 · ${completedHabits.length} 已完成`,
+      `${scheduledHabits.length} 个习惯 · ${scheduledDailyProgress.length} 个日更任务`,
       `${upcomingCount} 个带日期的未完成事项`,
       `${streak} 天连续活跃`,
     ];
@@ -89,7 +99,11 @@ export class PersonalHomeService {
     lower.className = "dashflow-home-lower-grid";
     lower.append(this.renderActivity(), this.renderRecentNotes());
 
-    page.append(top, areaSection, lower);
+    page.appendChild(top);
+    if (scheduledDailyProgress.length > 0) {
+      page.appendChild(this.renderDailyProgress(scheduledDailyProgress, today));
+    }
+    page.append(areaSection, lower);
     return page;
   }
 
@@ -156,6 +170,8 @@ export class PersonalHomeService {
     completedTasks: number,
     habitsDone: number,
     habitsTotal: number,
+    dailyProgressDone: number,
+    dailyProgressTotal: number,
     projects: number,
     streak: number,
   ): HTMLElement {
@@ -186,10 +202,66 @@ export class PersonalHomeService {
     metrics.className = "dashflow-home-status-metrics";
     metrics.append(
       this.metric("习惯", `${habitsDone}/${habitsTotal}`),
+      this.metric("日更", `${dailyProgressDone}/${dailyProgressTotal}`),
       this.metric("项目", String(projects)),
       this.metric("连续活跃", `${streak} 天`),
     );
     card.append(lead, track, metrics);
+    return card;
+  }
+
+  private renderDailyProgress(habits: Habit[], today: string): HTMLElement {
+    const card = document.createElement("section");
+    card.className = "dashflow-home-card dashflow-home-daily-progress";
+    const completed = habits.filter((habit) => habitCompletedOn(habit, today)).length;
+
+    const head = document.createElement("div");
+    head.className = "dashflow-home-card-head";
+    head.append(this.text("strong", "长期任务 · 今日推进"), this.text("span", `${completed}/${habits.length} DONE`));
+    card.appendChild(head);
+
+    const list = document.createElement("div");
+    list.className = "dashflow-home-daily-progress-list";
+    for (const habit of habits.slice(0, 5)) {
+      const done = habitCompletedOn(habit, today);
+      const row = document.createElement("div");
+      row.className = `dashflow-home-daily-progress-row${done ? " is-done" : ""}`;
+
+      const checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = done;
+      checkbox.setAttribute("aria-label", `${done ? "取消" : "完成"}今日推进 · ${habit.name}`);
+      checkbox.addEventListener("change", () => void this.plugin.habitService.toggleDate(habit, today));
+
+      const body = document.createElement("button");
+      body.type = "button";
+      body.className = "dashflow-home-daily-progress-main";
+      const note = habit.dailyNotes?.[today]?.trim();
+      const meta = note
+        ? note
+        : habit.linkedProjectId
+          ? `关联项目 · ${habit.linkedProjectId}`
+          : "记录今天实际推进了什么";
+      body.append(this.text("strong", habit.name), this.text("small", meta));
+      body.addEventListener("click", () => new HabitEditorModal(this.plugin, habit).open());
+
+      const noteButton = document.createElement("button");
+      noteButton.type = "button";
+      noteButton.className = `dashflow-home-daily-progress-note${note ? " has-note" : ""}`;
+      noteButton.title = note ? "编辑今日备注" : "添加今日备注";
+      noteButton.setAttribute("aria-label", `${note ? "编辑" : "添加"}今日备注 · ${habit.name}`);
+      setIcon(noteButton, note ? "notebook-tabs" : "notebook-pen");
+      noteButton.addEventListener("click", () => new DailyProgressNoteModal(this.plugin, habit, today).open());
+
+      row.append(checkbox, body, noteButton);
+      list.appendChild(row);
+    }
+    if (habits.length > 5) {
+      const more = this.text("div", `还有 ${habits.length - 5} 个长期任务，可在「习惯」页查看。`);
+      more.className = "dashflow-home-daily-progress-more";
+      list.appendChild(more);
+    }
+    card.appendChild(list);
     return card;
   }
 
@@ -391,6 +463,7 @@ export class PersonalHomeService {
 
   private metric(label: string, value: string): HTMLElement {
     const el = document.createElement("div");
+    el.className = "dashflow-home-metric";
     el.append(this.text("strong", value), this.text("span", label));
     return el;
   }
