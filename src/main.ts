@@ -13,6 +13,8 @@ import { AIPlanningService } from "./services/AIPlanningService";
 import { CalendarService } from "./services/CalendarService";
 import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInteractionService";
 import { CaptureService } from "./services/CaptureService";
+import { ContextSwitcherService } from "./services/ContextSwitcherService";
+import { DailyNoteService } from "./services/DailyNoteService";
 import { DashboardSwitcherInteractionService } from "./services/DashboardSwitcherInteractionService";
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
 import { DesignSystemService } from "./services/DesignSystemService";
@@ -37,6 +39,7 @@ import { MorningBriefingSettingsModal } from "./ui/MorningBriefingSettingsModal"
 import { ProjectEditorModal } from "./ui/ProjectEditorModal";
 import { QuickAddModal } from "./ui/QuickAddModal";
 import { TaskEditorModal } from "./ui/TaskEditorModal";
+import { WorkflowSettingsModal } from "./ui/WorkflowSettingsModal";
 import { localDate } from "./utils/date";
 import { registerBuiltins } from "./widgets/builtins";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
@@ -47,6 +50,7 @@ export default class DashFlowPlugin extends Plugin {
   dashboardManager!: DashboardManager;
   dashboardSwitcher!: DashboardSwitcherInteractionService;
   dashboardTransfer!: DashboardTransferInteractionService;
+  contextSwitcher!: ContextSwitcherService;
   vaultIndex!: VaultIndexService;
   activityService!: ActivityService;
   activityWidgets!: ActivityWidgetInteractionService;
@@ -58,6 +62,7 @@ export default class DashFlowPlugin extends Plugin {
   habitWidgets!: HabitWidgetInteractionService;
   taskService!: TaskService;
   projectService!: ProjectService;
+  dailyNotes!: DailyNoteService;
   captureService!: CaptureService;
   taskInteractions!: TaskInteractionService;
   aiClient!: AIClient;
@@ -103,10 +108,18 @@ export default class DashFlowPlugin extends Plugin {
       this.projectService,
       this.calendarService,
     );
+    this.dailyNotes = new DailyNoteService(
+      this.app,
+      () => this.data.settings.dailyNoteFolder,
+      () => this.data.settings.dailyNoteDateFormat,
+    );
     this.captureService = new CaptureService(
       this.app,
       () => this.data.settings.inboxPath,
       this.activityService,
+      this.dailyNotes,
+      () => this.data.settings.quickCaptureTarget,
+      () => this.data.settings.dailyCaptureHeading,
     );
     this.habitService = new HabitService(
       this.app,
@@ -126,6 +139,7 @@ export default class DashFlowPlugin extends Plugin {
     this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
+    this.contextSwitcher = new ContextSwitcherService(this);
     this.productDesign = new ProductDesignService();
     this.personalHomeDesign = new PersonalHomeDesignService();
     this.designSystem = new DesignSystemService();
@@ -140,6 +154,7 @@ export default class DashFlowPlugin extends Plugin {
 
     this.addCommand({ id: "open-dashboard", name: "打开 DashFlow", callback: () => void this.activateDashboard() });
     this.addCommand({ id: "quick-add", name: "快速添加", callback: () => new QuickAddModal(this).open() });
+    this.addCommand({ id: "configure-workflow-context", name: "配置 Quick Capture 与情景模式", callback: () => new WorkflowSettingsModal(this).open() });
     this.addCommand({ id: "search-dashflow", name: "搜索任务、项目与习惯", callback: () => new GlobalSearchModal(this).open() });
     this.addCommand({ id: "new-task", name: "新建任务", callback: () => new TaskEditorModal(this).open() });
     this.addCommand({ id: "new-project", name: "新建项目", callback: () => new ProjectEditorModal(this).open() });
@@ -191,11 +206,13 @@ export default class DashFlowPlugin extends Plugin {
     this.weeklyReviewWidgets.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
+    this.contextSwitcher.start();
     this.productExperience.start();
   }
 
   onunload(): void {
     this.productExperience?.stop();
+    this.contextSwitcher?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
     this.weeklyReviewWidgets?.stop();
