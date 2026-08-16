@@ -13,7 +13,8 @@ test("v0.4.3 carries the Home scene into non-home surfaces without a DOM observe
   assert.ok(polish.includes("dashflow-command-shell:not(.is-personal-home)::before"));
   assert.ok(runtime.includes("resolveLocalHeroImage"));
   assert.ok(runtime.includes("--df-ambient-image"));
-  assert.equal(runtime.includes("MutationObserver"), false);
+  assert.equal(runtime.includes("new MutationObserver"), false);
+  assert.equal(runtime.includes(".observe("), false);
   assert.ok(main.includes("new PresentationRuntimeService(this)"));
 });
 
