@@ -216,8 +216,32 @@ export interface MorningBriefingCacheEntry {
   advice: string;
 }
 
+export interface NewsItem {
+  id: string;
+  source: string;
+  title: string;
+  url: string;
+  description: string;
+  publishedAt?: string;
+}
+
+export interface CuratedNewsItem extends NewsItem {
+  score: number;
+  reason: string;
+}
+
+export interface NewsCurationCacheEntry {
+  configHash: string;
+  candidatesHash: string;
+  fetchedAt: number;
+  rankedAt: number;
+  candidates: NewsItem[];
+  curated: CuratedNewsItem[];
+}
+
 export interface AICache {
   morningBriefing?: MorningBriefingCacheEntry;
+  news?: Record<string, NewsCurationCacheEntry>;
 }
 
 export interface DashFlowSettings {
@@ -274,6 +298,12 @@ export interface UpcomingWidgetConfig extends Record<string, unknown> { days: nu
 export interface CountdownWidgetConfig extends Record<string, unknown> { title: string; targetDate: string; }
 export interface HeatmapWidgetConfig extends Record<string, unknown> { days: number; metric: ActivityMetric; showLegend: boolean; }
 export interface HabitsWidgetConfig extends Record<string, unknown> { historyDays: number; limit: number; showProgress: boolean; includePaused: boolean; }
+export interface AINewsWidgetConfig extends Record<string, unknown> {
+  sources: string;
+  interests: string;
+  topK: number;
+  refreshHours: number;
+}
 export interface CalendarWidgetConfig extends Record<string, unknown> {
   weekStart: CalendarWeekStart;
   showTasks: boolean;

@@ -25,3 +25,4 @@ import "./personal-home.test";
 import "./weread.test";
 import "./intelligence-core.test";
 import "./workflow-context.test";
+import "./ai-news.test";
