@@ -160,8 +160,10 @@ export default class DashFlowPlugin extends Plugin {
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
     this.productDesign.start();
     this.personalHomeDesign.start();
-    this.uiRefinementPolish.start();
+    // VisualContinuity marks the Hero actions as polished. Starting it first keeps
+    // UiRefinementPolish from attaching the same post-navigation focus listener twice.
     this.visualContinuity.start();
+    this.uiRefinementPolish.start();
     this.activityService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
@@ -184,8 +186,8 @@ export default class DashFlowPlugin extends Plugin {
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
     this.activityService?.stop();
-    this.visualContinuity?.stop();
     this.uiRefinementPolish?.stop();
+    this.visualContinuity?.stop();
     this.personalHomeDesign?.stop();
     this.productDesign?.stop();
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
