@@ -1,7 +1,7 @@
 {
   "name": "dashflow",
-  "version": "0.5.4",
-  "description": "A Personal OS for Obsidian with Focus sessions, safe Magic Embed, Visual Data Filter, AI News, Morning Briefing, configurable Quick Capture and context switching.",
+  "version": "0.5.5",
+  "description": "A Personal OS for Obsidian with revision-aware query caching, bounded Vault indexing, Visual Data Filter, Focus, AI News, Morning Briefing and configurable workflows.",
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "node tests/run-layout-tests.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
-  "keywords": ["obsidian", "personal-os", "personal-dashboard", "productivity", "focus", "pomodoro", "magic-embed", "iframe", "visual-filter", "data-filter", "notes", "frontmatter", "ai-news", "rss", "quick-capture", "daily-notes", "context-switcher", "tasks", "projects", "habits", "daily-progress", "calendar", "review", "ai", "dashboard", "mobile"],
+  "keywords": ["obsidian", "personal-os", "personal-dashboard", "productivity", "performance", "query-cache", "vault-index", "focus", "pomodoro", "magic-embed", "iframe", "visual-filter", "data-filter", "notes", "frontmatter", "ai-news", "rss", "quick-capture", "daily-notes", "context-switcher", "tasks", "projects", "habits", "daily-progress", "calendar", "review", "ai", "dashboard", "mobile"],
   "devDependencies": {
     "@types/node": "^22.15.17",
     "esbuild": "0.25.5",
