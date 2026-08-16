@@ -24,8 +24,9 @@ test("v0.4.3 design system is presentation-only and starts after legacy styles",
   const polishStart = main.indexOf("this.uiRefinementPolish.start();");
   const designStart = main.indexOf("this.designSystem.start();");
   assert.ok(designStart > polishStart);
-  assert.equal(design.includes("MutationObserver"), false);
-  assert.equal(design.includes("addEventListener"), false);
+  assert.equal(design.includes("new MutationObserver"), false);
+  assert.equal(design.includes(".observe("), false);
+  assert.equal(design.includes("addEventListener("), false);
   assert.equal(design.includes("TaskService"), false);
   assert.equal(design.includes("ProjectService"), false);
   assert.equal(design.includes("HabitService"), false);
