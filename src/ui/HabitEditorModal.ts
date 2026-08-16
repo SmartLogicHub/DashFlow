@@ -26,7 +26,7 @@ export class HabitEditorModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.addClass("dashflow-habit-editor");
+    contentEl.addClass("dashflow-habit-editor", "dashflow-editor-modal");
 
     const draft: HabitEditInput = {
       id: this.habit?.id ?? "",
@@ -39,12 +39,13 @@ export class HabitEditorModal extends Modal {
       targetDays: this.habit?.targetDays,
     };
 
+    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: this.habit ? "HABIT · EDIT" : "HABIT · NEW" });
     contentEl.createEl("h2", { text: this.habit ? "编辑习惯" : "新建习惯" });
     contentEl.createEl("p", {
-      cls: "setting-item-description",
+      cls: "setting-item-description dashflow-modal-lead",
       text: this.habit
         ? `定义与打卡记录保存在 ${this.habit.source.path} 的 frontmatter 中。`
-        : `新习惯会创建在 ${this.plugin.data.settings.habitFolder}。`,
+        : `新习惯会创建在 ${this.plugin.data.settings.habitFolder}，保持长期节奏而不是临时待办。`,
     });
 
     new Setting(contentEl)
@@ -78,7 +79,7 @@ export class HabitEditorModal extends Modal {
 
     new Setting(contentEl)
       .setName("频率")
-      .setDesc("v0.1.5 先支持每天与工作日两种节奏。")
+      .setDesc("当前支持每天与工作日两种节奏。")
       .addDropdown((component) => {
         for (const [value, label] of FREQUENCY_OPTIONS) component.addOption(value, label);
         component.setValue(draft.frequency);
