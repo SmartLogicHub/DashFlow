@@ -35,7 +35,7 @@ test("v0.4.2 final polish preserves unified navigation geometry and makes discon
   assert.ok(homeDesign.includes(sharedWidth));
   assert.ok(design.includes("Unified Command Bar"));
   assert.equal(polish.includes("width: min(1180px"), false);
-  assert.equal(polish.includes("border-radius: 0!important"), false);
+  assert.equal(polish.includes("Treat the command bar as product navigation"), false);
   assert.ok(polish.includes("dashflow-home-weread:has(.dashflow-home-weread-mark)"));
   assert.ok(polish.includes("A disconnected WeRead integration is a setup hint"));
   assert.ok(polish.includes("grid-template-columns: minmax(0, 1fr) auto!important"));
