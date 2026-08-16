@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "minAppVersion": "1.11.4",
-  "description": "A Personal OS for Obsidian with AI News Curation, AI Morning Briefing, configurable Quick Capture, context switching, Daily Progress, tasks, projects, habits, calendar and review.",
+  "description": "A Personal OS for Obsidian with Visual Data Filter, AI News Curation, AI Morning Briefing, configurable Quick Capture, context switching, Daily Progress, tasks, projects, habits, calendar and review.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }
