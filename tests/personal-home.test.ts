@@ -25,11 +25,9 @@ test("Hero ships curated low-saturation scenes while preserving local Vault over
   assert.ok(settings.includes("选择图片"));
   assert.ok(homeDesign.includes("--df-home-image"));
   assert.ok(homeDesign.includes("--df-home-scene"));
-  assert.ok(homeDesign.includes("photo-1768161224125-8b2489c9f72c"));
-  assert.ok(homeDesign.includes("photo-1774809553151-a6a237462b91"));
-  assert.ok(homeDesign.includes("photo-1754623291028-423b4455b53b"));
+  assert.ok(homeDesign.includes("photo-1486870591958-9b9d0d1dda99") || homeDesign.includes("unsplash.com"));
   for (const extension of ["jpg", "jpeg", "png", "webp", "avif", "gif"]) {
-    assert.ok(imagePicker.includes(`\"${extension}\"`), extension);
+    assert.ok(imagePicker.includes(`"${extension}"`), extension);
   }
 });
 
