@@ -204,6 +204,20 @@ export interface CustomDashboardTemplate {
   updatedAt: number;
 }
 
+export interface MorningBriefingCacheEntry {
+  date: string;
+  sourceDate: string;
+  sourcePath: string;
+  sourceHash: string;
+  generatedAt: number;
+  summary: string;
+  advice: string;
+}
+
+export interface AICache {
+  morningBriefing?: MorningBriefingCacheEntry;
+}
+
 export interface DashFlowSettings {
   inboxPath: string;
   projectTypeValue: string;
@@ -222,6 +236,9 @@ export interface DashFlowSettings {
   aiBaseUrl: string;
   aiModel: string;
   aiSecretId: string;
+  aiMorningBriefingEnabled: boolean;
+  dailyNoteFolder: string;
+  dailyNoteDateFormat: string;
 }
 
 export interface DashFlowData {
@@ -231,6 +248,7 @@ export interface DashFlowData {
   activeDashboardId: string;
   customTemplates: CustomDashboardTemplate[];
   activity: ActivityStore;
+  aiCache: AICache;
 }
 
 export interface VaultSnapshot {
