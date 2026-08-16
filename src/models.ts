@@ -10,10 +10,11 @@ export type CalendarWeekStart = "monday" | "sunday";
 export type HomeTheme = "alpine" | "paper" | "midnight" | "obsidian";
 export type CaptureTarget = "inbox" | "daily-note" | "ask";
 export type ContextMode = "morning" | "work" | "review";
-export type DataFilterEntity = "all" | "task" | "project" | "habit";
+export type DataFilterEntity = "all" | "note" | "task" | "project" | "habit";
 export type DataFilterState = "active" | "completed" | "all";
 export type DataFilterDateRange = "all" | "overdue" | "today" | "next7" | "next30" | "none";
 export type DataFilterSort = "date" | "name" | "type";
+export type DataFilterTaskStatus = "all" | "has-tasks" | "pending" | "completed" | "none";
 
 export interface SourceLocation {
   path: string;
@@ -97,6 +98,18 @@ export interface HabitEditInput {
   end?: string;
   targetDays?: number;
   linkedProjectId?: string;
+}
+
+export interface NoteRecord {
+  path: string;
+  name: string;
+  folder: string;
+  tags: string[];
+  frontmatter: Record<string, string>;
+  taskTotal: number;
+  taskCompleted: number;
+  createdAt: number;
+  modifiedAt: number;
 }
 
 export interface CalendarEvent {
@@ -289,6 +302,7 @@ export interface DashFlowData {
 export interface VaultSnapshot {
   revision: number;
   notes: number;
+  noteRecords?: NoteRecord[];
   tasks: Task[];
   projects: Project[];
   habits: Habit[];
@@ -314,6 +328,9 @@ export interface DataFilterWidgetConfig extends Record<string, unknown> {
   dateRange: DataFilterDateRange;
   query: string;
   tag: string;
+  folder: string;
+  frontmatter: string;
+  noteTaskStatus: DataFilterTaskStatus;
   sort: DataFilterSort;
   limit: number;
 }
