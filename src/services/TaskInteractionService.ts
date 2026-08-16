@@ -3,37 +3,25 @@ import type { Task, TasksWidgetConfig, UpcomingWidgetConfig, WidgetInstance } fr
 import { TaskEditorModal } from "../ui/TaskEditorModal";
 
 export class TaskInteractionService {
-  private observer: MutationObserver | null = null;
-  private scheduled = false;
+  private unsubscribeRender: (() => void) | null = null;
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
-    if (this.observer) return;
-    this.observer = new MutationObserver(() => this.schedule());
-    this.observer.observe(document.body, { childList: true, subtree: true });
-    this.schedule();
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => this.decorate(root));
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root));
   }
 
   stop(): void {
-    this.observer?.disconnect();
-    this.observer = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
   }
 
-  private schedule(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorate();
-    }, 0);
-  }
-
-  private decorate(): void {
+  private decorate(root: HTMLElement): void {
     const dashboard = this.plugin.dashboardManager.active();
     const widgets = new Map(dashboard.widgets.map((widget) => [widget.id, widget]));
 
-    for (const card of document.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
+    for (const card of root.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
       const widgetId = card.dataset.widgetId;
       const widget = widgetId ? widgets.get(widgetId) : undefined;
       if (!widget || (widget.type !== "tasks" && widget.type !== "upcoming")) continue;
@@ -77,14 +65,12 @@ export class TaskInteractionService {
     }
 
     const config = widget.config as TasksWidgetConfig;
-    const snapshot = this.plugin.vaultIndex.getSnapshot();
-    const today = this.plugin.taskService.today(snapshot.tasks);
-    const overdue = config.includeOverdue
-      ? this.plugin.taskService.overdue(snapshot.tasks)
-      : [];
+    const today = this.plugin.taskService.today();
+    const overdue = config.includeOverdue ? this.plugin.taskService.overdue() : [];
+    const overdueIds = new Set(overdue.map((task) => task.id));
     return [
       ...overdue,
-      ...today.filter((task) => !overdue.some((item) => item.id === task.id)),
+      ...today.filter((task) => !overdueIds.has(task.id)),
     ].slice(0, config.limit ?? 10);
   }
 
