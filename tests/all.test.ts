@@ -13,6 +13,7 @@ import "./design-system.test";
 import "./visual-polish.test";
 import "./ui-refinement-final.test";
 import "./visual-continuity.test";
+import "./typography-modal.test";
 import "./product-navigation.test";
 import "./studio-ui.test";
 import "./personal-home.test";
