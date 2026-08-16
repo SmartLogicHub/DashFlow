@@ -37,7 +37,8 @@ function cleanText(value: string): string {
 function isPrivateIpv4(hostname: string): boolean {
   const parts = hostname.split(".").map(Number);
   if (parts.length !== 4 || parts.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) return false;
-  const [a, b] = parts;
+  const a = parts[0]!;
+  const b = parts[1]!;
   return a === 10
     || a === 127
     || (a === 169 && b === 254)
@@ -174,7 +175,7 @@ export class NewsCurationService {
         const rawLink = node.tagName.toLowerCase().endsWith("entry") ? atomLink(node) : textFrom(node, ["link", "guid"]);
         const url = httpUrl(rawLink);
         if (!title || !url) continue;
-        const description = cleanText(textFrom(node, ["description", "summary", "content"])) .slice(0, MAX_DESCRIPTION);
+        const description = cleanText(textFrom(node, ["description", "summary", "content"])).slice(0, MAX_DESCRIPTION);
         const publishedAt = safeDate(textFrom(node, ["pubDate", "published", "updated", "date"]));
         items.push({
           id: hashText(`${feedTitle}\n${url}\n${title}`),
