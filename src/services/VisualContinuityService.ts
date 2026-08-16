@@ -1,8 +1,9 @@
 const STYLE_ID = "dashflow-visual-continuity-v042";
 
 export const VISUAL_CONTINUITY_STYLES = `
-/* v0.4.2 visual continuity — keep the Personal OS atmosphere across sections
- * without turning every working surface into another landing page. */
+/* v0.4.2 visual continuity — keep one stable visual frame across every
+ * DashFlow section. Home carries the richer copy/actions, while work pages
+ * reuse the same scene, crop and height with a lighter section label. */
 
 /* ProductExperience rebuilds the Hero when its observer decorates the shell.
  * Keep the visible labels in CSS so DOM replacement cannot alternate copy. */
@@ -20,8 +21,8 @@ export const VISUAL_CONTINUITY_STYLES = `
 .dashflow-home-hero-actions > button:nth-child(1)::after { content: "开始今天 →"; }
 .dashflow-home-hero-actions > button:nth-child(2)::after { content: "收集灵感"; }
 
-/* The older polish layer paints a very faint pseudo ambience. Replace it with
- * one deliberate compact scene ribbon so the theme is actually perceptible. */
+/* The old ambient pseudo strip is no longer needed. Every main section now
+ * owns the same 194px photographic frame as Home, avoiding any visual jump. */
 .dashflow-command-shell:not(.is-personal-home)::before {
   display: none!important;
 }
@@ -30,23 +31,23 @@ export const VISUAL_CONTINUITY_STYLES = `
   display: flex!important;
   position: relative!important;
   isolation: isolate;
-  height: 84px!important;
-  min-height: 84px!important;
-  margin: 0 0 10px!important;
-  padding: 14px 18px!important;
+  height: 194px!important;
+  min-height: 194px!important;
+  margin: 0 0 12px!important;
+  padding: 24px 30px!important;
   align-items: flex-end!important;
   justify-content: flex-start!important;
   overflow: hidden!important;
-  border: 1px solid var(--df-cmd-border)!important;
-  border-radius: 12px!important;
+  border: 1px solid var(--df-home-border, var(--df-cmd-border))!important;
+  border-radius: 14px!important;
   color: #fff!important;
   background-color: #0f172a!important;
   background-image:
-    linear-gradient(90deg, rgba(15, 23, 42, .68) 0%, rgba(15, 23, 42, .38) 48%, rgba(15, 23, 42, .14) 100%),
+    linear-gradient(90deg, rgba(15, 23, 42, .74) 0%, rgba(15, 23, 42, .40) 56%, rgba(15, 23, 42, .08) 100%),
     var(--df-ambient-image, var(--df-home-scene))!important;
   background-size: cover!important;
-  background-position: center 48%!important;
-  box-shadow: none!important;
+  background-position: center 50%!important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, .06)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero > * {
@@ -59,19 +60,19 @@ export const VISUAL_CONTINUITY_STYLES = `
   inset: 0;
   z-index: 0;
   pointer-events: none;
-  background: linear-gradient(180deg, rgba(255,255,255,.035), rgba(0,0,0,.16));
+  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.16));
 }
 
 .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after {
   content: "DASHFLOW";
   position: relative;
   z-index: 1;
-  color: rgba(255,255,255,.96);
-  font-size: 14px;
-  line-height: 1;
-  font-weight: 760;
-  letter-spacing: .025em;
-  text-shadow: 0 1px 8px rgba(0,0,0,.30);
+  color: rgba(255,255,255,.97);
+  font-size: 24px;
+  line-height: 1.05;
+  font-weight: 800;
+  letter-spacing: -.02em;
+  text-shadow: 0 2px 14px rgba(0,0,0,.38);
 }
 
 .dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="work"].is-active) > .dashflow-hero::after {
@@ -93,8 +94,7 @@ export const VISUAL_CONTINUITY_STYLES = `
   content: "复盘 · REVIEW";
 }
 
-/* Let the navigation sit naturally beneath the scene instead of looking like
- * an unrelated white admin toolbar. */
+/* Let navigation remain visually attached to the same scene. */
 .dashflow-command-shell:not(.is-personal-home) > .dashflow-command-bar {
   background: color-mix(in srgb, var(--df-cmd-surface) 92%, transparent)!important;
   backdrop-filter: blur(10px);
@@ -102,13 +102,13 @@ export const VISUAL_CONTINUITY_STYLES = `
 
 @media (max-width: 760px) {
   .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
-    height: 68px!important;
-    min-height: 68px!important;
-    padding: 12px 14px!important;
-    border-radius: 10px!important;
+    height: 160px!important;
+    min-height: 160px!important;
+    padding: 20px 22px!important;
+    border-radius: 12px!important;
   }
   .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after {
-    font-size: 12.5px;
+    font-size: 20px;
   }
 }
 
