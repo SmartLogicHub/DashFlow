@@ -4,6 +4,7 @@ import { DashboardManager } from "./dashboard/DashboardManager";
 import { DashboardView } from "./dashboard/DashboardView";
 import { createDefaultDashboard } from "./dashboard/defaultDashboard";
 import { upgradeLegacyHomeLayout } from "./dashboard/defaultLayoutMigration";
+import { normalizeFocusState } from "./focus/focusTimer";
 import type { ActivityStore, DashFlowData } from "./models";
 import type { ProductSection } from "./product/navigation";
 import { ActivityService } from "./services/ActivityService";
@@ -20,8 +21,11 @@ import { DashboardSwitcherInteractionService } from "./services/DashboardSwitche
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
 import { DataFilterWidgetInteractionService } from "./services/DataFilterWidgetInteractionService";
 import { DesignSystemService } from "./services/DesignSystemService";
+import { FocusService } from "./services/FocusService";
+import { FocusWidgetInteractionService } from "./services/FocusWidgetInteractionService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
+import { MagicEmbedWidgetInteractionService } from "./services/MagicEmbedWidgetInteractionService";
 import { MorningBriefingService } from "./services/MorningBriefingService";
 import { NewsCurationService } from "./services/NewsCurationService";
 import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService";
@@ -46,6 +50,8 @@ import { WorkflowSettingsModal } from "./ui/WorkflowSettingsModal";
 import { localDate } from "./utils/date";
 import { registerBuiltins } from "./widgets/builtins";
 import { registerDataWidgets } from "./widgets/data";
+import { registerEmbedWidgets } from "./widgets/embed";
+import { registerFocusWidgets } from "./widgets/focus";
 import { registerIntelligenceWidgets } from "./widgets/intelligence";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
 
@@ -76,6 +82,9 @@ export default class DashFlowPlugin extends Plugin {
   newsCuration!: NewsCurationService;
   aiNewsWidgets!: AINewsWidgetInteractionService;
   dataFilterWidgets!: DataFilterWidgetInteractionService;
+  focusService!: FocusService;
+  focusWidgets!: FocusWidgetInteractionService;
+  magicEmbedWidgets!: MagicEmbedWidgetInteractionService;
   weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
@@ -87,6 +96,8 @@ export default class DashFlowPlugin extends Plugin {
     this.widgetRegistry = new WidgetRegistry();
     registerBuiltins(this.widgetRegistry);
     registerDataWidgets(this.widgetRegistry);
+    registerFocusWidgets(this.widgetRegistry);
+    registerEmbedWidgets(this.widgetRegistry);
     registerIntelligenceWidgets(this.widgetRegistry);
     await this.loadPluginData();
 
@@ -104,6 +115,7 @@ export default class DashFlowPlugin extends Plugin {
       () => this.data.activity,
       () => this.savePluginData(),
     );
+    this.focusService = new FocusService(this);
     this.taskService = new TaskService(this.app, this.vaultIndex, this.activityService);
     this.projectService = new ProjectService(
       this.app,
@@ -150,6 +162,8 @@ export default class DashFlowPlugin extends Plugin {
     this.weeklyReviewWidgets = new WeeklyReviewWidgetInteractionService(this);
     this.aiNewsWidgets = new AINewsWidgetInteractionService(this);
     this.dataFilterWidgets = new DataFilterWidgetInteractionService(this);
+    this.focusWidgets = new FocusWidgetInteractionService(this);
+    this.magicEmbedWidgets = new MagicEmbedWidgetInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.contextSwitcher = new ContextSwitcherService(this);
@@ -211,6 +225,7 @@ export default class DashFlowPlugin extends Plugin {
     this.designSystem.start();
     this.presentationRuntime.start();
     this.activityService.start();
+    this.focusService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
     this.activityWidgets.start();
@@ -219,6 +234,8 @@ export default class DashFlowPlugin extends Plugin {
     this.weeklyReviewWidgets.start();
     this.aiNewsWidgets.start();
     this.dataFilterWidgets.start();
+    this.focusWidgets.start();
+    this.magicEmbedWidgets.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
     this.contextSwitcher.start();
@@ -230,6 +247,8 @@ export default class DashFlowPlugin extends Plugin {
     this.contextSwitcher?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
+    this.magicEmbedWidgets?.stop();
+    this.focusWidgets?.stop();
     this.dataFilterWidgets?.stop();
     this.aiNewsWidgets?.stop();
     this.weeklyReviewWidgets?.stop();
@@ -237,6 +256,7 @@ export default class DashFlowPlugin extends Plugin {
     this.habitWidgets?.stop();
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
+    this.focusService?.stop();
     this.activityService?.stop();
     this.presentationRuntime?.stop();
     this.designSystem?.stop();
@@ -279,6 +299,7 @@ export default class DashFlowPlugin extends Plugin {
         days: loaded?.activity?.days ?? {},
       },
       aiCache: loaded?.aiCache ?? {},
+      focus: normalizeFocusState(loaded?.focus),
     };
 
     if (this.data.dashboards.length === 0) {

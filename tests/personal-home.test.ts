@@ -10,8 +10,8 @@ const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const imagePicker = readFileSync("src/ui/HeroImagePickerModal.ts", "utf8");
 const settings = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 
-test("v0.5.3.1 keeps schema-backed preferences without changing Markdown truth", () => {
-  assert.equal(PLUGIN_VERSION, "0.5.3.1");
+test("v0.5.4 keeps schema-backed preferences without changing Markdown truth", () => {
+  assert.equal(PLUGIN_VERSION, "0.5.4");
   assert.equal(SCHEMA_VERSION, 7);
   assert.equal(DEFAULT_SETTINGS.homeTheme, "alpine");
   assert.equal(DEFAULT_SETTINGS.homeHeroImagePath, "");

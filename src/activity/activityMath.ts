@@ -9,11 +9,14 @@ export function emptyDailyActivity(date: string): DailyActivity {
     tasksCreated: 0,
     tasksCompleted: 0,
     habitsCompleted: 0,
+    focusSessions: 0,
+    focusMinutes: 0,
     createdNoteKeys: [],
     modifiedNoteKeys: [],
     createdTaskKeys: [],
     completedTaskKeys: [],
     completedHabitKeys: [],
+    completedFocusSessionKeys: [],
   };
 }
 
@@ -23,7 +26,8 @@ export function activityScore(day?: DailyActivity): number {
     + (day.tasksCreated ?? 0)
     + (day.notesCreated ?? 0) * 3
     + (day.notesModified ?? 0)
-    + (day.habitsCompleted ?? 0) * 3;
+    + (day.habitsCompleted ?? 0) * 3
+    + (day.focusSessions ?? 0) * 2;
 }
 
 export function activityMetricValue(day: DailyActivity | undefined, metric: ActivityMetric): number {

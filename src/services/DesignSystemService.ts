@@ -1,5 +1,6 @@
 import { AI_NEWS_STYLES } from "../styles/AINewsStyles";
 import { DATA_FILTER_STYLES } from "../styles/DataFilterStyles";
+import { FOCUS_EMBED_STYLES } from "../styles/FocusEmbedStyles";
 import { INTERACTION_MOTION_STYLES } from "../styles/InteractionMotionStyles";
 import { UI_REFINEMENT_POLISH_STYLES } from "../styles/UiRefinementStyles";
 import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles";
@@ -235,6 +236,7 @@ const CONSOLIDATED_STYLES = [
   DESIGN_SYSTEM_STYLES,
   AI_NEWS_STYLES,
   DATA_FILTER_STYLES,
+  FOCUS_EMBED_STYLES,
   INTERACTION_MOTION_STYLES,
 ].join("\n\n");
 
