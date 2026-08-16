@@ -1,10 +1,7 @@
 import { setIcon } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { AINewsWidgetConfig, CuratedNewsItem, WidgetInstance } from "../models";
-import { AI_NEWS_STYLES } from "../styles/AINewsStyles";
 import type { NewsCurationResult } from "./NewsCurationService";
-
-const STYLE_ID = "dashflow-ai-news-styles";
 
 export class AINewsWidgetInteractionService {
   private unsubscribeDashboard: (() => void) | null = null;
@@ -14,7 +11,6 @@ export class AINewsWidgetInteractionService {
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
-    this.ensureStyles();
     this.unsubscribeDashboard = this.plugin.dashboardManager.subscribe(() => this.schedule());
     this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.schedule());
     this.plugin.registerEvent(this.plugin.app.workspace.on("layout-change", () => this.schedule()));
@@ -27,7 +23,6 @@ export class AINewsWidgetInteractionService {
     this.unsubscribeDashboard = null;
     this.unsubscribeIndex?.();
     this.unsubscribeIndex = null;
-    document.getElementById(STYLE_ID)?.remove();
   }
 
   schedule(): void {
@@ -159,13 +154,5 @@ export class AINewsWidgetInteractionService {
     node.className = "dashflow-ai-news-empty";
     node.textContent = text;
     return node;
-  }
-
-  private ensureStyles(): void {
-    if (document.getElementById(STYLE_ID)) return;
-    const style = document.createElement("style");
-    style.id = STYLE_ID;
-    style.textContent = AI_NEWS_STYLES;
-    document.head.appendChild(style);
   }
 }
