@@ -5,12 +5,13 @@ import { DEFAULT_SETTINGS, PLUGIN_VERSION, SCHEMA_VERSION } from "../src/constan
 
 const home = readFileSync("src/services/PersonalHomeService.ts", "utf8");
 const homeDesign = readFileSync("src/services/PersonalHomeDesignService.ts", "utf8");
+const designSystem = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const imagePicker = readFileSync("src/ui/HeroImagePickerModal.ts", "utf8");
 const settings = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 
-test("v0.4.5 keeps schema-backed preferences without changing Markdown truth", () => {
-  assert.equal(PLUGIN_VERSION, "0.4.5");
+test("v0.4.6 keeps schema-backed preferences without changing Markdown truth", () => {
+  assert.equal(PLUGIN_VERSION, "0.4.6");
   assert.equal(SCHEMA_VERSION, 7);
   assert.equal(DEFAULT_SETTINGS.homeTheme, "alpine");
   assert.equal(DEFAULT_SETTINGS.homeHeroImagePath, "");
@@ -38,6 +39,16 @@ test("Personal Home uses real Task, Project, Habit, Activity, WeRead and recent 
   assert.ok(home.includes("activityRange"));
   assert.ok(home.includes("plugin.weRead"));
   assert.ok(home.includes("getMarkdownFiles"));
+});
+
+test("Personal Home promotes Daily Progress without mixing it into Habit metrics", () => {
+  assert.ok(home.includes('habit.kind !== "daily-progress"'));
+  assert.ok(home.includes('habit.kind === "daily-progress"'));
+  assert.ok(home.includes("renderDailyProgress"));
+  assert.ok(home.includes("DailyProgressNoteModal"));
+  assert.ok(home.includes('this.metric("日更"'));
+  assert.ok(designSystem.includes("dashflow-home-daily-progress-row"));
+  assert.ok(designSystem.includes("grid-template-columns: repeat(4, minmax(0, 1fr))"));
 });
 
 test("Visual Reset makes areas compact navigation rows instead of large empty cards", () => {

@@ -4,6 +4,7 @@ import type { CalendarEvent, Task, WeeklyReviewWidgetConfig, WidgetInstance } fr
 import { HabitEditorModal } from "../ui/HabitEditorModal";
 import { TaskEditorModal } from "../ui/TaskEditorModal";
 import type {
+  WeeklyReviewDailyProgress,
   WeeklyReviewData,
   WeeklyReviewHabit,
   WeeklyReviewProject,
@@ -25,7 +26,7 @@ const WEEKLY_STYLES = `
 .dashflow-weekly-list{display:flex;flex-direction:column;gap:5px;min-width:0}
 .dashflow-weekly-row{appearance:none;width:100%;border:1px solid var(--background-modifier-border);border-radius:8px;background:var(--background-primary);padding:6px 7px;display:flex;align-items:center;gap:7px;color:var(--text-normal);text-align:left;cursor:pointer;min-width:0}.dashflow-weekly-row:hover{border-color:var(--text-muted)}
 .dashflow-weekly-row-main{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}.dashflow-weekly-row-title{font-size:10px;font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dashflow-weekly-row-meta{font-size:8px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dashflow-weekly-badge{font-size:7px;border:1px solid var(--background-modifier-border);border-radius:5px;padding:2px 4px;color:var(--text-muted);white-space:nowrap;text-transform:uppercase}.dashflow-weekly-badge.is-overdue{color:var(--text-error);border-color:color-mix(in srgb,var(--text-error) 36%,var(--background-modifier-border))}.dashflow-weekly-badge.is-project{color:var(--text-warning)}.dashflow-weekly-badge.is-habit{color:var(--text-success)}
+.dashflow-weekly-badge{font-size:7px;border:1px solid var(--background-modifier-border);border-radius:5px;padding:2px 4px;color:var(--text-muted);white-space:nowrap;text-transform:uppercase}.dashflow-weekly-badge.is-overdue{color:var(--text-error);border-color:color-mix(in srgb,var(--text-error) 36%,var(--background-modifier-border))}.dashflow-weekly-badge.is-project{color:var(--text-warning)}.dashflow-weekly-badge.is-habit{color:var(--text-success)}.dashflow-weekly-badge.is-progress{color:var(--interactive-accent);border-color:color-mix(in srgb,var(--interactive-accent) 38%,var(--background-modifier-border))}
 .dashflow-weekly-progress{width:46px;height:4px;border-radius:999px;background:var(--background-modifier-border);overflow:hidden;flex:none}.dashflow-weekly-progress span{display:block;height:100%;background:var(--interactive-accent);border-radius:inherit}
 .dashflow-weekly-empty{font-size:9px;color:var(--text-faint);padding:7px 2px}
 .dashflow-weekly-note{font-size:8px;color:var(--text-faint);margin-top:auto;padding-top:2px}
@@ -113,6 +114,7 @@ export class WeeklyReviewWidgetInteractionService {
 
     const right = document.createElement("div");
     right.className = "dashflow-weekly-column";
+    right.append(this.dailyProgressSection(review));
     right.append(this.nextWeekSection(review, nextLimit));
     const note = document.createElement("div");
     note.className = "dashflow-weekly-note";
@@ -155,9 +157,9 @@ export class WeeklyReviewWidgetInteractionService {
     const wrap = document.createElement("div");
     wrap.className = "dashflow-weekly-kpis";
     wrap.append(
-      this.kpi(String(review.activity.tasksCompleted), "tasks done", `${review.activity.tasksCreated} created`),
+      this.kpi(String(review.activity.tasksCompleted), "tasks done", `${review.activity.activeDays}/7 active days`),
       this.kpi(`${review.habitRate}%`, "habit rate", `${review.habitCompleted}/${review.habitScheduled}`),
-      this.kpi(`${review.activity.activeDays}/7`, "active days", `${review.activity.notesTouched} note actions`),
+      this.kpi(`${review.dailyProgressRate}%`, "daily progress", `${review.dailyProgressCompleted}/${review.dailyProgressScheduled} · ${review.dailyProgressNoteCount} notes`),
     );
 
     if (config.showActivityComparison !== false) {
@@ -165,7 +167,7 @@ export class WeeklyReviewWidgetInteractionService {
       const value = change === null ? "NEW" : `${change >= 0 ? "+" : ""}${change}%`;
       wrap.append(this.kpi(value, "activity vs last week", `${review.activity.score} score`));
     } else {
-      wrap.append(this.kpi(String(review.activity.score), "activity score", `${review.activity.habitChecks} habit checks`));
+      wrap.append(this.kpi(String(review.activity.score), "activity score", `${review.activity.notesTouched} note actions`));
     }
     return wrap;
   }
@@ -199,6 +201,20 @@ export class WeeklyReviewWidgetInteractionService {
     const visible = review.habits.slice(0, 5);
     if (visible.length === 0) list.append(this.empty("本周没有需要执行的 Habit。"));
     else for (const item of visible) list.append(this.habitRow(item));
+    section.appendChild(list);
+    return section;
+  }
+
+  private dailyProgressSection(review: WeeklyReviewData): HTMLElement {
+    const meta = `${review.dailyProgressCompleted}/${review.dailyProgressScheduled} · ${review.dailyProgressNoteCount} NOTES`;
+    const section = this.section("Daily Progress", meta);
+    const list = this.list();
+    const visible = review.dailyProgress.slice(0, 5);
+    if (visible.length === 0) list.append(this.empty("本周没有长期日更任务。"));
+    else for (const item of visible) list.append(this.dailyProgressRow(item));
+    if (review.dailyProgress.length > visible.length) {
+      list.append(this.empty(`还有 ${review.dailyProgress.length - visible.length} 项未显示`));
+    }
     section.appendChild(list);
     return section;
   }
@@ -248,6 +264,19 @@ export class WeeklyReviewWidgetInteractionService {
     row.append(
       this.badge(`${item.stats.rate}%`, "is-habit"),
       this.rowMain(item.habit.name, `${item.stats.completed}/${item.stats.scheduled} completed`),
+    );
+    return row;
+  }
+
+  private dailyProgressRow(item: WeeklyReviewDailyProgress): HTMLElement {
+    const row = this.rowButton(() => new HabitEditorModal(this.plugin, item.habit).open());
+    const latest = item.notes[0];
+    const meta = latest
+      ? `${this.shortDate(latest.date)} · ${latest.note}`
+      : `${item.stats.completed}/${item.stats.scheduled} days · no notes this week`;
+    row.append(
+      this.badge(`${item.stats.rate}%`, "is-progress"),
+      this.rowMain(item.habit.name, meta),
     );
     return row;
   }

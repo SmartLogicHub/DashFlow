@@ -1,8 +1,28 @@
-# DashFlow v0.4.5
+# DashFlow v0.4.6
 
 DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project / Habit / Daily Progress 都以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
 
-> v0.4.5 新增长期任务「日更打卡」：把论文、考试、产品上线、写作挑战等长期目标拆成每天可推进的一格，并为每天保存自己的推进备注。
+> v0.4.6 把长期任务「Daily Progress」从单独的 Habit Widget 能力整合进整个 Personal OS：Home / Today 会显示今天真正需要推进的长期任务，Weekly Review 会单独统计日更完成率并汇总本周推进备注。
+
+## v0.4.6 · Daily Progress Integration
+
+Daily Progress 现在不再被当成普通 Habit 混合统计：
+
+- **Home / Today 独立指标**：习惯、日更、项目、连续活跃分别展示。
+- **今日推进卡片**：直接完成 / 取消今天的长期任务进度。
+- **今日备注**：从 Home 直接记录“今天实际推进了什么”。
+- **Weekly Review 独立完成率**：Habit 与 Daily Progress 分开计算。
+- **本周推进摘要**：周复盘会带出长期任务在本周写下的 Daily Notes。
+- **零迁移**：继续使用 v0.4.5 的 `habit_log` 与 `daily_notes`，旧 Habit 完全不需要转换。
+
+```text
+今日状态
+任务 75%    习惯 2/3    日更 1/2    连续活跃 8 天
+
+长期任务 · 今日推进                    1/2 DONE
+✓ DashFlow 0.5     完成 Daily Progress 首页整合   📝
+○ 论文写作          记录今天实际推进了什么         📝
+```
 
 ## v0.4.5 · Daily Progress
 
@@ -71,9 +91,10 @@ Home 是个人状态和长期成长入口：
 
 1. 约 194px Hero：日期、个人标题、副标题、开始今天、收集灵感
 2. 微信读书每日划线：真实书籍、章节和个人划线
-3. Today + 今日状态：任务、Habit、Daily Progress、活动项目与 Activity streak
-4. 长期成长入口：工作 / 生活 / 时间 / 复盘
-5. 最近 Activity 与最近修改的 Vault Markdown
+3. Today + 今日状态：Task / Habit / Daily Progress / Project / Activity streak
+4. 长期任务今日推进：直接打卡和写当天备注
+5. 长期成长入口：工作 / 生活 / 时间 / 复盘
+6. 最近 Activity 与最近修改的 Vault Markdown
 
 ### Work · 执行工作台
 
@@ -99,6 +120,19 @@ DashFlow 0.5     日更 · ↗ DashFlow   连续 8 天
 ```
 
 Daily Progress 的历史格子可以点击回填完成状态；今日可以直接写推进备注。
+
+### Weekly Review · 周复盘
+
+Weekly Review 会分别展示：
+
+- 本周完成任务与 Activity 变化
+- 普通 Habit 完成率
+- Daily Progress 日更完成率
+- 长期任务本周备注摘要
+- 活动 Project 进度
+- 下周任务 / Project 截止日
+
+复制周报时，Habit 与 Daily Progress 也会保持独立章节。
 
 ### 自定义 Countdown
 
@@ -139,7 +173,7 @@ API Key 只保存在 Obsidian SecretStorage / Keychain；不使用 Cookie 抓取
 - Task 创建 / 编辑 / 完成 / 计划日 / 截止日 / 优先级 / 项目关联
 - Project 创建 / 编辑 / 详情 / 自动任务进度
 - Habit 创建 / 编辑 / 打卡 / streak / 目标
-- Daily Progress 日更打卡 / 历史回填 / 每日备注 / Project 关联
+- Daily Progress 日更打卡 / 历史回填 / 每日备注 / Project 关联 / Home / Weekly Review 整合
 - Activity Tracker + Heatmap
 - Calendar + Agenda
 - Weekly Review

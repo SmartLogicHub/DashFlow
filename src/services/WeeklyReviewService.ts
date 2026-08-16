@@ -33,6 +33,10 @@ export interface WeeklyReviewHabit {
   stats: WeeklyHabitStats;
 }
 
+export interface WeeklyReviewDailyProgress extends WeeklyReviewHabit {
+  notes: Array<{ date: string; note: string }>;
+}
+
 export interface WeeklyReviewData {
   anchor: string;
   week: WeekRange;
@@ -48,6 +52,11 @@ export interface WeeklyReviewData {
   habitScheduled: number;
   habitCompleted: number;
   habitRate: number;
+  dailyProgress: WeeklyReviewDailyProgress[];
+  dailyProgressScheduled: number;
+  dailyProgressCompleted: number;
+  dailyProgressRate: number;
+  dailyProgressNoteCount: number;
   nextWeekEvents: CalendarEvent[];
 }
 
@@ -78,8 +87,9 @@ export class WeeklyReviewService {
         || a.progress - b.progress
         || a.project.name.localeCompare(b.project.name));
 
-    const habits = snapshot.habits
-      .filter((habit) => habit.status === "active")
+    const activeHabits = snapshot.habits.filter((habit) => habit.status === "active");
+    const habits = activeHabits
+      .filter((habit) => habit.kind !== "daily-progress")
       .map((habit) => ({ habit, stats: weeklyHabitStats(habit, week) }))
       .filter((item) => item.stats.scheduled > 0)
       .sort((a, b) => a.stats.rate - b.stats.rate || a.habit.name.localeCompare(b.habit.name));
@@ -87,6 +97,26 @@ export class WeeklyReviewService {
     const habitScheduled = habits.reduce((sum, item) => sum + item.stats.scheduled, 0);
     const habitCompleted = habits.reduce((sum, item) => sum + item.stats.completed, 0);
     const habitRate = habitScheduled === 0 ? 0 : Math.round((habitCompleted / habitScheduled) * 100);
+
+    const dailyProgress = activeHabits
+      .filter((habit) => habit.kind === "daily-progress")
+      .map((habit): WeeklyReviewDailyProgress => ({
+        habit,
+        stats: weeklyHabitStats(habit, week),
+        notes: Object.entries(habit.dailyNotes ?? {})
+          .filter(([date, note]) => date >= week.start && date <= week.end && Boolean(note.trim()))
+          .map(([date, note]) => ({ date, note: note.trim() }))
+          .sort((a, b) => b.date.localeCompare(a.date)),
+      }))
+      .filter((item) => item.stats.scheduled > 0)
+      .sort((a, b) => a.stats.rate - b.stats.rate || a.habit.name.localeCompare(b.habit.name));
+
+    const dailyProgressScheduled = dailyProgress.reduce((sum, item) => sum + item.stats.scheduled, 0);
+    const dailyProgressCompleted = dailyProgress.reduce((sum, item) => sum + item.stats.completed, 0);
+    const dailyProgressRate = dailyProgressScheduled === 0
+      ? 0
+      : Math.round((dailyProgressCompleted / dailyProgressScheduled) * 100);
+    const dailyProgressNoteCount = dailyProgress.reduce((sum, item) => sum + item.notes.length, 0);
 
     const nextWeekEvents = this.calendar.eventsBetween(nextWeek.start, nextWeek.end, {
       weekStart: config.weekStart === "sunday" ? "sunday" : "monday",
@@ -112,6 +142,11 @@ export class WeeklyReviewService {
       habitScheduled,
       habitCompleted,
       habitRate,
+      dailyProgress,
+      dailyProgressScheduled,
+      dailyProgressCompleted,
+      dailyProgressRate,
+      dailyProgressNoteCount,
       nextWeekEvents,
     };
   }
@@ -127,6 +162,8 @@ export class WeeklyReviewService {
       `- 活跃天数：${review.activity.activeDays}/7`,
       `- Activity Score：${review.activity.score}`,
       `- Habit：${review.habitCompleted}/${review.habitScheduled}（${review.habitRate}%）`,
+      `- Daily Progress：${review.dailyProgressCompleted}/${review.dailyProgressScheduled}（${review.dailyProgressRate}%）`,
+      `- 日更备注：${review.dailyProgressNoteCount}`,
       `- 笔记活动：${review.activity.notesTouched}`,
       "",
       "### 需要处理",
@@ -145,6 +182,13 @@ export class WeeklyReviewService {
       else for (const item of review.habits) {
         lines.push(`- ${item.habit.name}：${item.stats.completed}/${item.stats.scheduled}（${item.stats.rate}%）`);
       }
+    }
+
+    lines.push("", "### Daily Progress");
+    if (review.dailyProgress.length === 0) lines.push("- 无长期日更任务");
+    else for (const item of review.dailyProgress) {
+      lines.push(`- ${item.habit.name}：${item.stats.completed}/${item.stats.scheduled}（${item.stats.rate}%）`);
+      for (const note of item.notes) lines.push(`  - ${note.date} · ${note.note}`);
     }
 
     lines.push("", `### 下周 · ${review.nextWeek.start} → ${review.nextWeek.end}`);

@@ -1,7 +1,7 @@
 {
   "name": "dashflow",
-  "version": "0.4.5",
-  "description": "A Personal OS for Obsidian with flexible dashboards, daily progress, tasks, projects, habits, calendar, review, search and optional AI planning.",
+  "version": "0.4.6",
+  "description": "A Personal OS for Obsidian with flexible dashboards, integrated daily progress, tasks, projects, habits, calendar, review, search and optional AI planning.",
   "main": "main.js",
   "type": "module",
   "scripts": {
