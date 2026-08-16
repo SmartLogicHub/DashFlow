@@ -1,8 +1,3 @@
-import { normalizePath, TFile } from "obsidian";
-import type DashFlowPlugin from "../main";
-
-const STYLE_ID = "dashflow-ui-refinement-polish-v042";
-
 export const UI_REFINEMENT_POLISH_STYLES = `
 /* Screenshot-driven final pass for v0.4.2. Keep behavior/data untouched.
  * Geometry shared by Home and Work belongs to the base design services;
@@ -214,20 +209,7 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   font-size: 9.5px!important;
 }
 
-/* Hero actions should feel like real workflow entry points. */
-.dashflow-home-hero-actions button[data-dashflow-role="start"] {
-  min-width: 92px;
-}
-
-.dashflow-home-hero-actions button[data-dashflow-role="capture"] {
-  min-width: 86px;
-}
-
 /* WORK ------------------------------------------------------------------ */
-/* Shared shell width, top padding and Command Bar geometry intentionally come
- * from ProductDesignService + PersonalHomeDesignService. Do not override them here.
- */
-
 .dashflow-command-shell:not(.is-personal-home) .dashflow-command-button {
   height: 30px!important;
   padding: 0 9px!important;
@@ -265,8 +247,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   border-radius: 6px!important;
 }
 
-/* Empty cards and fixed summary widgets should never show a decorative
- * scrollbar. Lists with real overflow still keep their native scroll. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget:has(.dashflow-empty) .dashflow-widget-body,
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget[data-widget-type="quick-capture"] .dashflow-widget-body,
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget[data-widget-type="progress"] .dashflow-widget-body,
@@ -282,7 +262,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   display: none!important;
 }
 
-/* Empty states should read like one piece of information, not a poster. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-empty {
   min-height: 48px!important;
   padding: 8px 10px!important;
@@ -302,7 +281,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   font-weight: 650!important;
 }
 
-/* Quick Capture remains useful but fits its compact top-row slot cleanly. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget[data-widget-type="quick-capture"] .dashflow-widget-body {
   padding: 0!important;
 }
@@ -332,7 +310,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   padding: 0 9px!important;
 }
 
-/* Today + progress top-row content should fit without tiny inner scrollbars. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget[data-widget-type="tasks"] .dashflow-widget-body {
   padding: 0 9px 7px!important;
 }
@@ -341,7 +318,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   padding: 4px 8px 6px!important;
 }
 
-/* Compact project rows: clean 2-column layout and enough room for three rows. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget[data-widget-type="projects"] .dashflow-widget-body {
   padding: 3px 10px 5px!important;
 }
@@ -400,7 +376,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   color: var(--df-cmd-muted)!important;
 }
 
-/* Progress and countdown: factual, balanced metrics. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-progress-metric {
   border: 0!important;
   background: transparent!important;
@@ -444,7 +419,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   gap: 4px!important;
 }
 
-/* Activity heatmap. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-heatmap-grid {
   gap: 2px!important;
 }
@@ -454,8 +428,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
 }
 
 /* CALENDAR -------------------------------------------------------------- */
-/* One accent, one job: today and selected no longer fight with green +
- * cyan/purple glow at the same time. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-calendar-day.is-today {
   border: 1px solid color-mix(in srgb, var(--df-home-accent, var(--df-cmd-purple)) 58%, var(--df-cmd-border))!important;
   background: color-mix(in srgb, var(--df-home-accent, var(--df-cmd-purple)) 6%, var(--df-cmd-surface))!important;
@@ -476,7 +448,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
 }
 
 /* REVIEW ---------------------------------------------------------------- */
-/* Turn four tiny admin-stat cards into one calm summary strip. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-weekly-kpis {
   gap: 0!important;
   overflow: hidden!important;
@@ -522,7 +493,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   border-bottom: 0!important;
 }
 
-/* Give a meaningful response when the Hero's primary action enters Work. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget.is-hero-action-target {
   border-color: color-mix(in srgb, var(--df-home-accent, var(--df-cmd-purple)) 58%, var(--df-cmd-border))!important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--df-home-accent, var(--df-cmd-purple)) 10%, transparent)!important;
@@ -552,93 +522,3 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   }
 }
 `;
-
-export class UiRefinementPolishService {
-  private observer: MutationObserver | null = null;
-  private scheduled = false;
-
-  constructor(private readonly plugin: DashFlowPlugin) {}
-
-  start(): void {
-    if (!document.getElementById(STYLE_ID)) {
-      const style = document.createElement("style");
-      style.id = STYLE_ID;
-      style.textContent = UI_REFINEMENT_POLISH_STYLES;
-      document.head.appendChild(style);
-    }
-
-    this.observer = new MutationObserver(() => this.scheduleSync());
-    this.observer.observe(document.body, { childList: true, subtree: true });
-    this.scheduleSync();
-  }
-
-  stop(): void {
-    this.observer?.disconnect();
-    this.observer = null;
-    document.getElementById(STYLE_ID)?.remove();
-  }
-
-  private scheduleSync(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.syncAmbientImage();
-      this.enhanceHeroActions();
-    }, 24);
-  }
-
-  private syncAmbientImage(): void {
-    const customImage = this.resolveLocalHeroImage();
-    for (const view of document.querySelectorAll<HTMLElement>(".dashflow-view-container")) {
-      if (customImage) view.style.setProperty("--df-ambient-image", `url(\"${customImage.replace(/\"/g, "%22")}\")`);
-      else view.style.removeProperty("--df-ambient-image");
-    }
-  }
-
-  private resolveLocalHeroImage(): string | null {
-    const path = this.plugin.data.settings.homeHeroImagePath.trim();
-    if (!path) return null;
-    const file = this.plugin.app.vault.getAbstractFileByPath(normalizePath(path));
-    return file instanceof TFile ? this.plugin.app.vault.getResourcePath(file) : null;
-  }
-
-  private enhanceHeroActions(): void {
-    for (const actions of document.querySelectorAll<HTMLElement>(".dashflow-home-hero-actions")) {
-      const buttons = actions.querySelectorAll<HTMLButtonElement>(":scope > button");
-      const start = buttons[0];
-      const capture = buttons[1];
-
-      if (start && start.dataset.dashflowPolished !== "1") {
-        start.dataset.dashflowPolished = "1";
-        start.dataset.dashflowRole = "start";
-        start.textContent = "开始今天 →";
-        start.title = "进入工作台，并聚焦今日任务";
-        start.setAttribute("aria-label", "开始今天：进入工作台并聚焦今日任务");
-        start.addEventListener("click", () => {
-          window.setTimeout(() => this.focusTodayWidget(), 48);
-        });
-      }
-
-      if (capture && capture.dataset.dashflowPolished !== "1") {
-        capture.dataset.dashflowPolished = "1";
-        capture.dataset.dashflowRole = "capture";
-        capture.textContent = "收集灵感";
-        capture.title = "打开 Quick Add，把一句想法收进 Inbox";
-        capture.setAttribute("aria-label", "收集灵感：打开 Quick Add 并写入 Inbox");
-      }
-    }
-  }
-
-  private focusTodayWidget(): void {
-    const card = document.querySelector<HTMLElement>(
-      '.dashflow-command-shell:not(.is-personal-home) .dashflow-widget[data-widget-id="today-tasks"]',
-    );
-    if (!card) return;
-
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    card.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
-    card.classList.add("is-hero-action-target");
-    window.setTimeout(() => card.classList.remove("is-hero-action-target"), reduceMotion ? 0 : 900);
-  }
-}

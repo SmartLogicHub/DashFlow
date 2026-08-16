@@ -1,5 +1,3 @@
-const STYLE_ID = "dashflow-visual-continuity-v042";
-
 export const VISUAL_CONTINUITY_STYLES = `
 /* DashFlow v0.4.2 final visual system.
  * This is the last presentation layer: it stabilizes the shared photographic
@@ -97,8 +95,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   color: var(--df-cmd-muted)!important;
   font-size: 10.5px!important;
 }
-/* Creation remains available from the manager; remove the isolated plus from
- * the top bar so Home/+ /... no longer reads like stray controls. */
 .dashflow-command-shell .dashflow-command-workspace .dashflow-dashboard-switcher > button:first-of-type {
   display: none!important;
 }
@@ -141,7 +137,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   line-height: 1.45!important;
 }
 
-/* Project rows contain main content + five-step progress + numeric stat. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-project-row {
   grid-template-columns: minmax(0, 1fr) minmax(96px, 146px) 54px!important;
   gap: 14px!important;
@@ -158,8 +153,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   font-weight: 650!important;
   letter-spacing: -.01em!important;
 }
-/* The five-stage track already communicates progress; remove the duplicate
- * thin bar from decorated rows so the eye only has one progress language. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-project-row:has(.dashflow-project-steps) .dashflow-project-bar {
   display: none!important;
 }
@@ -198,7 +191,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   line-height: 1.2!important;
 }
 
-/* Dual progress rings: one accent, one inner disc, symmetric spacing. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget[data-widget-type="progress"] .dashflow-widget-body {
   padding: 5px 10px 8px!important;
   overflow: hidden!important;
@@ -298,7 +290,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   font-size: 11px!important;
 }
 
-/* Inbox */
 .dashflow-command-shell .dashflow-command-inbox-composer {
   height: 44px!important;
   margin: 14px 0 8px!important;
@@ -317,7 +308,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   font-size: 10.5px!important;
 }
 
-/* Calendar: one accent language, no green circle + purple outline collision. */
 .dashflow-command-shell .dashflow-calendar-day {
   border-radius: 8px!important;
   box-shadow: none!important;
@@ -348,7 +338,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   line-height: 1.3!important;
 }
 
-/* Habits */
 .dashflow-command-shell .dashflow-habit-row {
   min-height: 52px!important;
   padding: 8px 10px!important;
@@ -367,7 +356,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   line-height: 1.35!important;
 }
 
-/* Review: a summary band, not four independent admin KPI cards. */
 .dashflow-command-shell .dashflow-weekly-kpis {
   gap: 0!important;
   overflow: hidden!important;
@@ -452,7 +440,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   line-height: 1.55!important;
 }
 
-/* Obsidian Setting-based editors */
 .dashflow-task-editor > .setting-item,
 .dashflow-project-editor > .setting-item,
 .dashflow-habit-editor > .setting-item {
@@ -973,7 +960,6 @@ export const VISUAL_CONTINUITY_STYLES = `
   font-size: 11.5px!important;
 }
 
-/* Stable response when Home's primary action enters Work. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget.is-hero-action-target {
   border-color: color-mix(in srgb, var(--df-home-accent, var(--interactive-accent)) 58%, var(--df-cmd-border))!important;
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--df-home-accent, var(--interactive-accent)) 10%, transparent)!important;
@@ -1045,63 +1031,3 @@ export const VISUAL_CONTINUITY_STYLES = `
   }
 }
 `;
-
-export class VisualContinuityService {
-  private observer: MutationObserver | null = null;
-
-  start(): void {
-    if (!document.getElementById(STYLE_ID)) {
-      const style = document.createElement("style");
-      style.id = STYLE_ID;
-      style.textContent = VISUAL_CONTINUITY_STYLES;
-      document.head.appendChild(style);
-    }
-
-    this.observer = new MutationObserver(() => this.stabilizeHeroActions());
-    this.observer.observe(document.body, { childList: true, subtree: true });
-    this.stabilizeHeroActions();
-  }
-
-  stop(): void {
-    this.observer?.disconnect();
-    this.observer = null;
-    document.getElementById(STYLE_ID)?.remove();
-  }
-
-  private stabilizeHeroActions(): void {
-    for (const actions of document.querySelectorAll<HTMLElement>(".dashflow-home-hero-actions")) {
-      const buttons = actions.querySelectorAll<HTMLButtonElement>(":scope > button");
-      const start = buttons[0];
-      const capture = buttons[1];
-
-      if (start && start.dataset.dashflowContinuity !== "1") {
-        start.dataset.dashflowContinuity = "1";
-        start.dataset.dashflowPolished = "1";
-        start.dataset.dashflowRole = "start";
-        start.title = "进入工作台，并聚焦今日任务";
-        start.setAttribute("aria-label", "开始今天：进入工作台并聚焦今日任务");
-        start.addEventListener("click", () => window.setTimeout(() => this.focusTodayWidget(), 48));
-      }
-
-      if (capture && capture.dataset.dashflowContinuity !== "1") {
-        capture.dataset.dashflowContinuity = "1";
-        capture.dataset.dashflowPolished = "1";
-        capture.dataset.dashflowRole = "capture";
-        capture.title = "打开 Quick Add，把一句想法收进 Inbox";
-        capture.setAttribute("aria-label", "收集灵感：打开 Quick Add 并写入 Inbox");
-      }
-    }
-  }
-
-  private focusTodayWidget(): void {
-    const card = document.querySelector<HTMLElement>(
-      '.dashflow-command-shell:not(.is-personal-home) .dashflow-widget[data-widget-id="today-tasks"]',
-    );
-    if (!card) return;
-
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    card.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "nearest" });
-    card.classList.add("is-hero-action-target");
-    window.setTimeout(() => card.classList.remove("is-hero-action-target"), reduceMotion ? 0 : 900);
-  }
-}

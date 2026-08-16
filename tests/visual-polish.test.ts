@@ -9,7 +9,7 @@ import { WidgetRegistry } from "../src/widgets/WidgetRegistry";
 
 const design = readFileSync("src/services/ProductDesignService.ts", "utf8");
 const homeDesign = readFileSync("src/services/PersonalHomeDesignService.ts", "utf8");
-const polish = readFileSync("src/services/UiRefinementPolishService.ts", "utf8");
+const polish = readFileSync("src/styles/UiRefinementStyles.ts", "utf8");
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const settingsSource = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 

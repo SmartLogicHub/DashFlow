@@ -14,17 +14,17 @@ import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInter
 import { CaptureService } from "./services/CaptureService";
 import { DashboardSwitcherInteractionService } from "./services/DashboardSwitcherInteractionService";
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
+import { DesignSystemService } from "./services/DesignSystemService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
 import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService";
+import { PresentationRuntimeService } from "./services/PresentationRuntimeService";
 import { ProductDesignService } from "./services/ProductDesignService";
 import { ProductExperienceService } from "./services/ProductExperienceService";
 import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
-import { UiRefinementPolishService } from "./services/UiRefinementPolishService";
 import { VaultIndexService } from "./services/VaultIndexService";
-import { VisualContinuityService } from "./services/VisualContinuityService";
 import { WeeklyReviewService } from "./services/WeeklyReviewService";
 import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
 import { WeReadService } from "./services/WeReadService";
@@ -61,8 +61,8 @@ export default class DashFlowPlugin extends Plugin {
   weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
-  uiRefinementPolish!: UiRefinementPolishService;
-  visualContinuity!: VisualContinuityService;
+  designSystem!: DesignSystemService;
+  presentationRuntime!: PresentationRuntimeService;
   productExperience!: ProductExperienceService;
 
   async onload(): Promise<void> {
@@ -121,8 +121,8 @@ export default class DashFlowPlugin extends Plugin {
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.productDesign = new ProductDesignService();
     this.personalHomeDesign = new PersonalHomeDesignService();
-    this.uiRefinementPolish = new UiRefinementPolishService(this);
-    this.visualContinuity = new VisualContinuityService();
+    this.designSystem = new DesignSystemService();
+    this.presentationRuntime = new PresentationRuntimeService(this);
     this.productExperience = new ProductExperienceService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
@@ -160,8 +160,10 @@ export default class DashFlowPlugin extends Plugin {
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
     this.productDesign.start();
     this.personalHomeDesign.start();
-    this.uiRefinementPolish.start();
-    this.visualContinuity.start();
+    // v0.4.3 owns the final visual cascade. Legacy CSS is imported by this
+    // presentation-only service without starting the old observer runtimes.
+    this.designSystem.start();
+    this.presentationRuntime.start();
     this.activityService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
@@ -184,8 +186,8 @@ export default class DashFlowPlugin extends Plugin {
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
     this.activityService?.stop();
-    this.visualContinuity?.stop();
-    this.uiRefinementPolish?.stop();
+    this.presentationRuntime?.stop();
+    this.designSystem?.stop();
     this.personalHomeDesign?.stop();
     this.productDesign?.stop();
     this.app.workspace.detachLeavesOfType(VIEW_TYPE);
