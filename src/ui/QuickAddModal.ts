@@ -12,14 +12,14 @@ export class QuickAddModal extends Modal {
   onOpen(): void {
     const { contentEl } = this;
     contentEl.empty();
-    contentEl.addClass("dashflow-quick-add-modal");
+    contentEl.addClass("dashflow-quick-add-modal", "dashflow-editor-modal");
 
-    const eyebrow = contentEl.createDiv("dashflow-quick-add-eyebrow");
+    const eyebrow = contentEl.createDiv("dashflow-modal-eyebrow dashflow-quick-add-eyebrow");
     eyebrow.setText("QUICK ADD");
     contentEl.createEl("h2", { text: "先记下来，再整理。" });
     contentEl.createEl("p", {
-      cls: "dashflow-quick-add-lead",
-      text: "直接输入一句话按 Enter 会进入收集箱；需要日期、项目或优先级时再打开完整任务编辑器。",
+      cls: "dashflow-modal-lead dashflow-quick-add-lead",
+      text: "输入一句话按 Enter 会进入收集箱；需要日期、项目或优先级时，再进入完整任务编辑器。",
     });
 
     const composer = contentEl.createDiv("dashflow-quick-add-composer");
@@ -47,7 +47,7 @@ export class QuickAddModal extends Modal {
 
     const actions = contentEl.createDiv("dashflow-quick-add-actions");
     actions.append(
-      this.actionButton("circle-check-big", "详细任务", "设置日期、优先级和项目", () => {
+      this.actionButton("circle-check-big", "详细任务", "日期、优先级与项目", () => {
         const text = input.value.trim();
         this.close();
         new TaskEditorModal(this.plugin, undefined, text ? { text } : {}).open();
