@@ -1,29 +1,31 @@
-import { normalizePath, setIcon } from "obsidian";
+import { normalizePath, setIcon, TFile } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { Task } from "../models";
 import { activityStreak } from "../activity/activityMath";
 import { PLUGIN_VERSION } from "../constants";
 import { inboxTasks, type ProductSection } from "../product/navigation";
-import { localDate } from "../utils/date";
 import { AIPlanModal } from "../ui/AIPlanModal";
 import { GlobalSearchModal } from "../ui/GlobalSearchModal";
 import { HabitEditorModal } from "../ui/HabitEditorModal";
 import { ProjectDetailModal } from "../ui/ProjectDetailModal";
 import { ProjectEditorModal } from "../ui/ProjectEditorModal";
+import { QuickAddModal } from "../ui/QuickAddModal";
 import { TaskEditorModal } from "../ui/TaskEditorModal";
+import { PersonalHomeService } from "./PersonalHomeService";
 
 const OBSERVE_OPTIONS: MutationObserverInit = { childList: true, subtree: true };
 
 const COMMAND_SECTIONS: Array<{ id: ProductSection; label: string; icon: string }> = [
   { id: "today", label: "主页", icon: "home" },
-  { id: "projects", label: "全部项目", icon: "layout-grid" },
+  { id: "work", label: "工作台", icon: "layout-dashboard" },
+  { id: "projects", label: "项目", icon: "folder-kanban" },
   { id: "inbox", label: "收集箱", icon: "inbox" },
   { id: "calendar", label: "日历", icon: "calendar-days" },
   { id: "habits", label: "习惯", icon: "repeat-2" },
   { id: "review", label: "复盘", icon: "bar-chart-3" },
 ];
 
-const HOME_WIDGET_TYPES = new Set([
+const WORK_WIDGET_TYPES = new Set([
   "quick-capture",
   "tasks",
   "progress",
@@ -38,8 +40,11 @@ export class ProductExperienceService {
   private unsubscribeIndex: (() => void) | null = null;
   private scheduled = false;
   private activeSection: ProductSection = "today";
+  private readonly personalHome: PersonalHomeService;
 
-  constructor(private readonly plugin: DashFlowPlugin) {}
+  constructor(private readonly plugin: DashFlowPlugin) {
+    this.personalHome = new PersonalHomeService(plugin, (section) => this.openSection(section));
+  }
 
   start(): void {
     this.observer = new MutationObserver(() => this.schedule());
@@ -102,9 +107,12 @@ export class ProductExperienceService {
     grid.classList.remove("dashflow-product-hidden");
 
     const editing = grid.classList.contains("is-editing");
+    const personalHome = this.activeSection === "today" && !editing;
     shell.classList.toggle("is-layout-editing", editing);
+    shell.classList.toggle("is-personal-home", personalHome);
+    this.applyTheme(shell, personalHome);
 
-    this.decorateHero(hero);
+    this.decorateHero(hero, personalHome);
     this.decoratePulse(pulse);
     this.decorateTitle(shell, title, editing);
     const commandBar = this.ensureCommandBar(shell, title);
@@ -124,13 +132,64 @@ export class ProductExperienceService {
     this.applySection(grid, this.activeSection);
   }
 
-  private decorateHero(hero: HTMLElement): void {
-    const eyebrow = hero.querySelector<HTMLElement>(".dashflow-eyebrow");
-    const heading = hero.querySelector<HTMLElement>("h1");
-    const description = hero.querySelector<HTMLElement>("p");
-    if (eyebrow) eyebrow.textContent = "DASHFLOW · SECOND BRAIN";
-    if (heading) heading.textContent = "Obsidian · Personal Dashboard";
-    if (description) description.textContent = "WHERE TASKS, NOTES, AND PROJECTS CONVERGE.";
+  private applyTheme(shell: HTMLElement, home: boolean): void {
+    const view = shell.closest<HTMLElement>(".dashflow-view-container");
+    if (!view) return;
+    view.dataset.dashflowTheme = this.plugin.data.settings.homeTheme;
+    view.classList.toggle("dashflow-personal-home-active", home);
+  }
+
+  private decorateHero(hero: HTMLElement, personalHome: boolean): void {
+    hero.replaceChildren();
+    hero.style.removeProperty("--df-home-image");
+    hero.style.removeProperty("--df-home-overlay");
+
+    if (personalHome) {
+      const settings = this.plugin.data.settings;
+      hero.style.setProperty("--df-home-overlay", String(Math.max(0, Math.min(80, settings.homeHeroOverlay)) / 100));
+      const image = this.resolveHeroImage(settings.homeHeroImagePath);
+      if (image) hero.style.setProperty("--df-home-image", `url("${image.replace(/"/g, "%22")}")`);
+
+      const content = document.createElement("div");
+      content.className = "dashflow-home-hero-content";
+      const date = this.text("span", new Intl.DateTimeFormat("zh-CN", {
+        year: "numeric",
+        month: "long",
+        day: "numeric",
+        weekday: "long",
+      }).format(new Date()));
+      date.className = "dashflow-home-hero-date";
+      const heading = this.text("h1", settings.homeHeroTitle || "我的成长");
+      const subtitle = this.text("p", settings.homeHeroSubtitle || "把输入变成理解，把理解变成行动。");
+      const actions = document.createElement("div");
+      actions.className = "dashflow-home-hero-actions";
+      const work = this.text("button", "进入工作台 ↗");
+      work.type = "button";
+      work.className = "is-primary";
+      work.addEventListener("click", () => this.openSection("work"));
+      const capture = this.text("button", "记录灵感");
+      capture.type = "button";
+      capture.addEventListener("click", () => new QuickAddModal(this.plugin).open());
+      actions.append(work, capture);
+      content.append(date, heading, subtitle, actions);
+      hero.appendChild(content);
+      return;
+    }
+
+    const content = document.createElement("div");
+    const heading = this.text("h1", "Obsidian · Personal Dashboard");
+    const description = this.text("p", "WHERE TASKS, NOTES, AND PROJECTS CONVERGE.");
+    const eyebrow = this.text("span", "DASHFLOW · SECOND BRAIN");
+    eyebrow.className = "dashflow-eyebrow";
+    content.append(heading, description, eyebrow);
+    hero.appendChild(content);
+  }
+
+  private resolveHeroImage(pathText: string): string | null {
+    const trimmed = pathText.trim();
+    if (!trimmed) return null;
+    const file = this.plugin.app.vault.getAbstractFileByPath(normalizePath(trimmed));
+    return file instanceof TFile ? this.plugin.app.vault.getResourcePath(file) : null;
   }
 
   private decoratePulse(pulse: HTMLElement): void {
@@ -162,7 +221,7 @@ export class ProductExperienceService {
 
     const copy = document.createElement("div");
     copy.className = "dashflow-command-title-copy";
-    const eyebrow = this.text("span", "SECOND BRAIN");
+    const eyebrow = this.text("span", this.activeSection === "work" ? "WORK SYSTEM" : "SECOND BRAIN");
     eyebrow.className = "dashflow-command-eyebrow";
     const heading = this.text("strong", dashboard.name === "Home" ? "MY DASHBOARD" : dashboard.name);
     heading.className = "dashflow-command-title";
@@ -220,9 +279,10 @@ export class ProductExperienceService {
     const actions = document.createElement("div");
     actions.className = "dashflow-command-actions";
 
-    const task = this.commandButton("square-plus", "新建任务");
-    task.addEventListener("click", () => new TaskEditorModal(this.plugin).open());
+    const add = this.commandButton("plus", "添加");
+    add.addEventListener("click", () => new QuickAddModal(this.plugin).open());
     const project = this.commandButton("folder-plus", "新建项目");
+    project.classList.add("is-secondary-action");
     project.addEventListener("click", () => new ProjectEditorModal(this.plugin).open());
     const habit = this.commandButton("circle-plus", "新建习惯");
     habit.classList.add("is-secondary-action");
@@ -231,7 +291,7 @@ export class ProductExperienceService {
     search.classList.add("is-icon-action");
     search.addEventListener("click", () => new GlobalSearchModal(this.plugin).open());
 
-    actions.append(task, project, habit, search);
+    actions.append(add, project, habit, search);
     if (this.plugin.data.settings.aiEnabled) {
       const ai = this.commandButton("sparkles", "AI 规划");
       ai.classList.add("is-secondary-action");
@@ -411,12 +471,21 @@ export class ProductExperienceService {
   private applySection(grid: HTMLElement, section: ProductSection): void {
     const dashboard = this.plugin.dashboardManager.active();
     grid.dataset.productSection = section;
+    grid.style.removeProperty("display");
     grid.style.gridTemplateColumns = `repeat(${dashboard.settings.columns}, minmax(0, 1fr))`;
     grid.style.gridAutoRows = `${dashboard.settings.rowHeight}px`;
     grid.style.gap = `${dashboard.settings.gap}px`;
 
+    if (section === "today") {
+      for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget")) this.setCardVisible(card, false);
+      grid.style.setProperty("display", "block", "important");
+      grid.appendChild(this.personalHome.render());
+      return;
+    }
+
     if (section === "inbox") {
       for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget")) this.setCardVisible(card, false);
+      grid.style.setProperty("display", "block", "important");
       grid.appendChild(this.renderInboxPage());
       return;
     }
@@ -427,8 +496,8 @@ export class ProductExperienceService {
       if (!widget) continue;
       const type = widget.type;
 
-      if (section === "today") {
-        const visible = HOME_WIDGET_TYPES.has(type);
+      if (section === "work") {
+        const visible = WORK_WIDGET_TYPES.has(type);
         this.setCardVisible(card, visible);
         if (visible) this.applySavedLayout(card, widget.layout);
         continue;
@@ -482,6 +551,7 @@ export class ProductExperienceService {
   private restoreAllWidgets(grid: HTMLElement): void {
     const dashboard = this.plugin.dashboardManager.active();
     grid.removeAttribute("data-product-section");
+    grid.style.removeProperty("display");
     for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget[data-widget-id]")) {
       const id = card.dataset.widgetId ?? "";
       const widget = dashboard.widgets.find((item) => item.id === id);
@@ -492,14 +562,12 @@ export class ProductExperienceService {
   }
 
   private clearSyntheticPage(grid: HTMLElement): void {
-    for (const page of grid.querySelectorAll(":scope > .dashflow-command-page")) page.remove();
+    for (const page of grid.querySelectorAll(":scope > .dashflow-command-page, :scope > .dashflow-personal-home")) page.remove();
   }
 
   private renderInboxPage(): HTMLElement {
     const page = document.createElement("section");
     page.className = "dashflow-command-page dashflow-command-inbox";
-    page.style.gridColumn = "1 / -1";
-    page.style.gridRow = "1 / span 9";
 
     const header = document.createElement("div");
     header.className = "dashflow-command-page-head";

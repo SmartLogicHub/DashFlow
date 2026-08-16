@@ -28,12 +28,11 @@ function habit(id: string, extra: Partial<Habit> = {}): Habit {
   };
 }
 
-test("Today is an execution surface rather than the old all-widget wall", () => {
-  const types = sectionWidgetTypes("today");
-  assert.deepEqual(types, ["tasks", "progress", "upcoming", "projects"]);
-  assert.equal(types.includes("quick-capture"), false);
-  assert.equal(types.includes("weekly-review"), false);
-  assert.equal(types.includes("vault-stats"), false);
+test("Personal Home is separate from the dense Work dashboard", () => {
+  assert.deepEqual(sectionWidgetTypes("today"), []);
+  assert.deepEqual(sectionWidgetTypes("work"), ["quick-capture", "tasks", "progress", "projects", "upcoming", "heatmap", "countdown"]);
+  assert.equal(sectionWidgetTypes("work").includes("weekly-review"), false);
+  assert.equal(sectionWidgetTypes("work").includes("vault-stats"), false);
 });
 
 test("Inbox contains only genuinely unprocessed open tasks", () => {

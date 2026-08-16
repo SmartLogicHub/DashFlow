@@ -6,6 +6,7 @@ export type HabitFrequency = "daily" | "weekdays";
 export type ActivityMetric = "score" | "tasks" | "notes" | "habits";
 export type CalendarEventKind = "task-due" | "task-scheduled" | "project-deadline" | "habit";
 export type CalendarWeekStart = "monday" | "sunday";
+export type HomeTheme = "alpine" | "paper" | "midnight" | "obsidian";
 
 export interface SourceLocation {
   path: string;
@@ -203,6 +204,11 @@ export interface DashFlowSettings {
   projectFolder: string;
   habitTypeValue: string;
   habitFolder: string;
+  homeTheme: HomeTheme;
+  homeHeroImagePath: string;
+  homeHeroTitle: string;
+  homeHeroSubtitle: string;
+  homeHeroOverlay: number;
   aiEnabled: boolean;
   aiBaseUrl: string;
   aiModel: string;
@@ -210,7 +216,7 @@ export interface DashFlowSettings {
 }
 
 export interface DashFlowData {
-  schemaVersion: 5;
+  schemaVersion: 6;
   settings: DashFlowSettings;
   dashboards: DashboardDefinition[];
   activeDashboardId: string;

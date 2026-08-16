@@ -4,33 +4,35 @@ import { readFileSync } from "node:fs";
 
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const design = readFileSync("src/services/ProductDesignService.ts", "utf8");
+const home = readFileSync("src/services/PersonalHomeService.ts", "utf8");
+const homeDesign = readFileSync("src/services/PersonalHomeDesignService.ts", "utf8");
 
-test("Command Dashboard uses horizontal navigation instead of an internal full-height app sidebar", () => {
+test("DashFlow keeps Obsidian chrome and uses horizontal navigation instead of an internal app sidebar", () => {
   assert.ok(experience.includes("COMMAND_SECTIONS"));
   assert.ok(experience.includes("dashflow-command-bar"));
   assert.ok(experience.includes("dashflow-command-nav"));
-  assert.ok(experience.includes("dashflow-command-actions"));
   assert.ok(experience.includes("dashflow-product-nav\")?.remove()"));
   assert.equal(design.includes("grid-template-columns: 176px minmax(0, 1fr)"), false);
 });
 
-test("Home is a compact editable dashboard rather than a synthetic Today application screen", () => {
-  assert.ok(experience.includes("HOME_WIDGET_TYPES"));
-  for (const type of ["quick-capture", "tasks", "progress", "projects", "upcoming", "heatmap", "countdown"]) {
-    assert.ok(experience.includes(`\"${type}\"`), type);
-  }
-  assert.equal(experience.includes("dashflow-focus-panel"), false);
+test("Personal Home and Work dashboard are intentionally separate surfaces", () => {
+  assert.ok(experience.includes('section === "today"'));
+  assert.ok(experience.includes("this.personalHome.render()"));
+  assert.ok(experience.includes('section === "work"'));
+  assert.ok(experience.includes("WORK_WIDGET_TYPES"));
+  assert.ok(home.includes("长期成长的四个领域"));
 });
 
-test("Reference styling uses one dark purple hero, terminal-like pulse and dense card chrome", () => {
-  assert.ok(design.includes("Reference-style purple command banner"));
-  assert.ok(design.includes("Pulse strip: narrow, data-dense"));
+test("Personal Home uses one emotional Hero and quiet content surfaces", () => {
+  assert.ok(homeDesign.includes("Hero: one emotional surface"));
+  assert.ok(homeDesign.includes("dashflow-home-top-grid"));
+  assert.ok(homeDesign.includes("dashflow-home-area-grid"));
+  assert.ok(homeDesign.includes("dashflow-home-activity-strip"));
+  assert.ok(experience.includes("homeHeroImagePath"));
+});
+
+test("Work remains a dense editable Command Dashboard with real metrics", () => {
   assert.ok(design.includes("Dense dashboard grid"));
-  assert.ok(design.includes("border-radius: 7px !important"));
-  assert.ok(design.includes("height: 34px !important"));
-});
-
-test("Reference dashboard enhancements use real data instead of decorative fake metrics", () => {
   assert.ok(experience.includes("activityStreak(this.plugin.data.activity)"));
   assert.ok(experience.includes('this.progressMetric("TODAY"'));
   assert.ok(experience.includes('this.progressMetric("ALL TASKS"'));

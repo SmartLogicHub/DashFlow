@@ -1,67 +1,77 @@
-# DashFlow v0.3.2
+# DashFlow v0.4.0
 
-DashFlow 是建立在 Obsidian Vault 之上的个人工作 Dashboard。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
+DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
 
-## v0.3.2 · Command Dashboard
+## v0.4.0 · Personal OS Home
 
-这一版根据真实 Obsidian Dashboard 参考重新确定视觉方向：**不在 Obsidian 里面再造第二套 App 外壳，而是让 Obsidian 自己负责左右侧栏，DashFlow 专注中间工作区。**
+这一版把此前互相冲突的两种需求正式拆开：
 
-默认界面由五层组成：
+- **Home / 主页**：有情绪、有个人感，回答“我现在处于什么状态、长期在成长什么”。
+- **Work / 工作台**：保留 v0.3.2 的高密度 Command Dashboard，回答“我现在具体要推进什么”。
+
+这样首页不再是所有 Widget 的总和，工作台也不需要承担生活主页的视觉职责。
+
+### Personal Home
+
+主页包含：
+
+- 情绪化 Hero：日期、个人标题、副标题、进入工作台、记录灵感
+- Today Focus：真实今日 / 逾期任务，可直接完成或编辑
+- 今日状态：今日任务完成率、Habit 完成数、活动项目数、Activity streak
+- 长期成长四领域：工作、生活、时间、复盘；点击进入对应工作流
+- 最近 30 天 Activity 热力条
+- 最近修改的 Markdown 笔记
+
+### Hero 与主题
+
+DashFlow **不会内置或请求远程库存照片**。默认 Hero 使用主题渐变；用户可以直接从 Vault 中选择 JPG / PNG / WebP / AVIF / GIF 图片。
+
+推荐使用低饱和、横向构图、主体不过度居中的图片，例如：
+
+- 雪山 / 湖泊 / 冰川：最适合 Alpine 冷蓝灰主题
+- 森林 / 海岸：适合安静的生活主页
+- 极简建筑 / 城市夜景：适合偏工作型 Personal OS
+
+内置四套外观：
 
 ```text
-Purple Command Banner
-Vault Pulse
-Dashboard identity + date/time
-Horizontal command bar
-Dense editable widget grid
+Alpine    冷蓝灰 / 风景型
+Paper     暖白 / 纸张型
+Midnight  深色 / 沉浸型
+Obsidian  跟随当前 Obsidian Theme / Accent
 ```
 
-### 视觉与布局
+设置里可以直接搜索并选择 Vault 图片，也可以调整 Hero 标题、副标题和图片遮罩；图片留空时自动回到主题渐变。
 
-- 紫黑色横幅成为唯一强视觉焦点，Light / Dark 下都保持统一品牌识别
-- Vault Pulse 压缩为终端式状态条，不再使用大 KPI 卡
-- Dashboard 标题、版本和日期时间放在同一信息层
-- 取消 DashFlow 自己的全高左侧导航，不与 Obsidian 文件树和右侧插件栏争夺宽度
-- 横向命令条提供主页、项目、收集箱、日历、习惯、复盘，以及新建任务 / 项目 / 习惯、搜索和可选 AI 规划
-- 默认 Home 恢复 Bento/Grid，但卡片更紧凑、边框更细、留白更少
-- 桌面默认首屏：Quick Capture / TODO / Progress / Upcoming；第二层 Projects；第三层 Activity + Countdown
-- Habit / Calendar / Review 继续作为独立工作流存在，不强塞首屏
-- 编辑布局继续支持拖拽、resize、配置、添加、删除和重置；编辑工具条改成浮动 pill
-- 手机仍然使用单列内容，不做自由 resize
+### Work · Command Dashboard
 
-### 工作流
+工作台继续保留 v0.3.2 的真实高密度能力：
 
-**主页**
-- 快速捕捉直接写入 Inbox
-- TODO 显示今天与逾期任务
-- Progress 使用真实任务数据
-- Upcoming 显示未来截止任务
-- Projects 显示真实项目进度并可进入项目详情
-- Activity 使用真实 Activity 数据
-- Countdown 使用 Widget 配置的目标日期
+- Quick Capture / TODO / 双任务完成率 / Upcoming
+- Project progress + DashFlow Project Detail
+- Activity Heatmap
+- Countdown
+- 可编辑 Bento/Grid：拖拽、resize、配置、添加、删除、重置
+- Obsidian 左右原生 Sidebars 不被 DashFlow 占用
 
-**收集箱**
-- 顶部输入后按 Enter 即可捕捉
-- 只显示尚未整理的开放任务
-- 点击任务进入完整任务编辑器
+### Quick Add
 
-**项目**
-- 项目列表、进度、任务完成数
-- 点击进入 Project Detail
-- Project Detail 中可新建已关联项目的下一步任务
+Quick Capture 不再必须长期占据 Personal Home。全局 **Quick Add** 可以从命令面板或顶部「添加」呼出：
 
-**日历 / 习惯 / 复盘**
-- Calendar + Agenda
-- Habit check-in / streak / history
-- Weekly Review + Activity + Vault stats
+- 直接输入一句话并按 Enter → 进入 Inbox
+- 「详细任务」→ 设置计划日 / 截止日 / 优先级 / 项目
+- 新建项目
+- 新建习惯
 
-### 可选 AI 日计划
+### 其他工作流
 
-- 默认兼容 DeepSeek OpenAI Chat Completions API
-- API Key 使用 Obsidian SecretStorage / Keychain
-- 只有用户主动点击 AI 规划时才请求
-- 只发送结构化任务 / 项目 / Habit 摘要，不发送笔记正文
-- AI 只给建议，不自动修改 Vault
+- Inbox：只显示尚未整理的任务；补充项目或日期后自动离开待整理状态
+- Projects：项目进度、详情、下一步任务
+- Calendar：Calendar + Agenda
+- Habits：Habit check-in / streak / history
+- Review：Weekly Review + Activity + Vault stats
+- Search：跨 Task / Project / Habit 搜索
+- AI 日计划：可选，API Key 使用 Obsidian SecretStorage / Keychain
 
 ## 数据格式
 
@@ -108,14 +118,15 @@ habit_log:
 - Activity Tracker + Heatmap
 - Calendar + Agenda
 - Weekly Review
+- Personal Home + Work Command Dashboard
 - 多 Dashboard、内置模板、自定义模板、JSON 导入 / 导出
-- Desktop Grid 与移动端排序
-- 全局搜索与快速新建
+- Desktop Grid 与移动端单列体验
+- 全局搜索与 Quick Add
 - 可选 AI 日计划
 
 ## 数据边界
 
-DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。Dashboard 布局、模板与 Activity 派生统计保存在插件数据中；AI API Key 保存在 Obsidian SecretStorage 中。
+DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。Dashboard 布局、Personal Home 外观、模板与 Activity 派生统计保存在插件数据中；Hero 图片只引用 Vault 文件，不上传；AI API Key 保存在 Obsidian SecretStorage 中。
 
 ## 开发
 
