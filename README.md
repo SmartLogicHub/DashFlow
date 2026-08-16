@@ -1,19 +1,20 @@
-# DashFlow v0.4.3
+# DashFlow v0.4.4
 
 DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
 
-> v0.4.3 的重点不是继续增加功能，而是把 Home / Work 的视觉系统、运行时和数据边界真正收敛下来，让后续迭代更稳定。
+> v0.4.4 把 Dashboard 从“可编辑布局”升级成更有反馈、更灵活的个人工作台：统一动效、自由拖拽、卡片缩放、响应式信息密度和多实例自定义倒计时。
 
-## v0.4.3 · Design System Consolidation
+## v0.4.4 · Interaction & Flexible Dashboard
 
-这一版完成了 DashFlow 展示层的一次结构性整理：
+- **全新 Motion System**：卡片 stagger 入场、数字反馈、hover lift、拖拽与 resize 状态都使用统一 motion token / easing。
+- **卡片自由排序**：Desktop 编辑布局继续支持拖拽模块，自由调整位置并持久化；拖动时增加明确的层级、目标边框和阴影反馈。
+- **自定义倒计时**：Countdown 本身就是多实例 Widget，每张卡片可以独立设置标题和目标日期，例如“距项目上线”“距考试”“距旅行”。
+- **卡片缩放**：Desktop Grid 支持自由 resize；v0.4.4 使用 Container Query 让卡片在 compact / normal / expanded 宽度下自动调整信息密度，而不是简单把内容硬挤进去。
+- **细节与性能**：Light / Dark 使用不同阴影强度；数字使用 tabular nums；只在活动拖拽卡片启用 `will-change`；移动端关闭无意义 hover 位移。
+- **无障碍动效**：完整支持 `prefers-reduced-motion`，减少动效用户不会被强制播放入场、数字或拖拽动画。
+- **数据边界不变**：这次交互升级只影响 Dashboard presentation / layout，不修改 Task / Project / Habit Markdown 真实数据。
 
-- **统一 Design System**：最终 CSS cascade 由 `DesignSystemService` 统一装载，spacing / radius / typography / control height 开始使用共享 token。
-- **视觉层与行为层拆开**：旧的 `UiRefinementPolishService` / `VisualContinuityService` 已移除，样式迁移到 `src/styles/` 的纯样式模块。
-- **移除视觉 MutationObserver**：展示相关动态行为集中到轻量 `PresentationRuntimeService`，使用 Workspace 事件和 click delegation，不再全局扫描 DOM。
-- **Home 与 Work 分层更清楚**：Home 保留完整 194px 场景 Hero；Work / Projects / Calendar / Habits / Review 使用 88px compact Hero，Inbox 使用 72px，移动端统一更紧凑。
-- **数据边界回归保护**：Dashboard layout migration 可以调整布局，但不能替换 Task / Project / Habit 或 widget config 等业务数据。
-- **CI / Release 验证**：测试、TypeScript build、production bundle、`node --check main.js` 与发布流程持续校验。
+> Desktop 支持自由拖拽和 resize；移动端继续采用稳定的单列顺序与触控友好交互，避免自由缩放带来的误触。
 
 ## 产品结构
 
@@ -40,6 +41,19 @@ Work 强调尽快进入执行，而不是展示 landing page：
 - Progress 保留 Today / All Tasks 两个真实维度
 - Inbox / Calendar / Habits / Review 作为独立工作流
 - Dashboard 支持 drag / resize / config / add / remove / reset
+- Resize 后自动切换信息密度
+
+### 自定义 Countdown
+
+在「编辑布局」中可以添加多个 Countdown，每个实例独立配置：
+
+```text
+距 DashFlow 0.5 发布   46 DAYS
+距考试                 23 DAYS
+距旅行                128 DAYS
+```
+
+配置项：卡片标题、倒计时标签、目标日期。Countdown 配置保存在 Dashboard Widget config 中，不会写进 Task / Project / Habit Markdown。
 
 ### Quick Add
 
@@ -90,13 +104,7 @@ skill_version: 1.0.4
 首页“微信读书 · 我的划线”
 ```
 
-安全与数据原则：
-
-- API Key 只保存在 Obsidian SecretStorage / Keychain；DashFlow `data.json` 只保存 Secret 名称
-- 不使用 Cookie 抓取
-- 不持久化完整划线缓存，内存缓存约 10 分钟
-- `/book/bookmarklist` 没有返回 `deepLink` 时，不自行拼接 `weread://` 链接
-- 未连接或没有真实数据时，不展示假的“我的划线”
+安全与数据原则：API Key 只保存在 Obsidian SecretStorage / Keychain；不使用 Cookie 抓取；不伪造内容或 deep link。
 
 ## 核心能力
 
@@ -108,6 +116,8 @@ skill_version: 1.0.4
 - Calendar + Agenda
 - Weekly Review
 - Personal Home + Work execution surface
+- Motion System + Flexible Dashboard Grid
+- 多实例自定义 Countdown
 - 微信读书真实个人划线
 - 多 Dashboard、内置模板、自定义模板、JSON 导入 / 导出
 - Desktop Grid 与移动端单列体验
@@ -152,16 +162,7 @@ habit_log:
 
 ## 数据边界
 
-DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。
-
-插件数据主要保存：
-
-- Dashboard 布局与模板
-- Personal Home 外观设置
-- Activity 派生统计
-- UI / presentation state
-
-AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
+DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。插件数据主要保存 Dashboard 布局、Widget config、模板、Personal Home 外观、Activity 派生统计和 UI state。AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
 
 ## 开发
 

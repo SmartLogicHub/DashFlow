@@ -16,6 +16,7 @@ import "./visual-continuity.test";
 import "./typography-modal.test";
 import "./final-ui-system.test";
 import "./design-system-consolidation.test";
+import "./interaction-dashboard.test";
 import "./data-boundary.test";
 import "./product-navigation.test";
 import "./studio-ui.test";
