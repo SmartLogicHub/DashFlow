@@ -8,6 +8,8 @@ export type ActivityMetric = "score" | "tasks" | "notes" | "habits";
 export type CalendarEventKind = "task-due" | "task-scheduled" | "project-deadline" | "habit";
 export type CalendarWeekStart = "monday" | "sunday";
 export type HomeTheme = "alpine" | "paper" | "midnight" | "obsidian";
+export type CaptureTarget = "inbox" | "daily-note" | "ask";
+export type ContextMode = "morning" | "work" | "review";
 
 export interface SourceLocation {
   path: string;
@@ -239,6 +241,11 @@ export interface DashFlowSettings {
   aiMorningBriefingEnabled: boolean;
   dailyNoteFolder: string;
   dailyNoteDateFormat: string;
+  quickCaptureTarget: CaptureTarget;
+  dailyCaptureHeading: string;
+  contextMorningDashboardId: string;
+  contextWorkDashboardId: string;
+  contextReviewDashboardId: string;
 }
 
 export interface DashFlowData {
