@@ -36,6 +36,7 @@ import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
 import { VaultIndexService } from "./services/VaultIndexService";
+import { VaultQueryService } from "./services/VaultQueryService";
 import { WeeklyReviewService } from "./services/WeeklyReviewService";
 import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
 import { WeReadService } from "./services/WeReadService";
@@ -63,6 +64,7 @@ export default class DashFlowPlugin extends Plugin {
   dashboardTransfer!: DashboardTransferInteractionService;
   contextSwitcher!: ContextSwitcherService;
   vaultIndex!: VaultIndexService;
+  vaultQuery!: VaultQueryService;
   activityService!: ActivityService;
   activityWidgets!: ActivityWidgetInteractionService;
   calendarService!: CalendarService;
@@ -108,6 +110,7 @@ export default class DashFlowPlugin extends Plugin {
       () => this.data.settings.projectTypeValue,
       () => this.data.settings.habitTypeValue,
     );
+    this.vaultQuery = new VaultQueryService(() => this.vaultIndex.getSnapshot());
     this.activityService = new ActivityService(
       this.app,
       this,
@@ -116,12 +119,13 @@ export default class DashFlowPlugin extends Plugin {
       () => this.savePluginData(),
     );
     this.focusService = new FocusService(this);
-    this.taskService = new TaskService(this.app, this.vaultIndex, this.activityService);
+    this.taskService = new TaskService(this.app, this.vaultIndex, this.activityService, this.vaultQuery);
     this.projectService = new ProjectService(
       this.app,
       this.vaultIndex,
       () => this.data.settings.projectFolder,
       () => this.data.settings.projectTypeValue,
+      this.vaultQuery,
     );
     this.calendarService = new CalendarService(this.vaultIndex);
     this.weeklyReviewService = new WeeklyReviewService(
