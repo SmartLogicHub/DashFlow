@@ -9,31 +9,44 @@ const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const imagePicker = readFileSync("src/ui/HeroImagePickerModal.ts", "utf8");
 const settings = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 
-test("v0.4.0 introduces a schema-backed Personal OS appearance configuration", () => {
-  assert.equal(PLUGIN_VERSION, "0.4.0");
-  assert.equal(SCHEMA_VERSION, 6);
+test("v0.4.1 adds schema-backed WeRead preferences without changing Markdown truth", () => {
+  assert.equal(PLUGIN_VERSION, "0.4.1");
+  assert.equal(SCHEMA_VERSION, 7);
   assert.equal(DEFAULT_SETTINGS.homeTheme, "alpine");
   assert.equal(DEFAULT_SETTINGS.homeHeroImagePath, "");
-  assert.equal(DEFAULT_SETTINGS.homeHeroOverlay, 46);
+  assert.equal(DEFAULT_SETTINGS.homeHeroOverlay, 32);
+  assert.equal(DEFAULT_SETTINGS.weReadEnabled, false);
+  assert.equal(DEFAULT_SETTINGS.weReadSecretId, "");
+  assert.equal(DEFAULT_SETTINGS.weReadShowOnHome, true);
 });
 
-test("Hero image is local-vault-first with theme fallback instead of a remote stock URL", () => {
+test("Hero ships curated low-saturation scenes while preserving local Vault override", () => {
   assert.ok(settings.includes("HeroImagePickerModal"));
   assert.ok(settings.includes("选择图片"));
   assert.ok(homeDesign.includes("--df-home-image"));
-  assert.equal(homeDesign.includes("https://"), false);
-  assert.equal(settings.includes("unsplash"), false);
+  assert.ok(homeDesign.includes("--df-home-scene"));
+  assert.ok(homeDesign.includes("photo-1768161224125-8b2489c9f72c"));
+  assert.ok(homeDesign.includes("photo-1774809553151-a6a237462b91"));
+  assert.ok(homeDesign.includes("photo-1754623291028-423b4455b53b"));
   for (const extension of ["jpg", "jpeg", "png", "webp", "avif", "gif"]) {
     assert.ok(imagePicker.includes(`\"${extension}\"`), extension);
   }
 });
 
-test("Personal Home uses real Task, Project, Habit, Activity and recent Vault note data", () => {
+test("Personal Home uses real Task, Project, Habit, Activity, WeRead and recent Vault note data", () => {
   assert.ok(home.includes("taskService.focus"));
   assert.ok(home.includes("projectService.active"));
   assert.ok(home.includes("habitScheduledOn"));
   assert.ok(home.includes("activityRange"));
+  assert.ok(home.includes("plugin.weRead"));
   assert.ok(home.includes("getMarkdownFiles"));
+});
+
+test("Visual Reset makes areas compact navigation rows instead of large empty cards", () => {
+  assert.ok(home.includes("dashflow-home-area-list"));
+  assert.ok(homeDesign.includes("Areas are navigation rows"));
+  assert.equal(homeDesign.includes("min-height:174px"), false);
+  assert.ok(homeDesign.includes("height:194px!important"));
 });
 
 test("Quick Add captures immediately while preserving structured editors", () => {

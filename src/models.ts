@@ -209,6 +209,9 @@ export interface DashFlowSettings {
   homeHeroTitle: string;
   homeHeroSubtitle: string;
   homeHeroOverlay: number;
+  weReadEnabled: boolean;
+  weReadSecretId: string;
+  weReadShowOnHome: boolean;
   aiEnabled: boolean;
   aiBaseUrl: string;
   aiModel: string;
@@ -216,7 +219,7 @@ export interface DashFlowSettings {
 }
 
 export interface DashFlowData {
-  schemaVersion: 6;
+  schemaVersion: 7;
   settings: DashFlowSettings;
   dashboards: DashboardDefinition[];
   activeDashboardId: string;

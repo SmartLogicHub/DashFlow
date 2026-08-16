@@ -25,6 +25,7 @@ import { TaskService } from "./services/TaskService";
 import { VaultIndexService } from "./services/VaultIndexService";
 import { WeeklyReviewService } from "./services/WeeklyReviewService";
 import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
+import { WeReadService } from "./services/WeReadService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
 import { AIPlanModal } from "./ui/AIPlanModal";
 import { GlobalSearchModal } from "./ui/GlobalSearchModal";
@@ -55,6 +56,7 @@ export default class DashFlowPlugin extends Plugin {
   captureService!: CaptureService;
   taskInteractions!: TaskInteractionService;
   aiPlanning!: AIPlanningService;
+  weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
   productExperience!: ProductExperienceService;
@@ -105,6 +107,7 @@ export default class DashFlowPlugin extends Plugin {
       () => this.data.settings.habitTypeValue,
     );
     this.aiPlanning = new AIPlanningService(this);
+    this.weRead = new WeReadService(this);
     this.taskInteractions = new TaskInteractionService(this);
     this.activityWidgets = new ActivityWidgetInteractionService(this);
     this.habitWidgets = new HabitWidgetInteractionService(this);

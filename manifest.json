@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "minAppVersion": "1.11.4",
-  "description": "A Personal OS for Obsidian with an emotional Home, dense Work dashboard, tasks, projects, calendar, habits, review and optional AI planning.",
+  "description": "A Personal OS for Obsidian with a focused Home, real WeRead highlights, tasks, projects, calendar, habits, review and optional AI planning.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }

@@ -3,6 +3,8 @@ import type DashFlowPlugin from "../main";
 import type { HomeTheme } from "../models";
 import { HeroImagePickerModal } from "../ui/HeroImagePickerModal";
 
+const WEREAD_KEY_URL = "https://weread.qq.com/r/weread-skills";
+
 export class DashFlowSettingsTab extends PluginSettingTab {
   constructor(app: App, private readonly dashFlow: DashFlowPlugin) {
     super(app, dashFlow);
@@ -16,21 +18,21 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     const hero = containerEl.createDiv("dashflow-settings-hero");
     hero.createEl("h2", { text: "DashFlow 设置" });
     hero.createEl("p", {
-      text: "把首页做成自己的 Personal OS；工作台继续承担高密度任务、项目和复盘。",
+      text: "主页负责个人节奏与长期状态；工作台负责任务、项目和时间执行。",
     });
 
-    const appearance = this.panel(containerEl, "Personal OS · 外观", "Hero 默认使用主题渐变；也可以直接选择 Vault 里的本地图片，不请求网络资源。");
+    const appearance = this.panel(containerEl, "外观与首页", "默认场景经过低饱和与文字安全区筛选；也可以用 Vault 本地图片完全替换。")
     const preview = appearance.createDiv("dashflow-home-theme-preview");
     preview.createEl("strong", { text: this.dashFlow.data.settings.homeHeroTitle || "我的成长" });
     preview.createEl("span", { text: this.dashFlow.data.settings.homeHeroSubtitle || "把输入变成理解，把理解变成行动。" });
 
     new Setting(appearance)
       .setName("主题")
-      .setDesc("Alpine 冷蓝灰最接近风景型个人主页；Paper 更温暖，Midnight 更沉浸，Obsidian 完全跟随当前主题。")
+      .setDesc("Alpine 使用雪山湖村，Paper 使用柔和海岸，Midnight 使用雾林；Obsidian 只跟随当前主题。前三套默认场景来自 Unsplash，可被本地图片覆盖。")
       .addDropdown((dropdown) => dropdown
-        .addOption("alpine", "Alpine · 冷蓝灰")
-        .addOption("paper", "Paper · 暖纸张")
-        .addOption("midnight", "Midnight · 深夜")
+        .addOption("alpine", "Alpine · 雪山冷蓝")
+        .addOption("paper", "Paper · 海岸晨光")
+        .addOption("midnight", "Midnight · 雾林深色")
         .addOption("obsidian", "Obsidian · 跟随主题")
         .setValue(this.dashFlow.data.settings.homeTheme)
         .onChange(async (value) => {
@@ -40,8 +42,8 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         }));
 
     new Setting(appearance)
-      .setName("Hero 图片")
-      .setDesc("推荐低饱和雪山、湖泊、森林、海岸或极简建筑。优先点“选择图片”从 Vault 中挑选；留空时使用主题渐变。")
+      .setName("自己的 Hero 图片")
+      .setDesc("从 Vault 选择 JPG / PNG / WebP / AVIF / GIF。选择后优先使用本地图片；清除后恢复当前主题场景。")
       .addText((text) => text
         .setPlaceholder("Assets/hero/mountain.jpg")
         .setValue(this.dashFlow.data.settings.homeHeroImagePath)
@@ -62,7 +64,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         }))
       .addExtraButton((button) => button
         .setIcon("rotate-ccw")
-        .setTooltip("恢复主题渐变")
+        .setTooltip("恢复主题场景")
         .onClick(async () => {
           this.dashFlow.data.settings.homeHeroImagePath = "";
           await this.dashFlow.savePluginData();
@@ -72,7 +74,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
 
     new Setting(appearance)
       .setName("Hero 标题")
-      .setDesc("这是个人主页的主标题，不是技术版本信息。")
+      .setDesc("个人主页的主标题。建议短一些，例如“我的成长”或“Build My System”。")
       .addText((text) => text
         .setPlaceholder("我的成长")
         .setValue(this.dashFlow.data.settings.homeHeroTitle)
@@ -96,15 +98,77 @@ export class DashFlowSettingsTab extends PluginSettingTab {
 
     new Setting(appearance)
       .setName("图片遮罩")
-      .setDesc("图片越复杂，遮罩应该越高，保证标题在浅色和深色照片上都清晰。")
+      .setDesc("只控制文字区域的暗化程度。建议 24–42；照片复杂时再提高。")
       .addSlider((slider) => slider
-        .setLimits(20, 70, 1)
+        .setLimits(18, 62, 1)
         .setDynamicTooltip()
         .setValue(this.dashFlow.data.settings.homeHeroOverlay)
         .onChange(async (value) => {
           this.dashFlow.data.settings.homeHeroOverlay = value;
           await this.dashFlow.savePluginData();
           this.dashFlow.refreshDashboardViews();
+        }));
+
+    const reading = this.panel(containerEl, "微信读书 · 可选", "只读取你授权账户中的笔记本和个人划线，用于首页每日摘录；不会伪造名言，也不使用 Cookie 抓取。")
+    new Setting(reading)
+      .setName("启用微信读书")
+      .setDesc("关闭时 DashFlow 不会请求微信读书。")
+      .addToggle((toggle) => toggle
+        .setValue(this.dashFlow.data.settings.weReadEnabled)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.weReadEnabled = value;
+          this.dashFlow.weRead.clearCache();
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }));
+
+    new Setting(reading)
+      .setName("微信读书 API Key")
+      .setDesc("先从微信读书官方页面获取 wrk-… API Key，再从 Obsidian Keychain 选择或创建密钥。data.json 只保存密钥名称。")
+      .addComponent((el) => new SecretComponent(this.app, el)
+        .setValue(this.dashFlow.data.settings.weReadSecretId)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.weReadSecretId = value;
+          this.dashFlow.weRead.clearCache();
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }))
+      .addButton((button) => button
+        .setButtonText("获取 API Key")
+        .onClick(() => window.open(WEREAD_KEY_URL, "_blank", "noopener,noreferrer")));
+
+    new Setting(reading)
+      .setName("首页每日划线")
+      .setDesc("连接后在首页显示你的真实划线、书名、作者、章节和阅读进度。没有数据时只显示真实空状态。")
+      .addToggle((toggle) => toggle
+        .setValue(this.dashFlow.data.settings.weReadShowOnHome)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.weReadShowOnHome = value;
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }));
+
+    new Setting(reading)
+      .setName("连接测试")
+      .setDesc("只读取一页笔记本概览，确认 API Key 与官方 Agent Gateway 可用。")
+      .addButton((button) => button
+        .setButtonText("测试连接")
+        .onClick(async () => {
+          button.setDisabled(true);
+          button.setButtonText("测试中…");
+          try {
+            const result = await this.dashFlow.weRead.testConnection();
+            this.dashFlow.data.settings.weReadEnabled = true;
+            await this.dashFlow.savePluginData();
+            this.dashFlow.refreshDashboardViews();
+            new Notice(`微信读书已连接 · ${result.books} 本有笔记的书 · ${result.notes} 条笔记`);
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            new Notice(`微信读书：${message}`);
+          } finally {
+            button.setDisabled(false);
+            button.setButtonText("测试连接");
+          }
         }));
 
     const workflow = this.panel(containerEl, "工作流", "决定新内容保存到哪里；已有 Markdown 数据不会被移动。");

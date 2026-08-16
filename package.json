@@ -1,7 +1,7 @@
 {
   "name": "dashflow",
-  "version": "0.4.0",
-  "description": "A Personal OS for Obsidian with an emotional Home, dense Work dashboard, tasks, projects, calendar, habits, review, search and optional AI planning.",
+  "version": "0.4.1",
+  "description": "A Personal OS for Obsidian with a focused Home, real WeRead highlights, tasks, projects, habits, calendar, review, search and optional AI planning.",
   "main": "main.js",
   "type": "module",
   "scripts": {
@@ -9,7 +9,7 @@
     "test": "node tests/run-layout-tests.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
-  "keywords": ["obsidian", "personal-os", "personal-dashboard", "productivity", "tasks", "projects", "habits", "calendar", "review", "search", "ai-planning", "dashboard", "templates", "mobile"],
+  "keywords": ["obsidian", "personal-os", "personal-dashboard", "productivity", "tasks", "projects", "habits", "calendar", "review", "weread", "search", "ai-planning", "dashboard", "templates", "mobile"],
   "devDependencies": {
     "@types/node": "^22.15.17",
     "esbuild": "0.25.5",
