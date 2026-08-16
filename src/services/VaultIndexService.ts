@@ -4,6 +4,9 @@ import { parseHabit } from "../parsers/habitParser";
 import { parseProject } from "../parsers/projectParser";
 import { parseTasks } from "../parsers/taskParser";
 
+const INDEX_CONCURRENCY = 8;
+const FILE_EVENT_DELAY_MS = 24;
+
 function normalizeTag(value: string): string {
   return value.trim().replace(/^#+/, "");
 }
@@ -48,6 +51,7 @@ export class VaultIndexService {
   private readonly habitByPath = new Map<string, Habit>();
   private readonly noteByPath = new Map<string, NoteRecord>();
   private readonly listeners = new Set<(snapshot: VaultSnapshot) => void>();
+  private readonly fileTimers = new Map<string, number>();
   private snapshot: VaultSnapshot = {
     revision: 0,
     notes: 0,
@@ -67,6 +71,7 @@ export class VaultIndexService {
   ) {}
 
   initializeWhenReady(): void {
+    this.plugin.register(() => this.clearTimers());
     this.app.workspace.onLayoutReady(() => {
       void this.initialize();
       this.registerEvents();
@@ -74,8 +79,7 @@ export class VaultIndexService {
   }
 
   async initialize(): Promise<void> {
-    const files = this.app.vault.getMarkdownFiles();
-    await Promise.all(files.map((file) => this.indexFile(file, false)));
+    await this.indexFiles(this.app.vault.getMarkdownFiles());
     this.initialized = true;
     this.rebuildSnapshot();
   }
@@ -83,11 +87,11 @@ export class VaultIndexService {
   private registerEvents(): void {
     this.plugin.registerEvent(this.app.vault.on("create", (file) => {
       if (!this.app.workspace.layoutReady) return;
-      if (file instanceof TFile && file.extension === "md") void this.indexFile(file);
+      if (file instanceof TFile && file.extension === "md") this.scheduleFile(file);
     }));
 
     this.plugin.registerEvent(this.app.vault.on("modify", (file) => {
-      if (file instanceof TFile && file.extension === "md") void this.indexFile(file);
+      if (file instanceof TFile && file.extension === "md") this.scheduleFile(file);
     }));
 
     this.plugin.registerEvent(this.app.vault.on("delete", (file) => {
@@ -96,25 +100,26 @@ export class VaultIndexService {
 
     this.plugin.registerEvent(this.app.vault.on("rename", (file, oldPath) => {
       this.removePath(oldPath, false);
-      if (file instanceof TFile && file.extension === "md") void this.indexFile(file);
+      if (file instanceof TFile && file.extension === "md") this.scheduleFile(file);
     }));
 
     this.plugin.registerEvent(this.app.metadataCache.on("changed", (file) => {
-      if (file.extension === "md") void this.indexFile(file);
+      if (file.extension === "md") this.scheduleFile(file);
     }));
   }
 
   async reindexAll(): Promise<void> {
+    this.clearFileTimers();
     this.tasksByPath.clear();
     this.projectByPath.clear();
     this.habitByPath.clear();
     this.noteByPath.clear();
-    const files = this.app.vault.getMarkdownFiles();
-    await Promise.all(files.map((file) => this.indexFile(file, false)));
+    await this.indexFiles(this.app.vault.getMarkdownFiles());
     this.rebuildSnapshot();
   }
 
   async indexFile(file: TFile, notify = true): Promise<void> {
+    this.cancelFileTimer(file.path);
     try {
       const content = await this.app.vault.cachedRead(file);
       const tasks = parseTasks(file.path, content);
@@ -147,7 +152,49 @@ export class VaultIndexService {
     }
   }
 
+  private async indexFiles(files: TFile[]): Promise<void> {
+    let cursor = 0;
+    const workerCount = Math.min(INDEX_CONCURRENCY, files.length);
+    const workers = Array.from({ length: workerCount }, async () => {
+      while (cursor < files.length) {
+        const index = cursor;
+        cursor += 1;
+        const file = files[index];
+        if (file) await this.indexFile(file, false);
+      }
+    });
+    await Promise.all(workers);
+  }
+
+  private scheduleFile(file: TFile): void {
+    this.cancelFileTimer(file.path);
+    const timer = window.setTimeout(() => {
+      this.fileTimers.delete(file.path);
+      void this.indexFile(file);
+    }, FILE_EVENT_DELAY_MS);
+    this.fileTimers.set(file.path, timer);
+  }
+
+  private cancelFileTimer(path: string): void {
+    const timer = this.fileTimers.get(path);
+    if (timer === undefined) return;
+    window.clearTimeout(timer);
+    this.fileTimers.delete(path);
+  }
+
+  private clearFileTimers(): void {
+    for (const timer of this.fileTimers.values()) window.clearTimeout(timer);
+    this.fileTimers.clear();
+  }
+
+  private clearTimers(): void {
+    this.clearFileTimers();
+    if (this.timer !== null) window.clearTimeout(this.timer);
+    this.timer = null;
+  }
+
   private removePath(path: string, notify = true): void {
+    this.cancelFileTimer(path);
     this.tasksByPath.delete(path);
     this.projectByPath.delete(path);
     this.habitByPath.delete(path);

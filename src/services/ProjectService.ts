@@ -1,6 +1,7 @@
 import { Notice, TFile, normalizePath, type App } from "obsidian";
 import type { Project, ProjectEditInput, Task } from "../models";
 import type { VaultIndexService } from "./VaultIndexService";
+import type { VaultQueryService } from "./VaultQueryService";
 
 function sanitizeId(value: string): string {
   return value
@@ -30,27 +31,30 @@ export class ProjectService {
     private readonly index: VaultIndexService,
     private readonly getProjectFolder: () => string,
     private readonly getProjectTypeValue: () => string,
+    private readonly query?: VaultQueryService,
   ) {}
 
   active(): Project[] {
+    if (this.query) return this.query.getActiveProjects();
     return this.index.getSnapshot().projects
       .filter((project) => project.status === "active")
       .sort((a, b) => (a.deadline ?? "9999").localeCompare(b.deadline ?? "9999") || a.name.localeCompare(b.name));
   }
 
   all(): Project[] {
+    if (this.query) return this.query.getAllProjects();
     return [...this.index.getSnapshot().projects]
       .sort((a, b) => a.status.localeCompare(b.status) || (a.deadline ?? "9999").localeCompare(b.deadline ?? "9999") || a.name.localeCompare(b.name));
   }
 
   tasks(project: Project): Task[] {
+    if (this.query) return this.query.tasksForProject(project.id);
     return this.index.getSnapshot().tasks.filter((task) => task.projectId === project.id);
   }
 
   progress(project: Project): number {
-    if (project.progressMode === "manual" && project.manualProgress !== undefined) {
-      return project.manualProgress;
-    }
+    if (this.query) return this.query.projectProgress(project);
+    if (project.progressMode === "manual" && project.manualProgress !== undefined) return project.manualProgress;
     const tasks = this.tasks(project);
     if (tasks.length === 0) return 0;
     return Math.round((tasks.filter((task) => task.completed).length / tasks.length) * 100);

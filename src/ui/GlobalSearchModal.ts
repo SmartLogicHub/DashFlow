@@ -38,29 +38,11 @@ export class GlobalSearchModal extends SuggestModal<SearchItem> {
   }
 
   getSuggestions(query: string): SearchItem[] {
-    const snapshot = this.plugin.vaultIndex.getSnapshot();
     const results: SearchItem[] = [];
-
     for (const action of ACTIONS) {
       if (action.kind === "action" && matches(`${action.title} ${action.meta}`, query)) results.push(action);
     }
-
-    const tasks = snapshot.tasks
-      .filter((task) => !task.completed && matches(`${task.text} ${task.projectId ?? ""} ${task.tags.join(" ")}`, query))
-      .sort((a, b) => (a.scheduled ?? a.due ?? "9999").localeCompare(b.scheduled ?? b.due ?? "9999"))
-      .slice(0, query ? 18 : 7);
-    results.push(...tasks.map((task): SearchItem => ({ kind: "task", task })));
-
-    const projects = snapshot.projects
-      .filter((project) => project.status !== "archived" && matches(`${project.name} ${project.description ?? ""} ${project.tags.join(" ")}`, query))
-      .slice(0, query ? 10 : 5);
-    results.push(...projects.map((project): SearchItem => ({ kind: "project", project })));
-
-    const habits = snapshot.habits
-      .filter((habit) => habit.status !== "archived" && matches(`${habit.name} ${habit.description ?? ""} ${habit.tags.join(" ")}`, query))
-      .slice(0, query ? 10 : 5);
-    results.push(...habits.map((habit): SearchItem => ({ kind: "habit", habit })));
-
+    results.push(...this.plugin.vaultQuery.search(query));
     return results.slice(0, 30);
   }
 

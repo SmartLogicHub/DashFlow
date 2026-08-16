@@ -26,11 +26,24 @@ export interface DataFilterView {
   config: DataFilterWidgetConfig;
 }
 
+interface IndexedDataFilterMatch {
+  match: DataFilterMatch;
+  searchText: string;
+  normalizedTags: Set<string>;
+  folder: string;
+  frontmatter?: Map<string, string>;
+}
+
+export interface DataFilterIndex {
+  candidates: IndexedDataFilterMatch[];
+}
+
 const ENTITIES: DataFilterEntity[] = ["all", "note", "task", "project", "habit"];
 const STATES: DataFilterState[] = ["active", "completed", "all"];
 const DATE_RANGES: DataFilterDateRange[] = ["all", "overdue", "today", "next7", "next30", "none"];
 const SORTS: DataFilterSort[] = ["date", "name", "type"];
 const TASK_STATUSES: DataFilterTaskStatus[] = ["all", "has-tasks", "pending", "completed", "none"];
+const SNAPSHOT_INDEX_CACHE = new WeakMap<VaultSnapshot, DataFilterIndex>();
 
 export const DEFAULT_DATA_FILTER_CONFIG: DataFilterWidgetConfig = {
   entity: "all",
@@ -68,19 +81,6 @@ function normalizeTag(value: string): string {
   return value.trim().replace(/^#+/, "").toLocaleLowerCase();
 }
 
-function matchesTag(tags: string[], requested: string): boolean {
-  const wanted = normalizeTag(requested);
-  if (!wanted) return true;
-  return tags.some((tag) => normalizeTag(tag) === wanted);
-}
-
-function matchesQuery(haystack: string, query: string): boolean {
-  const needles = query.toLocaleLowerCase().split(/\s+/).filter(Boolean);
-  if (needles.length === 0) return true;
-  const normalized = haystack.toLocaleLowerCase();
-  return needles.every((needle) => normalized.includes(needle));
-}
-
 function stateMatches(match: DataFilterMatch, state: DataFilterState): boolean {
   if (match.kind === "note") return true;
   if (match.kind === "task") {
@@ -108,37 +108,6 @@ function folderForMatch(match: DataFilterMatch): string {
   const path = match.item.source.path;
   const index = path.lastIndexOf("/");
   return index >= 0 ? path.slice(0, index) : "";
-}
-
-function folderMatches(match: DataFilterMatch, requested: string): boolean {
-  const wanted = requested.trim().replace(/^\/+|\/+$/g, "").toLocaleLowerCase();
-  if (!wanted) return true;
-  const folder = folderForMatch(match).replace(/^\/+|\/+$/g, "").toLocaleLowerCase();
-  return folder === wanted || folder.startsWith(`${wanted}/`);
-}
-
-function frontmatterMatches(match: DataFilterMatch, requested: string): boolean {
-  const expression = requested.trim();
-  if (!expression) return true;
-  if (match.kind !== "note") return false;
-  const separator = expression.indexOf("=");
-  const keyText = (separator >= 0 ? expression.slice(0, separator) : expression).trim().toLocaleLowerCase();
-  if (!keyText) return true;
-  const entry = Object.entries(match.item.frontmatter).find(([key]) => key.toLocaleLowerCase() === keyText);
-  if (!entry) return false;
-  if (separator < 0) return true;
-  const expected = expression.slice(separator + 1).trim().toLocaleLowerCase();
-  return !expected || entry[1].toLocaleLowerCase().includes(expected);
-}
-
-function noteTaskStatusMatches(match: DataFilterMatch, status: DataFilterTaskStatus): boolean {
-  if (status === "all") return true;
-  if (match.kind !== "note") return false;
-  const { taskTotal, taskCompleted } = match.item;
-  if (status === "none") return taskTotal === 0;
-  if (status === "has-tasks") return taskTotal > 0;
-  if (status === "pending") return taskTotal > taskCompleted;
-  return taskTotal > 0 && taskCompleted === taskTotal;
 }
 
 function noteMatch(note: NoteRecord): DataFilterMatch {
@@ -211,6 +180,57 @@ function searchable(match: DataFilterMatch): string {
     .join(" ");
 }
 
+function indexMatch(match: DataFilterMatch): IndexedDataFilterMatch {
+  const frontmatter = match.kind === "note"
+    ? new Map(Object.entries(match.item.frontmatter).map(([key, value]) => [key.toLocaleLowerCase(), value.toLocaleLowerCase()]))
+    : undefined;
+  return {
+    match,
+    searchText: searchable(match).toLocaleLowerCase(),
+    normalizedTags: new Set(match.tags.map(normalizeTag).filter(Boolean)),
+    folder: folderForMatch(match).replace(/^\/+|\/+$/g, "").toLocaleLowerCase(),
+    frontmatter,
+  };
+}
+
+export function buildDataFilterIndex(snapshot: VaultSnapshot): DataFilterIndex {
+  const candidates: IndexedDataFilterMatch[] = [];
+  for (const note of snapshot.noteRecords ?? []) candidates.push(indexMatch(noteMatch(note)));
+  for (const task of snapshot.tasks) candidates.push(indexMatch(taskMatch(task)));
+  for (const project of snapshot.projects) candidates.push(indexMatch(projectMatch(project)));
+  for (const habit of snapshot.habits) candidates.push(indexMatch(habitMatch(habit)));
+  return { candidates };
+}
+
+function matchesQuery(searchText: string, query: string): boolean {
+  const needles = query.toLocaleLowerCase().split(/\s+/).filter(Boolean);
+  return needles.length === 0 || needles.every((needle) => searchText.includes(needle));
+}
+
+function frontmatterMatches(indexed: IndexedDataFilterMatch, requested: string): boolean {
+  const expression = requested.trim();
+  if (!expression) return true;
+  if (!indexed.frontmatter) return false;
+  const separator = expression.indexOf("=");
+  const key = (separator >= 0 ? expression.slice(0, separator) : expression).trim().toLocaleLowerCase();
+  if (!key) return true;
+  const value = indexed.frontmatter.get(key);
+  if (value === undefined) return false;
+  if (separator < 0) return true;
+  const expected = expression.slice(separator + 1).trim().toLocaleLowerCase();
+  return !expected || value.includes(expected);
+}
+
+function noteTaskStatusMatches(match: DataFilterMatch, status: DataFilterTaskStatus): boolean {
+  if (status === "all") return true;
+  if (match.kind !== "note") return false;
+  const { taskTotal, taskCompleted } = match.item;
+  if (status === "none") return taskTotal === 0;
+  if (status === "has-tasks") return taskTotal > 0;
+  if (status === "pending") return taskTotal > taskCompleted;
+  return taskTotal > 0 && taskCompleted === taskTotal;
+}
+
 function compareMatches(a: DataFilterMatch, b: DataFilterMatch, sort: DataFilterSort): number {
   if (sort === "name") return a.title.localeCompare(b.title, "zh-CN");
   if (sort === "type") {
@@ -221,36 +241,49 @@ function compareMatches(a: DataFilterMatch, b: DataFilterMatch, sort: DataFilter
     || a.title.localeCompare(b.title, "zh-CN");
 }
 
-export function filterVaultSnapshot(
-  snapshot: VaultSnapshot,
+export function filterDataFilterIndex(
+  index: DataFilterIndex,
   rawConfig: Partial<DataFilterWidgetConfig> | null | undefined,
   today = localDate(),
 ): DataFilterView {
   const config = normalizeDataFilterConfig(rawConfig);
-  const candidates: DataFilterMatch[] = [];
-  if (config.entity === "all" || config.entity === "note") candidates.push(...(snapshot.noteRecords ?? []).map(noteMatch));
-  if (config.entity === "all" || config.entity === "task") candidates.push(...snapshot.tasks.map(taskMatch));
-  if (config.entity === "all" || config.entity === "project") candidates.push(...snapshot.projects.map(projectMatch));
-  if (config.entity === "all" || config.entity === "habit") candidates.push(...snapshot.habits.map(habitMatch));
-
-  const filtered = candidates.filter((match) => (
-    stateMatches(match, config.state)
-    && dateMatches(match.date, config.dateRange, today)
-    && matchesTag(match.tags, config.tag)
-    && folderMatches(match, config.folder)
-    && frontmatterMatches(match, config.frontmatter)
-    && noteTaskStatusMatches(match, config.noteTaskStatus)
-    && matchesQuery(searchable(match), config.query)
-  ));
-  filtered.sort((a, b) => compareMatches(a, b, config.sort));
-
+  const wantedTag = normalizeTag(config.tag);
+  const wantedFolder = config.folder.replace(/^\/+|\/+$/g, "").toLocaleLowerCase();
+  const filtered: DataFilterMatch[] = [];
   const counts = { note: 0, task: 0, project: 0, habit: 0 };
-  for (const match of filtered) counts[match.kind] += 1;
 
+  for (const indexed of index.candidates) {
+    const match = indexed.match;
+    if (config.entity !== "all" && match.kind !== config.entity) continue;
+    if (!stateMatches(match, config.state)) continue;
+    if (!dateMatches(match.date, config.dateRange, today)) continue;
+    if (wantedTag && !indexed.normalizedTags.has(wantedTag)) continue;
+    if (wantedFolder && indexed.folder !== wantedFolder && !indexed.folder.startsWith(`${wantedFolder}/`)) continue;
+    if (!frontmatterMatches(indexed, config.frontmatter)) continue;
+    if (!noteTaskStatusMatches(match, config.noteTaskStatus)) continue;
+    if (!matchesQuery(indexed.searchText, config.query)) continue;
+    filtered.push(match);
+    counts[match.kind] += 1;
+  }
+
+  filtered.sort((a, b) => compareMatches(a, b, config.sort));
   return {
     items: filtered.slice(0, config.limit),
     total: filtered.length,
     counts,
     config,
   };
+}
+
+export function filterVaultSnapshot(
+  snapshot: VaultSnapshot,
+  rawConfig: Partial<DataFilterWidgetConfig> | null | undefined,
+  today = localDate(),
+): DataFilterView {
+  let index = SNAPSHOT_INDEX_CACHE.get(snapshot);
+  if (!index) {
+    index = buildDataFilterIndex(snapshot);
+    SNAPSHOT_INDEX_CACHE.set(snapshot, index);
+  }
+  return filterDataFilterIndex(index, rawConfig, today);
 }

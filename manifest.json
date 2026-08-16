@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "minAppVersion": "1.11.4",
-  "description": "A Personal OS for Obsidian with Focus sessions, safe Magic Embed, Visual Data Filter, AI News, Morning Briefing, Quick Capture and context switching.",
+  "description": "A Personal OS for Obsidian with revision-aware query caching, bounded Vault indexing, Visual Data Filter, Focus, AI News and workflow tools.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }
