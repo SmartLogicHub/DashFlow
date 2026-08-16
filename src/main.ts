@@ -14,6 +14,7 @@ import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInter
 import { CaptureService } from "./services/CaptureService";
 import { DashboardSwitcherInteractionService } from "./services/DashboardSwitcherInteractionService";
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
+import { DesignSystemService } from "./services/DesignSystemService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
 import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService";
@@ -63,6 +64,7 @@ export default class DashFlowPlugin extends Plugin {
   personalHomeDesign!: PersonalHomeDesignService;
   uiRefinementPolish!: UiRefinementPolishService;
   visualContinuity!: VisualContinuityService;
+  designSystem!: DesignSystemService;
   productExperience!: ProductExperienceService;
 
   async onload(): Promise<void> {
@@ -123,6 +125,7 @@ export default class DashFlowPlugin extends Plugin {
     this.personalHomeDesign = new PersonalHomeDesignService();
     this.uiRefinementPolish = new UiRefinementPolishService(this);
     this.visualContinuity = new VisualContinuityService();
+    this.designSystem = new DesignSystemService();
     this.productExperience = new ProductExperienceService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
@@ -164,6 +167,9 @@ export default class DashFlowPlugin extends Plugin {
     // UiRefinementPolish from attaching the same post-navigation focus listener twice.
     this.visualContinuity.start();
     this.uiRefinementPolish.start();
+    // v0.4.3 is the consolidation target. It stays presentation-only and starts
+    // last so new tokens/geometry can replace legacy visual decisions incrementally.
+    this.designSystem.start();
     this.activityService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
@@ -186,6 +192,7 @@ export default class DashFlowPlugin extends Plugin {
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
     this.activityService?.stop();
+    this.designSystem?.stop();
     this.uiRefinementPolish?.stop();
     this.visualContinuity?.stop();
     this.personalHomeDesign?.stop();
