@@ -5,7 +5,7 @@ import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles";
 const STYLE_ID = "dashflow-design-system-v044";
 
 /**
- * v0.4.4 design-system layer.
+ * Consolidated design-system layer.
  *
  * This service is presentation-only: no MutationObserver, no event handlers,
  * and no access to Task / Project / Habit data. Earlier visual layers are kept
@@ -80,6 +80,107 @@ export const DESIGN_SYSTEM_STYLES = `
   font-size: var(--df-font-md)!important;
 }
 
+/* v0.4.6 — Daily Progress becomes a first-class Home signal without changing
+ * its Markdown storage model. */
+.dashflow-home-status-metrics {
+  grid-template-columns: repeat(4, minmax(0, 1fr))!important;
+}
+
+.dashflow-home-daily-progress-list {
+  display: flex;
+  flex-direction: column;
+  padding: 5px 10px 9px;
+}
+
+.dashflow-home-daily-progress-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 30px;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 4px 3px;
+  border-bottom: 1px solid var(--df-home-border);
+}
+
+.dashflow-home-daily-progress-row:last-child {
+  border-bottom: 0;
+}
+
+.dashflow-home-daily-progress-row > input {
+  margin: 0;
+  accent-color: var(--df-home-accent);
+}
+
+.dashflow-home-daily-progress-main,
+.dashflow-home-daily-progress-note {
+  appearance: none;
+  border: 0!important;
+  background: transparent!important;
+  box-shadow: none!important;
+  color: var(--df-home-text)!important;
+}
+
+.dashflow-home-daily-progress-main {
+  min-width: 0;
+  padding: 3px 0!important;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.dashflow-home-daily-progress-main strong {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--df-font-sm);
+  font-weight: 700;
+}
+
+.dashflow-home-daily-progress-main small {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--df-home-muted);
+  font-size: var(--df-font-xs);
+}
+
+.dashflow-home-daily-progress-row.is-done .dashflow-home-daily-progress-main strong {
+  color: var(--df-home-muted);
+}
+
+.dashflow-home-daily-progress-note {
+  width: 28px;
+  height: 28px;
+  padding: 0!important;
+  display: grid;
+  place-items: center;
+  border-radius: var(--df-radius-sm)!important;
+  color: var(--df-home-muted)!important;
+  cursor: pointer;
+}
+
+.dashflow-home-daily-progress-note:hover,
+.dashflow-home-daily-progress-note.has-note {
+  color: var(--df-home-accent)!important;
+  background: var(--df-home-accent-soft)!important;
+}
+
+.dashflow-home-daily-progress-note svg {
+  width: 14px;
+  height: 14px;
+}
+
+.dashflow-home-daily-progress-more {
+  padding: 7px 3px 1px;
+  color: var(--df-home-muted);
+  font-size: var(--df-font-xs);
+}
+
 @media (max-width: 760px) {
   .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
     height: 72px!important;
@@ -89,6 +190,10 @@ export const DESIGN_SYSTEM_STYLES = `
 
   .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after {
     font-size: 17px!important;
+  }
+
+  .dashflow-home-status-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr))!important;
   }
 }
 `;
