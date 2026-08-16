@@ -1,8 +1,77 @@
-# DashFlow v0.5.1
+# DashFlow v0.5.2
 
 DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project / Habit / Daily Progress 都以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
 
-> v0.5.1 聚焦 **极速工作流**：Quick Capture 现在可以写入 DashFlow Inbox、当天 Daily Note，或每次提交时选择；同时新增 Morning / Work / Review 情景模式，直接映射现有 Dashboard，一键切换工作状态而不复制布局。
+> v0.5.2 新增 **AI News Curation**：把多个公开 RSS / Atom 信息源先在本地规范化、去重和缓存，再通过已有 `AIClient` 做一次个性化排序，只展示真正值得今天阅读的 Top-K 内容。
+
+## v0.5.2 · AI News Curation
+
+AI 早报是一个普通 Dashboard Widget，可以在「编辑布局 → 添加卡片」中加入，不会被写死在 Home。
+
+每个实例都可以单独配置：
+
+- **RSS / Atom 源**：换行、逗号或分号分隔，最多 12 个公开 HTTP(S) Feed。
+- **兴趣 Prompt**：例如 `AI Agent、Obsidian、独立开发、效率工具`。
+- **精选条数**：1–8 条，默认 3 条。
+- **刷新周期**：1–24 小时，默认 4 小时。
+
+```text
+AI 早报                                      AI CURATED · 4H CACHE
+
+01  OpenAI / Agent Runtime 新进展
+    与你的 Agent / Personal OS 方向高度相关，值得关注接口变化。
+    Source · 08/16 · 94/100
+
+02  Obsidian 插件架构实践
+    对插件状态管理和性能优化有直接参考价值。
+    Source · 08/16 · 88/100
+
+03  Local-first productivity tools
+    与本地优先、可控数据边界方向一致。
+    Source · 08/15 · 83/100
+```
+
+### 数据管线
+
+```text
+RSS / Atom
+    │
+    ├─ fetch（最多 12 源 × 每源 12 条）
+    │
+    ├─ normalize / clean
+    │
+    ├─ deduplicate
+    │
+    ├─ candidate cap（最多 40 条）
+    │
+    └─ AIClient.completeJson() 一次排序
+                   │
+                   └─ Top-K + score + 推荐理由
+```
+
+DashFlow **不抓取文章正文**。送给 AI Provider 的候选只包含 RSS / Atom 自带的标题、摘要、来源、发布日期和候选 ID；文章 URL 保留在本地用于打开原文。
+
+### 缓存与 Token 控制
+
+- Feed 在配置的刷新周期内直接使用缓存，不重复请求网络。
+- 每次刷新会计算 `candidatesHash`。
+- 如果候选内容没有变化，只更新时间并复用之前的 AI 排名。
+- 只有候选真正变化后才再次调用 AI。
+- AI News 缓存继续放在现有 `aiCache.news`，没有升级 `SCHEMA_VERSION`。
+
+### 安全边界
+
+AI News Widget 会在显示时自动读取配置的 Feed，因此 v0.5.2 对网络目标做了额外限制：
+
+- 只允许公开 `http://` / `https://` Feed。
+- 自动拒绝 `localhost`、`.localhost`、`.local`。
+- 自动拒绝 IPv4 loopback、RFC1918 私网、link-local 与 `0.0.0.0/8`。
+- 自动拒绝 IPv6 loopback、link-local 与本地 ULA 范围。
+- 超大 Feed 会在 XML 解析前被拒绝。
+- RSS 标题、摘要与来源始终被 AI Prompt 标记为**外部不可信数据**，其中的提示词不会被当作系统指令。
+- 原文链接使用 `noopener noreferrer` 打开。
+
+> 这里的限制只针对 **自动 Feed 抓取**。AI Provider 本身仍然可以配置为 `localhost` / `127.0.0.1` 的 Ollama 等本地 OpenAI-compatible 服务。
 
 ## v0.5.1 · Quick Capture + Context Switcher
 
@@ -90,7 +159,7 @@ v0.5.0 把原本 AI Planning 内部的网络请求抽成共享 `AIClient`：
                        │
           ┌────────────┼────────────┐
           │            │            │
-     AI Planning   Morning Brief   AI News (next)
+     AI Planning   Morning Brief   AI News
 ```
 
 统一支持：
@@ -192,6 +261,7 @@ daily_notes:
 ### Work · 执行工作台
 
 - Morning / Work / Review Context Switcher
+- AI News Curation 可作为普通 Dashboard Widget 添加
 - 紧凑命令栏与 compact Hero
 - Task 列表与真实优先级 / 日期 / 项目关联
 - Project 行式结构与真实进度
@@ -259,7 +329,8 @@ DashFlow 使用腾讯公开的微信读书 Agent API Gateway，只展示用户�
 
 - Vault 增量索引
 - Task / Project / Habit / Daily Progress
-- AIClient + AI Morning Briefing + 可选 AI 日计划
+- AIClient + AI Morning Briefing + AI News Curation + 可选 AI 日计划
+- AI News：RSS / Atom normalize / dedupe / cache / Top-K ranking
 - Quick Capture：Inbox / Daily Note / Ask
 - DailyNoteService：统一 Daily Note 路径与安全写入
 - Context Switcher：Morning / Work / Review → existing Dashboard IDs
@@ -335,9 +406,11 @@ daily_notes:
 
 DashFlow 不把 Task / Project / Habit / Daily Progress 锁进专有数据库。删除插件后，这些业务数据仍完整留在 Vault Markdown 中。
 
-插件私有数据主要保存 Dashboard 布局、Widget config、模板、Context 映射、Quick Capture 偏好、Personal Home 外观、Activity 派生统计、AI 晨间简报缓存和 UI state。AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
+插件私有数据主要保存 Dashboard 布局、Widget config、模板、Context 映射、Quick Capture 偏好、Personal Home 外观、Activity 派生统计、AI 晨间简报缓存、AI News 缓存和 UI state。AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
 
 AI 晨间简报默认关闭并需要独立授权。启用后，昨日 Daily Note 正文会发送给用户配置的 AI Base URL；如果使用 localhost Ollama，则请求留在本机。
+
+AI News 会直接请求用户配置的公开 RSS / Atom URL，并把候选的**标题、摘要、来源、日期**发送给用户配置的 AI Base URL 做排序；不会抓取或上传文章正文。Feed URL 的自动请求会阻止 localhost、私网、link-local 和 `.local` 地址。
 
 ## 开发
 
