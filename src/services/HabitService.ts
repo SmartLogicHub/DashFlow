@@ -38,6 +38,21 @@ function normalizeDates(value: unknown): string[] {
   return [...new Set(dates)].sort();
 }
 
+function normalizeDailyNotes(value: unknown): Record<string, string> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
+  const notes: Record<string, string> = {};
+  for (const [date, note] of Object.entries(value as Record<string, unknown>)) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) continue;
+    const text = String(note ?? "").trim();
+    if (text) notes[date] = text;
+  }
+  return notes;
+}
+
+function entityName(habit: Pick<Habit, "kind"> | Pick<HabitEditInput, "kind">): string {
+  return habit.kind === "daily-progress" ? "长期任务" : "习惯";
+}
+
 export class HabitService {
   constructor(
     private readonly app: App,
@@ -56,7 +71,7 @@ export class HabitService {
   async toggleDate(habit: Habit, date = localDate()): Promise<boolean> {
     const file = this.app.vault.getAbstractFileByPath(habit.source.path);
     if (!(file instanceof TFile)) {
-      new Notice("DashFlow: 找不到习惯笔记。");
+      new Notice(`DashFlow: 找不到${entityName(habit)}笔记。`);
       return false;
     }
 
@@ -77,17 +92,43 @@ export class HabitService {
 
     await this.index.indexFile(file);
     this.activity.setHabitCompleted(habit.id, date, completed);
-    new Notice(completed ? `已完成 · ${habit.name}` : `已取消 · ${habit.name}`);
+    const action = habit.kind === "daily-progress"
+      ? (completed ? "已推进" : "已取消推进")
+      : (completed ? "已完成" : "已取消");
+    new Notice(`${action} · ${habit.name}`);
+    return true;
+  }
+
+  async setDailyNote(habit: Habit, date: string, note: string): Promise<boolean> {
+    if (habit.kind !== "daily-progress") return false;
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+    const file = this.app.vault.getAbstractFileByPath(habit.source.path);
+    if (!(file instanceof TFile)) {
+      new Notice("DashFlow: 找不到长期任务笔记。");
+      return false;
+    }
+
+    const text = note.trim();
+    await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
+      const notes = normalizeDailyNotes(frontmatter.daily_notes);
+      if (text) notes[date] = text;
+      else delete notes[date];
+      frontmatter.daily_notes = notes;
+    });
+
+    await this.index.indexFile(file);
+    new Notice(text ? `已记录 · ${habit.name}` : `已清除备注 · ${habit.name}`);
     return true;
   }
 
   async create(input: HabitEditInput): Promise<Habit | undefined> {
     const name = input.name.trim();
     if (!name) {
-      new Notice("DashFlow: 习惯名称不能为空。");
+      new Notice("DashFlow: 名称不能为空。");
       return undefined;
     }
 
+    const kind = input.kind === "daily-progress" ? "daily-progress" : "habit";
     const id = sanitizeId(input.id || name) || `habit-${Date.now().toString(36)}`;
     const folder = normalizePath(this.getHabitFolder().trim() || "DashFlow/Habits");
     await this.ensureFolder(folder);
@@ -97,35 +138,45 @@ export class HabitService {
       path = normalizePath(`${folder}/${sanitizeFileName(name)}-${Date.now().toString(36)}.md`);
     }
 
+    const frequency = kind === "daily-progress" ? "daily" : input.frequency;
     const lines = [
       "---",
       `type: ${yamlString(this.getHabitTypeValue().trim() || "habit")}`,
       `habit_id: ${yamlString(id)}`,
       `name: ${yamlString(name)}`,
       `status: ${input.status}`,
-      `frequency: ${input.frequency}`,
+      `frequency: ${frequency}`,
     ];
+    if (kind === "daily-progress") lines.push("habit_kind: daily-progress");
     if (input.description?.trim()) lines.push(`description: ${yamlString(input.description.trim())}`);
     if (input.start) lines.push(`start: ${input.start}`);
     if (input.end) lines.push(`end: ${input.end}`);
     if (input.targetDays && input.targetDays > 0) lines.push(`target_days: ${Math.round(input.targetDays)}`);
-    lines.push("habit_log: []", "---", "", `# ${name}`, "");
+    if (kind === "daily-progress" && input.linkedProjectId?.trim()) {
+      lines.push(`linked_project: ${yamlString(input.linkedProjectId.trim())}`);
+    }
+    lines.push("habit_log: []");
+    if (kind === "daily-progress") lines.push("daily_notes: {}");
+    lines.push("---", "", `# ${name}`, "");
 
     const file = await this.app.vault.create(path, lines.join("\n"));
     await this.index.indexFile(file);
-    new Notice(`DashFlow: 已创建习惯「${name}」`);
+    new Notice(`DashFlow: 已创建${kind === "daily-progress" ? "长期任务" : "习惯"}「${name}」`);
 
     return {
       id,
       name,
       description: input.description?.trim() || undefined,
       status: input.status,
-      frequency: input.frequency,
+      frequency,
+      kind,
       start: input.start,
       end: input.end,
       targetDays: input.targetDays && input.targetDays > 0 ? Math.round(input.targetDays) : undefined,
+      linkedProjectId: kind === "daily-progress" ? input.linkedProjectId?.trim() || undefined : undefined,
       tags: [],
       completedDates: [],
+      dailyNotes: {},
       source: { path },
     };
   }
@@ -133,22 +184,28 @@ export class HabitService {
   async update(habit: Habit, input: HabitEditInput): Promise<boolean> {
     const name = input.name.trim();
     if (!name) {
-      new Notice("DashFlow: 习惯名称不能为空。");
+      new Notice("DashFlow: 名称不能为空。");
       return false;
     }
 
     const file = this.app.vault.getAbstractFileByPath(habit.source.path);
     if (!(file instanceof TFile)) {
-      new Notice("DashFlow: 找不到习惯笔记。");
+      new Notice(`DashFlow: 找不到${entityName(habit)}笔记。`);
       return false;
     }
+
+    const kind = input.kind === "daily-progress" ? "daily-progress" : "habit";
+    const frequency = kind === "daily-progress" ? "daily" : input.frequency;
 
     await this.app.fileManager.processFrontMatter(file, (frontmatter) => {
       frontmatter.type = this.getHabitTypeValue().trim() || "habit";
       frontmatter.habit_id = habit.id;
       frontmatter.name = name;
       frontmatter.status = input.status;
-      frontmatter.frequency = input.frequency;
+      frontmatter.frequency = frequency;
+
+      if (kind === "daily-progress") frontmatter.habit_kind = "daily-progress";
+      else delete frontmatter.habit_kind;
 
       if (input.description?.trim()) frontmatter.description = input.description.trim();
       else delete frontmatter.description;
@@ -162,11 +219,20 @@ export class HabitService {
       if (input.targetDays && input.targetDays > 0) frontmatter.target_days = Math.round(input.targetDays);
       else delete frontmatter.target_days;
 
+      if (kind === "daily-progress" && input.linkedProjectId?.trim()) {
+        frontmatter.linked_project = input.linkedProjectId.trim();
+      } else {
+        delete frontmatter.linked_project;
+      }
+
       frontmatter.habit_log = normalizeDates(frontmatter.habit_log);
+      if (kind === "daily-progress" || frontmatter.daily_notes) {
+        frontmatter.daily_notes = normalizeDailyNotes(frontmatter.daily_notes);
+      }
     });
 
     await this.index.indexFile(file);
-    new Notice(`DashFlow: 已更新习惯「${name}」`);
+    new Notice(`DashFlow: 已更新${kind === "daily-progress" ? "长期任务" : "习惯"}「${name}」`);
     return true;
   }
 
