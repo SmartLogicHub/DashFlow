@@ -119,7 +119,7 @@ export default class DashFlowPlugin extends Plugin {
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.productDesign = new ProductDesignService();
     this.personalHomeDesign = new PersonalHomeDesignService();
-    this.uiRefinementPolish = new UiRefinementPolishService();
+    this.uiRefinementPolish = new UiRefinementPolishService(this);
     this.productExperience = new ProductExperienceService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
