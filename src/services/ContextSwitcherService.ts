@@ -1,7 +1,10 @@
 import { setIcon } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { ContextMode } from "../models";
+import { WORKFLOW_STYLES } from "../styles/WorkflowStyles";
 import { WorkflowSettingsModal } from "../ui/WorkflowSettingsModal";
+
+const STYLE_ID = "dashflow-workflow-context-styles";
 
 interface ContextDefinition {
   mode: ContextMode;
@@ -24,6 +27,7 @@ export class ContextSwitcherService {
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
+    this.ensureStyles();
     this.unsubscribeDashboard = this.plugin.dashboardManager.subscribe(() => this.scheduleDecorate());
     this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.scheduleDecorate());
     this.plugin.registerEvent(this.plugin.app.workspace.on("layout-change", () => this.scheduleDecorate()));
@@ -36,6 +40,7 @@ export class ContextSwitcherService {
     this.unsubscribeDashboard = null;
     this.unsubscribeIndex?.();
     this.unsubscribeIndex = null;
+    document.getElementById(STYLE_ID)?.remove();
     for (const node of document.querySelectorAll(".dashflow-context-switcher")) node.remove();
   }
 
@@ -118,5 +123,13 @@ export class ContextSwitcherService {
       button.setAttribute("aria-pressed", valid && dashboardId === activeId ? "true" : "false");
       button.title = valid ? `切换到 ${context.label}` : `配置 ${context.label} Dashboard`;
     }
+  }
+
+  private ensureStyles(): void {
+    if (document.getElementById(STYLE_ID)) return;
+    const style = document.createElement("style");
+    style.id = STYLE_ID;
+    style.textContent = WORKFLOW_STYLES;
+    document.head.appendChild(style);
   }
 }
