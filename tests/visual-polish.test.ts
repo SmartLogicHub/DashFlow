@@ -8,6 +8,7 @@ import { registerBuiltins } from "../src/widgets/builtins";
 import { WidgetRegistry } from "../src/widgets/WidgetRegistry";
 
 const design = readFileSync("src/services/ProductDesignService.ts", "utf8");
+const homeDesign = readFileSync("src/services/PersonalHomeDesignService.ts", "utf8");
 const polish = readFileSync("src/services/UiRefinementPolishService.ts", "utf8");
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const settingsSource = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
@@ -28,9 +29,13 @@ test("Work owns only the center canvas and no longer renders the old purple land
   assert.ok(experience.includes("shell.querySelector(\":scope > .dashflow-product-nav\")?.remove()"));
 });
 
-test("v0.4.2 final polish flattens Work chrome and makes disconnected Home states recede", () => {
-  assert.ok(polish.includes("Treat the command bar as product navigation"));
-  assert.ok(polish.includes("border-bottom: 1px solid var(--df-cmd-border)!important"));
+test("v0.4.2 final polish preserves unified navigation geometry and makes disconnected Home states recede", () => {
+  const sharedWidth = "width: min(1160px, calc(100% - 28px))!important";
+  assert.ok(design.includes(sharedWidth));
+  assert.ok(homeDesign.includes(sharedWidth));
+  assert.ok(design.includes("Unified Command Bar"));
+  assert.equal(polish.includes("width: min(1180px"), false);
+  assert.equal(polish.includes("border-radius: 0!important"), false);
   assert.ok(polish.includes("dashflow-home-weread:has(.dashflow-home-weread-mark)"));
   assert.ok(polish.includes("A disconnected WeRead integration is a setup hint"));
   assert.ok(polish.includes("grid-template-columns: minmax(0, 1fr) auto!important"));
