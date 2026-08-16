@@ -1,66 +1,68 @@
-# DashFlow v0.3.0
+# DashFlow v0.3.1
 
-DashFlow 是建立在 Obsidian Vault 之上的个人工作系统。它不再把所有能力堆成一面 Widget 墙，而是把一天的工作拆成六个明确流程：**今天、收集箱、项目、日历、习惯、复盘**。
+DashFlow 是建立在 Obsidian Vault 之上的个人工作系统。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、组织、呈现和直接操作。
 
-Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、组织、呈现和直接操作。
+## v0.3.1：Studio UI
 
-## v0.3.0：Product Reset
+这一版继续沿用 v0.3.0 的 Today / Inbox / Projects / Calendar / Habits / Review 产品结构，但把默认界面从“经过包装的 Dashboard Grid”进一步改成真正的应用视图。
 
-这一版根据真实 Obsidian 使用反馈和成熟任务产品的交互方式重新设计信息架构。
+设计研究主要参考成熟生产力产品的共同原则：导航应后退、主内容应成为视觉焦点、Today 应是执行面、Quick Capture 应是随手记录入口而不是一张大卡、项目和任务应该直接可操作，而不是展示技术数据。
 
-### 今天
+### Today
 
-打开 DashFlow 默认进入 Today：
+- 默认不再渲染 Widget 网格；Today 使用独立 DOM 工作区
+- 黑色重侧栏改成轻量半透明导航面板
+- 删除四张等权 KPI 卡，改为一条低权重的当天上下文信息
+- 顶部增加真正可用的快速输入：输入文字并按 Enter，会直接创建一个计划在今天的任务
+- 今日任务成为唯一主面板；逾期、计划日、项目和优先级通过轻量 metadata 呈现
+- 右侧只保留接下来 7 天、活动项目和今日习惯三个上下文面板
+- 空状态不再占据巨大灰色矩形，会提供明确下一步动作
 
-- 今日计划 / 截止 / 逾期任务成为主工作区
-- 紧凑显示今日待推进、逾期、活动项目与习惯完成情况
-- Progress 和 Upcoming 是辅助信息，不再与任务争夺视觉焦点
-- 活动项目只显示必要的进度；点击进入项目详情，而不是直接把用户扔进 Markdown
+### Inbox
 
-### 收集箱
+- 收集箱使用独立处理队列
+- 顶部输入可以直接捕捉想法到 Inbox
+- 任务一旦补充项目、计划日、开始日或截止日，就会离开“未整理”状态
 
-“Quick Capture”不再占据首页一张大卡。所有尚未整理的快速任务进入真正的 Inbox 流程：
+### Projects
 
-- 查看未整理任务
-- 点击任务补充计划日期、截止日期、优先级和所属项目
-- 完成或打开 Inbox 原文
-- 全局“新建任务”仍然可以随时记录行动
+- 项目从进度条表单行改成项目 Portfolio Board
+- 卡片展示状态、描述/截止日、下一步数量和进度
+- 点击直接进入项目详情，而不是跳进 Markdown
 
-### 项目
+### Calendar / Habits / Review
 
-Project 现在是可操作对象：
+这些复杂工作流继续复用已经稳定的 Calendar / Habit / Weekly Review 行为，但放进新的 Studio workflow canvas：
 
-- 从 DashFlow 直接新建 / 编辑项目
-- 项目组合页显示状态、截止日、下一步任务数和进度
-- 项目详情显示下一步行动、已完成任务和项目进度
-- 在项目详情中直接创建已关联项目的任务
-- 原始 Markdown 仍然保留为二级入口
+- Calendar 独立全宽
+- Habits + Activity 在宽屏双栏、窄屏自动单列
+- Review 独立纵向工作流
 
-### 日历 / 习惯 / 复盘
+### 高级布局
 
-这些能力从 Today 撤出，分别成为清晰的工作流：
+旧 Dashboard Grid 没有删除。它现在是高级自定义能力：用户点“自定义布局”时仍可编辑 Widget、布局和 Dashboard；正常使用时它不再决定默认产品界面。
 
-- **日历**：任务计划日 / 截止日、项目截止日、习惯节奏与 Agenda
-- **习惯**：今日打卡、历史轨迹、连续天数、Heatmap
-- **复盘**：Weekly Review、Activity、Vault 统计
+## 工作流
 
-### 全局搜索与命令
+```text
+DashFlow
+├── 今天
+├── 收集箱
+├── 项目
+├── 日历
+├── 习惯
+└── 复盘
+```
 
-顶部 Search 可以跨 Task / Project / Habit 搜索，也可以直接新建任务、项目或习惯。命令面板同时提供 Today / Inbox / Projects / Calendar / Habits / Review 的直接入口。
-
-### 可选 AI 日计划
-
-v0.3.0 增加可选 AI Planning：
+## 可选 AI 日计划
 
 - 默认兼容 DeepSeek OpenAI Chat Completions API
-- 默认 Base URL `https://api.deepseek.com`
-- 默认模型 `deepseek-v4-flash`
-- API Key 使用 Obsidian SecretStorage / Keychain；插件 `data.json` 只保存 secret 名称，不保存 Key
-- 只有用户主动点击“AI 规划”才会发起请求
-- 只发送未完成任务、活动项目和习惯的结构化摘要，不发送笔记正文
-- AI 输出只是建议，不自动改写 Vault
+- API Key 使用 Obsidian SecretStorage / Keychain
+- 只有用户主动点击 AI 规划才会请求
+- 只发送任务 / 项目 / 习惯的结构化摘要，不发送笔记正文
+- AI 建议不会自动修改 Vault
 
-因为使用 Obsidian SecretStorage，v0.3.0 的最低 Obsidian 版本为 **1.11.4**。
+最低 Obsidian 版本为 **1.11.4**。
 
 ## 数据格式
 
@@ -110,29 +112,9 @@ habit_log:
 - Weekly Review
 - Activity Heatmap
 - 多 Dashboard、模板、自定义模板、导入 / 导出
-- Desktop Grid 与移动端排序
+- Desktop Grid 高级布局
 - 全局搜索 / 快速新建
 - 可选 AI 日计划
-
-## 架构
-
-```text
-Obsidian Vault
-  ↓
-VaultIndexService
-  ↓
-Task / Project / Habit / Activity / Calendar
-  ↓
-Product Workflows
-  ├── Today
-  ├── Inbox
-  ├── Projects
-  ├── Calendar
-  ├── Habits
-  └── Review
-  ↓
-Dashboard / Search / Editors / Optional AI Plan
-```
 
 ## 开发
 
