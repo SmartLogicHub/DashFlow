@@ -1,6 +1,6 @@
 {
   "name": "dashflow",
-  "version": "0.4.1",
+  "version": "0.4.3",
   "description": "A Personal OS for Obsidian with a focused Home, real WeRead highlights, tasks, projects, habits, calendar, review, search and optional AI planning.",
   "main": "main.js",
   "type": "module",
