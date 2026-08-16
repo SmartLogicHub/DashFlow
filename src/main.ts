@@ -153,6 +153,7 @@ export default class DashFlowPlugin extends Plugin {
       this.activityService,
       () => this.data.settings.habitFolder,
       () => this.data.settings.habitTypeValue,
+      this.vaultQuery,
     );
     this.aiClient = new AIClient(this);
     this.aiPlanning = new AIPlanningService(this);
