@@ -12,3 +12,4 @@ import "./custom-dashboard-templates.test";
 import "./design-system.test";
 import "./visual-polish.test";
 import "./product-navigation.test";
+import "./studio-ui.test";
