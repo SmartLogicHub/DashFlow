@@ -4,6 +4,7 @@ import { serializeTaskLine } from "../parsers/taskParser";
 import { addDays, localDate } from "../utils/date";
 import type { ActivityService } from "./ActivityService";
 import type { VaultIndexService } from "./VaultIndexService";
+import type { VaultQueryService } from "./VaultQueryService";
 
 const PRIORITY_WEIGHT = { urgent: 0, high: 1, normal: 2, low: 3 } as const;
 
@@ -23,6 +24,7 @@ export class TaskService {
     private readonly app: App,
     private readonly index: VaultIndexService,
     private readonly activity: ActivityService,
+    private readonly query?: VaultQueryService,
   ) {}
 
   async toggle(task: Task): Promise<void> {
@@ -97,17 +99,19 @@ export class TaskService {
     return true;
   }
 
-  today(tasks = this.index.getSnapshot().tasks): Task[] {
+  today(tasks?: Task[]): Task[] {
     const today = localDate();
-    return tasks
+    if (!tasks && this.query) return this.query.todayTasks(today);
+    return (tasks ?? this.index.getSnapshot().tasks)
       .filter((task) => task.due === today || task.scheduled === today)
       .sort(sortTasks);
   }
 
-  focus(tasks = this.index.getSnapshot().tasks): Task[] {
+  focus(tasks?: Task[]): Task[] {
     const today = localDate();
+    if (!tasks && this.query) return this.query.focusTasks(today);
     const byId = new Map<string, Task>();
-    for (const task of tasks) {
+    for (const task of tasks ?? this.index.getSnapshot().tasks) {
       if (task.completed) continue;
       if (task.due === today || task.scheduled === today || (task.due && task.due < today)) {
         byId.set(task.id, task);
@@ -120,17 +124,19 @@ export class TaskService {
     });
   }
 
-  overdue(tasks = this.index.getSnapshot().tasks): Task[] {
+  overdue(tasks?: Task[]): Task[] {
     const today = localDate();
-    return tasks
+    if (!tasks && this.query) return this.query.overdueTasks(today);
+    return (tasks ?? this.index.getSnapshot().tasks)
       .filter((task) => !task.completed && Boolean(task.due) && (task.due as string) < today)
       .sort(sortTasks);
   }
 
-  upcoming(days = 7, tasks = this.index.getSnapshot().tasks): Task[] {
+  upcoming(days = 7, tasks?: Task[]): Task[] {
     const start = localDate();
+    if (!tasks && this.query) return this.query.upcomingTasks(start, days);
     const end = addDays(start, days);
-    return tasks
+    return (tasks ?? this.index.getSnapshot().tasks)
       .filter((task) => {
         if (task.completed) return false;
         const scheduled = task.scheduled;
