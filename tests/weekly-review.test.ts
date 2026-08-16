@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import type { ActivityStore, Habit } from "../src/models";
 import {
   activityChangePercent,
@@ -8,6 +9,9 @@ import {
   weeklyActivityTotals,
   weeklyHabitStats,
 } from "../src/weekly/weeklyReviewMath";
+
+const weeklyService = readFileSync("src/services/WeeklyReviewService.ts", "utf8");
+const weeklyWidget = readFileSync("src/services/WeeklyReviewWidgetInteractionService.ts", "utf8");
 
 function habit(overrides: Partial<Habit> = {}): Habit {
   return {
@@ -86,4 +90,26 @@ test("weekly habit stats respect weekday schedules", () => {
     completed: 3,
     rate: 60,
   });
+});
+
+test("Daily Progress reuses schedule math but is reported separately from Habit", () => {
+  const stats = weeklyHabitStats(habit({
+    kind: "daily-progress",
+    start: "2026-08-12",
+    end: "2026-08-15",
+    completedDates: ["2026-08-12", "2026-08-14"],
+    dailyNotes: {
+      "2026-08-12": "完成第一阶段",
+      "2026-08-14": "解决阻塞问题",
+    },
+  }), { start: "2026-08-10", end: "2026-08-16" });
+
+  assert.deepEqual(stats, { scheduled: 4, completed: 2, rate: 50 });
+  assert.ok(weeklyService.includes('habit.kind !== "daily-progress"'));
+  assert.ok(weeklyService.includes('habit.kind === "daily-progress"'));
+  assert.ok(weeklyService.includes("dailyProgressNoteCount"));
+  assert.ok(weeklyService.includes('"### Daily Progress"'));
+  assert.ok(weeklyWidget.includes("dailyProgressSection"));
+  assert.ok(weeklyWidget.includes("dailyProgressRow"));
+  assert.ok(weeklyWidget.includes("is-progress"));
 });
