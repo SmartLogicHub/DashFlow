@@ -1,16 +1,38 @@
 import { Notice, TFile, normalizePath, type App } from "obsidian";
+import type { CaptureTarget } from "../models";
+import { CaptureDestinationModal, type ResolvedCaptureTarget } from "../ui/CaptureDestinationModal";
+import { localDate } from "../utils/date";
 import type { ActivityService } from "./ActivityService";
+import type { DailyNoteService } from "./DailyNoteService";
 
 export class CaptureService {
   constructor(
     private readonly app: App,
     private readonly getInboxPath: () => string,
     private readonly activity: ActivityService,
+    private readonly dailyNotes: DailyNoteService,
+    private readonly getCaptureTarget: () => CaptureTarget,
+    private readonly getDailyCaptureHeading: () => string,
   ) {}
 
-  async capture(text: string): Promise<boolean> {
+  async capture(text: string, target?: ResolvedCaptureTarget): Promise<boolean> {
     const trimmed = text.trim();
     if (!trimmed) return false;
+
+    let resolved = target;
+    if (!resolved) {
+      const preference = this.getCaptureTarget();
+      resolved = preference === "ask"
+        ? await CaptureDestinationModal.choose(this.app, trimmed) ?? undefined
+        : preference;
+    }
+    if (!resolved) return false;
+
+    if (resolved === "daily-note") {
+      const path = await this.dailyNotes.appendCapture(localDate(), trimmed, this.getDailyCaptureHeading());
+      new Notice(`已捕捉到今日 Daily Note · ${path}`);
+      return true;
+    }
 
     const path = normalizePath(this.getInboxPath());
     await this.ensureParentFolder(path);
