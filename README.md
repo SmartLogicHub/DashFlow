@@ -53,13 +53,7 @@ Work 强调尽快进入执行，而不是展示 landing page：
 距旅行                128 DAYS
 ```
 
-配置项：
-
-- 卡片标题
-- 倒计时标签
-- 目标日期
-
-Countdown 的配置保存在 Dashboard Widget config 中，不会写进 Task / Project / Habit Markdown。
+配置项：卡片标题、倒计时标签、目标日期。Countdown 配置保存在 Dashboard Widget config 中，不会写进 Task / Project / Habit Markdown。
 
 ### Quick Add
 
@@ -110,13 +104,7 @@ skill_version: 1.0.4
 首页“微信读书 · 我的划线”
 ```
 
-安全与数据原则：
-
-- API Key 只保存在 Obsidian SecretStorage / Keychain；DashFlow `data.json` 只保存 Secret 名称
-- 不使用 Cookie 抓取
-- 不持久化完整划线缓存，内存缓存约 10 分钟
-- `/book/bookmarklist` 没有返回 `deepLink` 时，不自行拼接 `weread://` 链接
-- 未连接或没有真实数据时，不展示假的“我的划线”
+安全与数据原则：API Key 只保存在 Obsidian SecretStorage / Keychain；不使用 Cookie 抓取；不伪造内容或 deep link。
 
 ## 核心能力
 
@@ -174,16 +162,7 @@ habit_log:
 
 ## 数据边界
 
-DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。
-
-插件数据主要保存：
-
-- Dashboard 布局、Widget config 与模板
-- Personal Home 外观设置
-- Activity 派生统计
-- UI / presentation state
-
-AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
+DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。插件数据主要保存 Dashboard 布局、Widget config、模板、Personal Home 外观、Activity 派生统计和 UI state。AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
 
 ## 开发
 
