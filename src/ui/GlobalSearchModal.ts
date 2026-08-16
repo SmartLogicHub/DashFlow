@@ -28,6 +28,7 @@ function matches(text: string, query: string): boolean {
 export class GlobalSearchModal extends SuggestModal<SearchItem> {
   constructor(private readonly plugin: DashFlowPlugin) {
     super(plugin.app);
+    this.modalEl.addClass("dashflow-search-modal");
     this.setPlaceholder("搜索任务、项目、习惯，或直接创建…");
     this.setInstructions([
       { command: "↵", purpose: "打开" },
