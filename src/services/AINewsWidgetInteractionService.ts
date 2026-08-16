@@ -4,40 +4,24 @@ import type { AINewsWidgetConfig, CuratedNewsItem, WidgetInstance } from "../mod
 import type { NewsCurationResult } from "./NewsCurationService";
 
 export class AINewsWidgetInteractionService {
-  private unsubscribeDashboard: (() => void) | null = null;
-  private unsubscribeIndex: (() => void) | null = null;
-  private scheduled = false;
+  private unsubscribeRender: (() => void) | null = null;
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
-    this.unsubscribeDashboard = this.plugin.dashboardManager.subscribe(() => this.schedule());
-    this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.schedule());
-    this.plugin.registerEvent(this.plugin.app.workspace.on("layout-change", () => this.schedule()));
-    this.plugin.registerEvent(this.plugin.app.workspace.on("active-leaf-change", () => this.schedule()));
-    this.schedule();
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => this.decorate(root));
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root));
   }
 
   stop(): void {
-    this.unsubscribeDashboard?.();
-    this.unsubscribeDashboard = null;
-    this.unsubscribeIndex?.();
-    this.unsubscribeIndex = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
   }
 
-  schedule(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorate();
-    }, 0);
-  }
-
-  private decorate(): void {
+  private decorate(root: HTMLElement): void {
     const dashboard = this.plugin.dashboardManager.active();
     const widgets = new Map(dashboard.widgets.map((widget) => [widget.id, widget]));
-    for (const card of document.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
+    for (const card of root.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
       const id = card.dataset.widgetId;
       const widget = id ? widgets.get(id) : undefined;
       if (!widget || widget.type !== "ai-news") continue;
