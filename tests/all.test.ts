@@ -30,3 +30,4 @@ import "./data-filter.test";
 import "./focus-embed.test";
 import "./query-performance.test";
 import "./runtime-render.test";
+import "./product-hierarchy-reset.test";
