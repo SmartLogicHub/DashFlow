@@ -45,10 +45,19 @@ export class DashboardRenderer {
   }
 
   render(): void {
-    if (this.destroyed || this.frameId !== null) return;
+    if (this.destroyed) return;
+    const coalesced = this.frameId !== null;
+    this.plugin.dashboardRender.requested(coalesced);
+    if (coalesced) return;
     this.frameId = window.requestAnimationFrame(() => {
       this.frameId = null;
-      if (!this.destroyed) this.renderNow();
+      if (this.destroyed) return;
+      const startedAt = performance.now();
+      try {
+        this.renderNow();
+      } finally {
+        this.plugin.dashboardRender.committed(performance.now() - startedAt);
+      }
     });
   }
 
@@ -523,7 +532,8 @@ export class DashboardRenderer {
       ));
     }
 
-    const buttons = createElement("div", "modal-button-container");
+    const buttons = document.createElement("div");
+    buttons.className = "modal-button-container";
     const reset = createElement("button", "", "恢复默认");
     reset.type = "button";
     reset.addEventListener("click", async () => {
