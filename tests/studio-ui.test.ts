@@ -15,24 +15,25 @@ test("DashFlow keeps Obsidian chrome and uses horizontal navigation instead of a
   assert.equal(design.includes("grid-template-columns: 176px minmax(0, 1fr)"), false);
 });
 
-test("Personal Home and Work dashboard are intentionally separate surfaces", () => {
+test("Personal Home and Work dashboard remain separate functional surfaces", () => {
   assert.ok(experience.includes('section === "today"'));
   assert.ok(experience.includes("this.personalHome.render()"));
   assert.ok(experience.includes('section === "work"'));
   assert.ok(experience.includes("WORK_WIDGET_TYPES"));
-  assert.ok(home.includes("长期成长的四个领域"));
+  assert.ok(home.includes("长期成长"));
 });
 
-test("Personal Home uses one emotional Hero and quiet content surfaces", () => {
-  assert.ok(homeDesign.includes("Hero: one emotional surface"));
+test("Personal Home uses a compact atmospheric Hero and content-led sections", () => {
+  assert.ok(homeDesign.includes("Compact atmospheric Hero"));
   assert.ok(homeDesign.includes("dashflow-home-top-grid"));
-  assert.ok(homeDesign.includes("dashflow-home-area-grid"));
+  assert.ok(homeDesign.includes("dashflow-home-area-list"));
   assert.ok(homeDesign.includes("dashflow-home-activity-strip"));
   assert.ok(experience.includes("homeHeroImagePath"));
 });
 
-test("Work remains a dense editable Command Dashboard with real metrics", () => {
-  assert.ok(design.includes("Dense dashboard grid"));
+test("Work hides the old landing banner and keeps real editable metrics", () => {
+  assert.ok(design.includes("Work is an execution surface"));
+  assert.ok(design.includes("dashflow-command-shell:not(.is-personal-home)>.dashflow-hero"));
   assert.ok(experience.includes("activityStreak(this.plugin.data.activity)"));
   assert.ok(experience.includes('this.progressMetric("TODAY"'));
   assert.ok(experience.includes('this.progressMetric("ALL TASKS"'));

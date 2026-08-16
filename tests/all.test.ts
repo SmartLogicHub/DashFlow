@@ -14,3 +14,4 @@ import "./visual-polish.test";
 import "./product-navigation.test";
 import "./studio-ui.test";
 import "./personal-home.test";
+import "./weread.test";

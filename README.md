@@ -1,77 +1,100 @@
-# DashFlow v0.4.0
+# DashFlow v0.4.1
 
 DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project / Habit 始终以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
 
-## v0.4.0 · Personal OS Home
+## v0.4.1 · Visual Reset + 微信读书
 
-这一版把此前互相冲突的两种需求正式拆开：
+这一版不是继续给 v0.4.0 的大卡片“换皮”，而是重新收紧 Home 与 Work 的信息层级：
 
-- **Home / 主页**：有情绪、有个人感，回答“我现在处于什么状态、长期在成长什么”。
-- **Work / 工作台**：保留 v0.3.2 的高密度 Command Dashboard，回答“我现在具体要推进什么”。
-
-这样首页不再是所有 Widget 的总和，工作台也不需要承担生活主页的视觉职责。
+- **Home**：图片只是氛围层，真正的主角是今天、阅读、长期领域和 Activity。
+- **Work**：取消紫色大 Banner、版本号和 SECOND BRAIN 等技术展示，从第一屏直接进入工作内容。
+- **微信读书**：接入腾讯官方 Agent API Gateway，只展示用户自己的真实个人划线，不伪造名言、封面或来源。
 
 ### Personal Home
 
-主页包含：
+主页现在由五块组成：
 
-- 情绪化 Hero：日期、个人标题、副标题、进入工作台、记录灵感
-- Today Focus：真实今日 / 逾期任务，可直接完成或编辑
-- 今日状态：今日任务完成率、Habit 完成数、活动项目数、Activity streak
-- 长期成长四领域：工作、生活、时间、复盘；点击进入对应工作流
-- 最近 30 天 Activity 热力条
-- 最近修改的 Markdown 笔记
+1. 约 194px 的紧凑 Hero：日期、个人标题、副标题、进入工作台、记录灵感
+2. 微信读书每日划线：书封、书名、作者、章节、真实划线、换一条；没有连接时显示明确连接入口
+3. Today + 今日状态：真实任务、Habit、活动项目、Activity streak
+4. 长期成长：工作 / 生活 / 时间 / 复盘改成紧凑导航行，不再使用四张巨大空卡
+5. 最近 30 天 Activity + 最近修改的 Vault Markdown
 
-### Hero 与主题
+空状态也被压缩，不再用几百像素的空白告诉用户“没有任务”。
 
-DashFlow **不会内置或请求远程库存照片**。默认 Hero 使用主题渐变；用户可以直接从 Vault 中选择 JPG / PNG / WebP / AVIF / GIF 图片。
+### Hero 场景
 
-推荐使用低饱和、横向构图、主体不过度居中的图片，例如：
-
-- 雪山 / 湖泊 / 冰川：最适合 Alpine 冷蓝灰主题
-- 森林 / 海岸：适合安静的生活主页
-- 极简建筑 / 城市夜景：适合偏工作型 Personal OS
-
-内置四套外观：
+DashFlow 提供三套经过筛选的低饱和联网场景，并保留完全本地的 Vault 图片覆盖：
 
 ```text
-Alpine    冷蓝灰 / 风景型
-Paper     暖白 / 纸张型
-Midnight  深色 / 沉浸型
-Obsidian  跟随当前 Obsidian Theme / Accent
+Alpine    雪山湖村 · 冷蓝
+Paper     海岸晨光 · 暖白
+Midnight  雾林 · 深色
+Obsidian  不加载场景照片，跟随当前 Obsidian Theme
 ```
 
-设置里可以直接搜索并选择 Vault 图片，也可以调整 Hero 标题、副标题和图片遮罩；图片留空时自动回到主题渐变。
+前三套场景使用 Unsplash License 下的免费照片：
 
-### Work · Command Dashboard
+- Alpine：Marios Gkortsilas · Hallstatt winter village
+- Paper：Howard Walsh · calm sunrise coast
+- Midnight：mark wang · foggy Sichuan pine forest
 
-工作台继续保留 v0.3.2 的真实高密度能力：
+如果不希望加载远程照片，可以选择 **Obsidian** 主题，或者从 Vault 选择自己的 JPG / PNG / WebP / AVIF / GIF；本地图片优先级最高。
 
-- Quick Capture / TODO / 双任务完成率 / Upcoming
-- Project progress + DashFlow Project Detail
-- Activity Heatmap
-- Countdown
-- 可编辑 Bento/Grid：拖拽、resize、配置、添加、删除、重置
-- Obsidian 左右原生 Sidebars 不被 DashFlow 占用
+### 微信读书
+
+DashFlow 使用腾讯公开的微信读书 Agent API Gateway：
+
+```text
+POST https://i.weread.qq.com/api/agent/gateway
+Authorization: Bearer wrk-...
+skill_version: 1.0.4
+```
+
+连接流程：
+
+1. 在 DashFlow 设置 → 微信读书点击「获取 API Key」
+2. 从微信读书官方页面获取 `wrk-...` Key
+3. 把 Key 保存到 Obsidian Keychain，并在 DashFlow 中选择该 Secret
+4. 点击「测试连接」
+
+首页读取路径严格按官方文档：
+
+```text
+/user/notebooks
+    ↓ 找到有个人划线的书
+/book/bookmarklist
+    ↓ markText + chapters + book metadata
+首页“微信读书 · 我的划线”
+```
+
+- API Key 只保存在 Obsidian SecretStorage / Keychain；DashFlow `data.json` 只保存 Secret 名称
+- 不使用 Cookie 抓取
+- 不持久化完整划线缓存，内存缓存约 10 分钟
+- `/book/bookmarklist` 没有返回 `deepLink` 时，不自行拼接 `weread://` 链接
+- 未连接或没有真实数据时，不展示假的“我的划线”
+
+### Work · 执行工作台
+
+Work 继续保留真实任务/项目能力和高级 Grid 编辑，但视觉回到生产力工具本身：
+
+- 顶部只保留一条紧凑命令栏
+- 去掉紫色 landing banner、`MY DASHBOARD`、版本号和技术性副标题
+- Widget 使用更轻的边界和更大的可读字体
+- Task 采用列表层级而不是卡片套卡片
+- Project 采用行式信息结构和真实进度
+- Progress 保留 Today / All Tasks 两个真实维度，但缩小视觉占比
+- Inbox / Calendar / Habits / Review 继续作为独立工作流
+- 编辑布局仍支持 drag / resize / config / add / remove / reset
 
 ### Quick Add
 
-Quick Capture 不再必须长期占据 Personal Home。全局 **Quick Add** 可以从命令面板或顶部「添加」呼出：
+全局 Quick Add 可以从命令面板或顶部「添加」呼出：
 
-- 直接输入一句话并按 Enter → 进入 Inbox
-- 「详细任务」→ 设置计划日 / 截止日 / 优先级 / 项目
+- 输入一句话按 Enter → 进入 Inbox
+- 详细任务 → 计划日 / 截止日 / 优先级 / 项目
 - 新建项目
 - 新建习惯
-
-### 其他工作流
-
-- Inbox：只显示尚未整理的任务；补充项目或日期后自动离开待整理状态
-- Projects：项目进度、详情、下一步任务
-- Calendar：Calendar + Agenda
-- Habits：Habit check-in / streak / history
-- Review：Weekly Review + Activity + Vault stats
-- Search：跨 Task / Project / Habit 搜索
-- AI 日计划：可选，API Key 使用 Obsidian SecretStorage / Keychain
 
 ## 数据格式
 
@@ -118,7 +141,8 @@ habit_log:
 - Activity Tracker + Heatmap
 - Calendar + Agenda
 - Weekly Review
-- Personal Home + Work Command Dashboard
+- Personal Home + Work execution surface
+- 微信读书真实个人划线
 - 多 Dashboard、内置模板、自定义模板、JSON 导入 / 导出
 - Desktop Grid 与移动端单列体验
 - 全局搜索与 Quick Add
@@ -126,7 +150,7 @@ habit_log:
 
 ## 数据边界
 
-DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。Dashboard 布局、Personal Home 外观、模板与 Activity 派生统计保存在插件数据中；Hero 图片只引用 Vault 文件，不上传；AI API Key 保存在 Obsidian SecretStorage 中。
+DashFlow 不把 Task / Project / Habit 锁进专有数据库。删除插件后，业务数据仍留在 Vault Markdown 中。Dashboard 布局、Personal Home 外观、模板与 Activity 派生统计保存在插件数据中；AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
 
 ## 开发
 

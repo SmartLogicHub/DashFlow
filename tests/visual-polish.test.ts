@@ -17,16 +17,17 @@ function registry(): WidgetRegistry {
   return value;
 }
 
-test("Command Dashboard owns only the center canvas and uses one strong purple banner", () => {
+test("Work owns only the center canvas and no longer renders the old purple landing banner", () => {
   assert.ok(design.includes("dashflow-command-shell"));
-  assert.ok(design.includes("Obsidian owns the app chrome"));
-  assert.ok(design.includes("linear-gradient(118deg, #20104e"));
+  assert.ok(design.includes("Work is an execution surface"));
   assert.ok(design.includes("dashflow-command-bar"));
+  assert.ok(design.includes("dashflow-command-shell:not(.is-personal-home)>.dashflow-hero"));
+  assert.equal(design.includes("linear-gradient(118deg, #20104e"), false);
   assert.equal(design.includes("grid-template-columns: 176px minmax(0, 1fr)"), false);
   assert.ok(experience.includes("shell.querySelector(\":scope > .dashflow-product-nav\")?.remove()"));
 });
 
-test("Command Dashboard default Home matches the compact reference composition and is collision free", () => {
+test("Command Dashboard default Home remains compact and collision free for layout editing", () => {
   const dashboard = createDefaultDashboard(registry());
   assert.equal(dashboard.settings.gap, 8);
   assert.equal(dashboard.settings.rowHeight, 44);
@@ -45,7 +46,7 @@ test("Command Dashboard default Home matches the compact reference composition a
   }
 });
 
-test("untouched v0.3.1 Studio layout migrates to the new compact dashboard without losing widget config", () => {
+test("untouched v0.3.1 Studio layout migrates without losing widget config", () => {
   const value = registry();
   const dashboard = createDefaultDashboard(value);
   const studio031 = {
@@ -104,4 +105,5 @@ test("settings UI remains grouped for non-technical users", () => {
   assert.ok(settingsSource.includes("dashflow-settings-hero"));
   assert.ok(settingsSource.includes("dashflow-settings-panel"));
   assert.ok(settingsSource.includes("dashflow-settings-guide-grid"));
+  assert.ok(settingsSource.includes("微信读书 · 可选"));
 });
