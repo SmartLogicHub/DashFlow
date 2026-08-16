@@ -13,10 +13,13 @@ test("Hero action labels stay visually stable across repeated decoration", () =>
   assert.ok(continuity.includes("stabilizeHeroActions"));
 });
 
-test("Every non-home section inherits a compact theme scene", () => {
+test("Every non-home section inherits the same desktop Hero frame", () => {
   assert.ok(continuity.includes("dashflow-command-shell:not(.is-personal-home) > .dashflow-hero"));
-  assert.ok(continuity.includes("height: 84px!important"));
+  assert.ok(continuity.includes("height: 194px!important"));
+  assert.ok(continuity.includes("min-height: 194px!important"));
+  assert.ok(continuity.includes("background-position: center 50%!important"));
   assert.ok(continuity.includes("var(--df-ambient-image, var(--df-home-scene))"));
+  assert.equal(continuity.includes("height: 84px!important"), false);
   for (const section of ["work", "projects", "inbox", "calendar", "habits", "review"]) {
     assert.ok(continuity.includes(`data-section=\"${section}\"`));
   }
