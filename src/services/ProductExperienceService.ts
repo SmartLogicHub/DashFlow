@@ -13,8 +13,6 @@ import { QuickAddModal } from "../ui/QuickAddModal";
 import { TaskEditorModal } from "../ui/TaskEditorModal";
 import { PersonalHomeService } from "./PersonalHomeService";
 
-const OBSERVE_OPTIONS: MutationObserverInit = { childList: true, subtree: true };
-
 const COMMAND_SECTIONS: Array<{ id: ProductSection; label: string; icon: string }> = [
   { id: "today", label: "主页", icon: "home" },
   { id: "work", label: "工作台", icon: "layout-dashboard" },
@@ -36,9 +34,8 @@ const WORK_WIDGET_TYPES = new Set([
 ]);
 
 export class ProductExperienceService {
-  private observer: MutationObserver | null = null;
-  private unsubscribeIndex: (() => void) | null = null;
-  private scheduled = false;
+  private unsubscribeRender: (() => void) | null = null;
+  private unsubscribeActivity: (() => void) | null = null;
   private activeSection: ProductSection = "today";
   private readonly personalHome: PersonalHomeService;
 
@@ -47,45 +44,34 @@ export class ProductExperienceService {
   }
 
   start(): void {
-    this.observer = new MutationObserver(() => this.schedule());
-    this.observer.observe(document.body, OBSERVE_OPTIONS);
-    this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.schedule(true));
-    this.schedule(true);
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => this.decorateRoot(root, false));
+    this.unsubscribeActivity = this.plugin.activityService.subscribe(() => this.refresh(true));
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorateRoot(root, true));
   }
 
   stop(): void {
-    this.observer?.disconnect();
-    this.observer = null;
-    this.unsubscribeIndex?.();
-    this.unsubscribeIndex = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
+    this.unsubscribeActivity?.();
+    this.unsubscribeActivity = null;
   }
 
   openSection(section: ProductSection): void {
     this.activeSection = section;
-    this.decorateSafely(true);
+    this.refresh(true);
   }
 
   currentSection(): ProductSection {
     return this.activeSection;
   }
 
-  private schedule(force = false): void {
-    if (this.scheduled && !force) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorateSafely(force);
-    }, 16);
+  private refresh(force = false): void {
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorateRoot(root, force));
   }
 
-  private decorateSafely(force = false): void {
-    this.observer?.disconnect();
-    try {
-      for (const shell of document.querySelectorAll<HTMLElement>(".dashflow-shell")) {
-        this.decorateShell(shell, force);
-      }
-    } finally {
-      this.observer?.observe(document.body, OBSERVE_OPTIONS);
+  private decorateRoot(root: HTMLElement, force = false): void {
+    for (const shell of root.querySelectorAll<HTMLElement>(".dashflow-shell")) {
+      this.decorateShell(shell, force);
     }
   }
 
@@ -195,7 +181,7 @@ export class ProductExperienceService {
   private decoratePulse(pulse: HTMLElement): void {
     const snapshot = this.plugin.vaultIndex.getSnapshot();
     const pending = snapshot.tasks.filter((task) => !task.completed).length;
-    const today = this.plugin.taskService.today(snapshot.tasks).filter((task) => !task.completed).length;
+    const today = this.plugin.taskService.today().filter((task) => !task.completed).length;
     const streak = activityStreak(this.plugin.data.activity);
     const items: Array<[string, number | null]> = [
       ["VAULT PULSE", null],
@@ -367,7 +353,7 @@ export class ProductExperienceService {
     if (!body) return;
 
     const snapshot = this.plugin.vaultIndex.getSnapshot();
-    const todayTasks = this.plugin.taskService.today(snapshot.tasks);
+    const todayTasks = this.plugin.taskService.today();
     const todayCompleted = todayTasks.filter((task) => task.completed).length;
     const todayProgress = todayTasks.length === 0 ? 0 : Math.round((todayCompleted / todayTasks.length) * 100);
     const allCompleted = snapshot.tasks.filter((task) => task.completed).length;
@@ -602,7 +588,7 @@ export class ProductExperienceService {
       const ok = await this.plugin.captureService.capture(input.value.trim());
       if (ok) {
         input.value = "";
-        this.schedule(true);
+        this.refresh(true);
       }
     });
     const hint = this.text("span", "ENTER");
@@ -637,7 +623,7 @@ export class ProductExperienceService {
     checkbox.checked = task.completed;
     checkbox.addEventListener("change", async () => {
       await this.plugin.taskService.toggle(task);
-      this.schedule(true);
+      this.refresh(true);
     });
     const main = document.createElement("button");
     main.type = "button";
