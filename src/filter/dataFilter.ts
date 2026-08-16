@@ -3,8 +3,10 @@ import type {
   DataFilterEntity,
   DataFilterSort,
   DataFilterState,
+  DataFilterTaskStatus,
   DataFilterWidgetConfig,
   Habit,
+  NoteRecord,
   Project,
   Task,
   VaultSnapshot,
@@ -12,6 +14,7 @@ import type {
 import { addDays, localDate } from "../utils/date";
 
 export type DataFilterMatch =
+  | { kind: "note"; item: NoteRecord; title: string; meta: string; date?: string; tags: string[] }
   | { kind: "task"; item: Task; title: string; meta: string; date?: string; tags: string[] }
   | { kind: "project"; item: Project; title: string; meta: string; date?: string; tags: string[] }
   | { kind: "habit"; item: Habit; title: string; meta: string; date?: string; tags: string[] };
@@ -19,14 +22,15 @@ export type DataFilterMatch =
 export interface DataFilterView {
   items: DataFilterMatch[];
   total: number;
-  counts: { task: number; project: number; habit: number };
+  counts: { note: number; task: number; project: number; habit: number };
   config: DataFilterWidgetConfig;
 }
 
-const ENTITIES: DataFilterEntity[] = ["all", "task", "project", "habit"];
+const ENTITIES: DataFilterEntity[] = ["all", "note", "task", "project", "habit"];
 const STATES: DataFilterState[] = ["active", "completed", "all"];
 const DATE_RANGES: DataFilterDateRange[] = ["all", "overdue", "today", "next7", "next30", "none"];
 const SORTS: DataFilterSort[] = ["date", "name", "type"];
+const TASK_STATUSES: DataFilterTaskStatus[] = ["all", "has-tasks", "pending", "completed", "none"];
 
 export const DEFAULT_DATA_FILTER_CONFIG: DataFilterWidgetConfig = {
   entity: "all",
@@ -34,6 +38,9 @@ export const DEFAULT_DATA_FILTER_CONFIG: DataFilterWidgetConfig = {
   dateRange: "all",
   query: "",
   tag: "",
+  folder: "",
+  frontmatter: "",
+  noteTaskStatus: "all",
   sort: "date",
   limit: 20,
 };
@@ -49,6 +56,9 @@ export function normalizeDataFilterConfig(value: Partial<DataFilterWidgetConfig>
     dateRange: oneOf(value?.dateRange, DATE_RANGES, DEFAULT_DATA_FILTER_CONFIG.dateRange),
     query: typeof value?.query === "string" ? value.query.trim().slice(0, 160) : "",
     tag: typeof value?.tag === "string" ? value.tag.trim().slice(0, 80) : "",
+    folder: typeof value?.folder === "string" ? value.folder.trim().replace(/^\/+|\/+$/g, "").slice(0, 180) : "",
+    frontmatter: typeof value?.frontmatter === "string" ? value.frontmatter.trim().slice(0, 160) : "",
+    noteTaskStatus: oneOf(value?.noteTaskStatus, TASK_STATUSES, DEFAULT_DATA_FILTER_CONFIG.noteTaskStatus),
     sort: oneOf(value?.sort, SORTS, DEFAULT_DATA_FILTER_CONFIG.sort),
     limit: Math.max(1, Math.min(100, Math.round(Number(value?.limit) || DEFAULT_DATA_FILTER_CONFIG.limit))),
   };
@@ -71,14 +81,13 @@ function matchesQuery(haystack: string, query: string): boolean {
   return needles.every((needle) => normalized.includes(needle));
 }
 
-function stateMatches(kind: DataFilterMatch["kind"], item: Task | Project | Habit, state: DataFilterState): boolean {
-  if (kind === "task") {
-    const task = item as Task;
+function stateMatches(match: DataFilterMatch, state: DataFilterState): boolean {
+  if (match.kind === "note") return true;
+  if (match.kind === "task") {
     if (state === "all") return true;
-    return state === "completed" ? task.completed : !task.completed;
+    return state === "completed" ? match.item.completed : !match.item.completed;
   }
-
-  const status = (item as Project | Habit).status;
+  const status = match.item.status;
   if (state === "all") return status !== "archived";
   if (state === "completed") return status === "completed";
   return status !== "completed" && status !== "archived";
@@ -92,6 +101,57 @@ function dateMatches(date: string | undefined, range: DataFilterDateRange, today
   if (range === "today") return date === today;
   const end = addDays(today, range === "next7" ? 7 : 30);
   return date >= today && date <= end;
+}
+
+function folderForMatch(match: DataFilterMatch): string {
+  if (match.kind === "note") return match.item.folder;
+  const path = match.item.source.path;
+  const index = path.lastIndexOf("/");
+  return index >= 0 ? path.slice(0, index) : "";
+}
+
+function folderMatches(match: DataFilterMatch, requested: string): boolean {
+  const wanted = requested.trim().replace(/^\/+|\/+$/g, "").toLocaleLowerCase();
+  if (!wanted) return true;
+  const folder = folderForMatch(match).replace(/^\/+|\/+$/g, "").toLocaleLowerCase();
+  return folder === wanted || folder.startsWith(`${wanted}/`);
+}
+
+function frontmatterMatches(match: DataFilterMatch, requested: string): boolean {
+  const expression = requested.trim();
+  if (!expression) return true;
+  if (match.kind !== "note") return false;
+  const separator = expression.indexOf("=");
+  const keyText = (separator >= 0 ? expression.slice(0, separator) : expression).trim().toLocaleLowerCase();
+  if (!keyText) return true;
+  const entry = Object.entries(match.item.frontmatter).find(([key]) => key.toLocaleLowerCase() === keyText);
+  if (!entry) return false;
+  if (separator < 0) return true;
+  const expected = expression.slice(separator + 1).trim().toLocaleLowerCase();
+  return !expected || entry[1].toLocaleLowerCase().includes(expected);
+}
+
+function noteTaskStatusMatches(match: DataFilterMatch, status: DataFilterTaskStatus): boolean {
+  if (status === "all") return true;
+  if (match.kind !== "note") return false;
+  const { taskTotal, taskCompleted } = match.item;
+  if (status === "none") return taskTotal === 0;
+  if (status === "has-tasks") return taskTotal > 0;
+  if (status === "pending") return taskTotal > taskCompleted;
+  return taskTotal > 0 && taskCompleted === taskTotal;
+}
+
+function noteMatch(note: NoteRecord): DataFilterMatch {
+  const date = localDate(new Date(note.modifiedAt));
+  const tasks = note.taskTotal > 0 ? `${note.taskCompleted}/${note.taskTotal} tasks` : "无任务";
+  return {
+    kind: "note",
+    item: note,
+    title: note.name,
+    meta: [note.folder || "Vault 根目录", tasks, `修改 ${date}`].join(" · "),
+    date,
+    tags: note.tags,
+  };
 }
 
 function taskMatch(task: Task): DataFilterMatch {
@@ -128,6 +188,15 @@ function habitMatch(habit: Habit): DataFilterMatch {
 }
 
 function searchable(match: DataFilterMatch): string {
+  if (match.kind === "note") {
+    return [
+      match.item.path,
+      match.item.name,
+      match.item.folder,
+      ...match.item.tags,
+      ...Object.entries(match.item.frontmatter).flatMap(([key, value]) => [key, value]),
+    ].join(" ");
+  }
   if (match.kind === "task") {
     const task = match.item;
     return [task.text, task.projectId, task.priority, ...task.tags].filter(Boolean).join(" ");
@@ -145,7 +214,7 @@ function searchable(match: DataFilterMatch): string {
 function compareMatches(a: DataFilterMatch, b: DataFilterMatch, sort: DataFilterSort): number {
   if (sort === "name") return a.title.localeCompare(b.title, "zh-CN");
   if (sort === "type") {
-    const order = { task: 0, project: 1, habit: 2 } as const;
+    const order = { note: 0, task: 1, project: 2, habit: 3 } as const;
     return order[a.kind] - order[b.kind] || a.title.localeCompare(b.title, "zh-CN");
   }
   return (a.date ?? "9999-12-31").localeCompare(b.date ?? "9999-12-31")
@@ -159,19 +228,23 @@ export function filterVaultSnapshot(
 ): DataFilterView {
   const config = normalizeDataFilterConfig(rawConfig);
   const candidates: DataFilterMatch[] = [];
+  if (config.entity === "all" || config.entity === "note") candidates.push(...(snapshot.noteRecords ?? []).map(noteMatch));
   if (config.entity === "all" || config.entity === "task") candidates.push(...snapshot.tasks.map(taskMatch));
   if (config.entity === "all" || config.entity === "project") candidates.push(...snapshot.projects.map(projectMatch));
   if (config.entity === "all" || config.entity === "habit") candidates.push(...snapshot.habits.map(habitMatch));
 
   const filtered = candidates.filter((match) => (
-    stateMatches(match.kind, match.item, config.state)
+    stateMatches(match, config.state)
     && dateMatches(match.date, config.dateRange, today)
     && matchesTag(match.tags, config.tag)
+    && folderMatches(match, config.folder)
+    && frontmatterMatches(match, config.frontmatter)
+    && noteTaskStatusMatches(match, config.noteTaskStatus)
     && matchesQuery(searchable(match), config.query)
   ));
   filtered.sort((a, b) => compareMatches(a, b, config.sort));
 
-  const counts = { task: 0, project: 0, habit: 0 };
+  const counts = { note: 0, task: 0, project: 0, habit: 0 };
   for (const match of filtered) counts[match.kind] += 1;
 
   return {
