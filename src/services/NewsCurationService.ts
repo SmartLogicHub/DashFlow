@@ -6,6 +6,7 @@ const MAX_SOURCES = 12;
 const MAX_PER_SOURCE = 12;
 const MAX_CANDIDATES = 40;
 const MAX_DESCRIPTION = 320;
+const MAX_FEED_CHARS = 1_500_000;
 
 export interface NewsCurationResult {
   items: CuratedNewsItem[];
@@ -33,10 +34,32 @@ function cleanText(value: string): string {
   return (doc.body.textContent ?? "").replace(/\s+/g, " ").trim();
 }
 
-function httpUrl(value: string): string | null {
+function isPrivateIpv4(hostname: string): boolean {
+  const parts = hostname.split(".").map(Number);
+  if (parts.length !== 4 || parts.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) return false;
+  const [a, b] = parts;
+  return a === 10
+    || a === 127
+    || (a === 169 && b === 254)
+    || (a === 172 && b >= 16 && b <= 31)
+    || (a === 192 && b === 168)
+    || a === 0;
+}
+
+function isPrivateHost(hostname: string): boolean {
+  const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
+  if (host === "localhost" || host.endsWith(".localhost") || host.endsWith(".local")) return true;
+  if (isPrivateIpv4(host)) return true;
+  if (host === "::1" || host === "::" || host.startsWith("fe80:") || host.startsWith("fc") || host.startsWith("fd")) return true;
+  return false;
+}
+
+function httpUrl(value: string, externalOnly = false): string | null {
   try {
     const url = new URL(value.trim());
-    return url.protocol === "http:" || url.protocol === "https:" ? url.toString() : null;
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (externalOnly && isPrivateHost(url.hostname)) return null;
+    return url.toString();
   } catch {
     return null;
   }
@@ -68,7 +91,7 @@ function safeDate(value: string): string | undefined {
 function parseSources(value: string): string[] {
   const unique = new Set<string>();
   for (const token of value.split(/[\n,;]+/)) {
-    const url = httpUrl(token);
+    const url = httpUrl(token, true);
     if (url) unique.add(url);
     if (unique.size >= MAX_SOURCES) break;
   }
@@ -80,7 +103,9 @@ export class NewsCurationService {
 
   async curate(cacheKey: string, config: AINewsWidgetConfig, force = false): Promise<NewsCurationResult> {
     const sources = parseSources(config.sources ?? "");
-    if (sources.length === 0) throw new Error("请先在卡片设置中添加至少一个 RSS / Atom URL。");
+    if (sources.length === 0) {
+      throw new Error("请添加公开 HTTP(S) RSS / Atom URL；localhost、私网与 .local 地址不会自动请求。");
+    }
     if (!this.plugin.aiClient.isConfigured()) throw new Error("AI Provider 尚未配置，无法执行个性化新闻筛选。");
 
     const interests = String(config.interests ?? "").trim() || "高价值、值得今天阅读的信息";
@@ -135,6 +160,9 @@ export class NewsCurationService {
       const response = await requestUrl({ url: sourceUrl, method: "GET" });
       if (response.status < 200 || response.status >= 300) {
         return { items: [], warning: `${sourceUrl}: HTTP ${response.status}` };
+      }
+      if (response.text.length > MAX_FEED_CHARS) {
+        return { items: [], warning: `${sourceUrl}: Feed 过大，已拒绝解析` };
       }
       const xml = new DOMParser().parseFromString(response.text, "text/xml");
       if (xml.querySelector("parsererror")) return { items: [], warning: `${sourceUrl}: XML 解析失败` };
