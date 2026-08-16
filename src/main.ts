@@ -8,6 +8,7 @@ import type { ActivityStore, DashFlowData } from "./models";
 import type { ProductSection } from "./product/navigation";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
+import { AIClient } from "./services/AIClient";
 import { AIPlanningService } from "./services/AIPlanningService";
 import { CalendarService } from "./services/CalendarService";
 import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInteractionService";
@@ -17,6 +18,7 @@ import { DashboardTransferInteractionService } from "./services/DashboardTransfe
 import { DesignSystemService } from "./services/DesignSystemService";
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
+import { MorningBriefingService } from "./services/MorningBriefingService";
 import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService";
 import { PresentationRuntimeService } from "./services/PresentationRuntimeService";
 import { ProductDesignService } from "./services/ProductDesignService";
@@ -31,6 +33,7 @@ import { WeReadService } from "./services/WeReadService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
 import { AIPlanModal } from "./ui/AIPlanModal";
 import { GlobalSearchModal } from "./ui/GlobalSearchModal";
+import { MorningBriefingSettingsModal } from "./ui/MorningBriefingSettingsModal";
 import { ProjectEditorModal } from "./ui/ProjectEditorModal";
 import { QuickAddModal } from "./ui/QuickAddModal";
 import { TaskEditorModal } from "./ui/TaskEditorModal";
@@ -57,7 +60,9 @@ export default class DashFlowPlugin extends Plugin {
   projectService!: ProjectService;
   captureService!: CaptureService;
   taskInteractions!: TaskInteractionService;
+  aiClient!: AIClient;
   aiPlanning!: AIPlanningService;
+  morningBriefing!: MorningBriefingService;
   weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
@@ -110,7 +115,9 @@ export default class DashFlowPlugin extends Plugin {
       () => this.data.settings.habitFolder,
       () => this.data.settings.habitTypeValue,
     );
+    this.aiClient = new AIClient(this);
     this.aiPlanning = new AIPlanningService(this);
+    this.morningBriefing = new MorningBriefingService(this);
     this.weRead = new WeReadService(this);
     this.taskInteractions = new TaskInteractionService(this);
     this.activityWidgets = new ActivityWidgetInteractionService(this);
@@ -137,6 +144,19 @@ export default class DashFlowPlugin extends Plugin {
     this.addCommand({ id: "new-task", name: "新建任务", callback: () => new TaskEditorModal(this).open() });
     this.addCommand({ id: "new-project", name: "新建项目", callback: () => new ProjectEditorModal(this).open() });
     this.addCommand({ id: "ai-plan-today", name: "AI 规划今天", callback: () => new AIPlanModal(this).open() });
+    this.addCommand({
+      id: "configure-ai-morning-briefing",
+      name: "配置 AI 晨间简报",
+      callback: () => new MorningBriefingSettingsModal(this).open(),
+    });
+    this.addCommand({
+      id: "refresh-ai-morning-briefing",
+      name: "刷新 AI 晨间简报",
+      callback: async () => {
+        await this.morningBriefing.clearCache();
+        await this.activateSection("today");
+      },
+    });
 
     const sections: Array<[ProductSection, string]> = [
       ["today", "打开 · 主页"], ["work", "打开 · 工作台"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
@@ -160,8 +180,6 @@ export default class DashFlowPlugin extends Plugin {
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
     this.productDesign.start();
     this.personalHomeDesign.start();
-    // v0.4.3 owns the final visual cascade. Legacy CSS is imported by this
-    // presentation-only service without starting the old observer runtimes.
     this.designSystem.start();
     this.presentationRuntime.start();
     this.activityService.start();
@@ -226,6 +244,7 @@ export default class DashFlowPlugin extends Plugin {
         startedAt: loaded?.activity?.startedAt ?? localDate(),
         days: loaded?.activity?.days ?? {},
       },
+      aiCache: loaded?.aiCache ?? {},
     };
 
     if (this.data.dashboards.length === 0) {
