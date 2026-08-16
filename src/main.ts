@@ -24,6 +24,7 @@ import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
 import { UiRefinementPolishService } from "./services/UiRefinementPolishService";
 import { VaultIndexService } from "./services/VaultIndexService";
+import { VisualContinuityService } from "./services/VisualContinuityService";
 import { WeeklyReviewService } from "./services/WeeklyReviewService";
 import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
 import { WeReadService } from "./services/WeReadService";
@@ -61,6 +62,7 @@ export default class DashFlowPlugin extends Plugin {
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
   uiRefinementPolish!: UiRefinementPolishService;
+  visualContinuity!: VisualContinuityService;
   productExperience!: ProductExperienceService;
 
   async onload(): Promise<void> {
@@ -120,6 +122,7 @@ export default class DashFlowPlugin extends Plugin {
     this.productDesign = new ProductDesignService();
     this.personalHomeDesign = new PersonalHomeDesignService();
     this.uiRefinementPolish = new UiRefinementPolishService(this);
+    this.visualContinuity = new VisualContinuityService();
     this.productExperience = new ProductExperienceService(this);
 
     this.registerView(VIEW_TYPE, (leaf) => new DashboardView(leaf, this));
@@ -158,6 +161,7 @@ export default class DashFlowPlugin extends Plugin {
     this.productDesign.start();
     this.personalHomeDesign.start();
     this.uiRefinementPolish.start();
+    this.visualContinuity.start();
     this.activityService.start();
     this.vaultIndex.initializeWhenReady();
     this.taskInteractions.start();
@@ -180,6 +184,7 @@ export default class DashFlowPlugin extends Plugin {
     this.activityWidgets?.stop();
     this.taskInteractions?.stop();
     this.activityService?.stop();
+    this.visualContinuity?.stop();
     this.uiRefinementPolish?.stop();
     this.personalHomeDesign?.stop();
     this.productDesign?.stop();
