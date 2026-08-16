@@ -1,21 +1,12 @@
 const STYLE_ID = "dashflow-ui-refinement-polish-v042";
 
 export const UI_REFINEMENT_POLISH_STYLES = `
-/* Screenshot-driven final pass for v0.4.2. Keep behavior/data untouched. */
+/* Screenshot-driven final pass for v0.4.2. Keep behavior/data untouched.
+ * Geometry shared by Home and Work belongs to the base design services;
+ * this layer only refines states and dense work content so it cannot reintroduce layout shift.
+ */
 
 /* HOME ------------------------------------------------------------------ */
-.dashflow-command-shell.is-personal-home .dashflow-hero {
-  background-position: 60% 52%!important;
-  box-shadow: 0 8px 24px rgba(18, 36, 45, 0.07)!important;
-}
-
-.dashflow-command-shell.is-personal-home .dashflow-command-bar {
-  min-height: 38px!important;
-  padding: 3px 4px!important;
-  border-color: color-mix(in srgb, var(--df-home-border) 72%, transparent)!important;
-  background: color-mix(in srgb, var(--df-home-surface) 90%, transparent)!important;
-}
-
 .dashflow-home-top-grid {
   align-items: start!important;
 }
@@ -98,38 +89,9 @@ export const UI_REFINEMENT_POLISH_STYLES = `
 }
 
 /* WORK ------------------------------------------------------------------ */
-.dashflow-command-shell:not(.is-personal-home) {
-  width: min(1180px, calc(100% - 32px))!important;
-  padding-top: 8px!important;
-}
-
-/* Treat the command bar as product navigation, not another card. */
-.dashflow-command-shell:not(.is-personal-home) .dashflow-command-bar {
-  min-height: 38px!important;
-  margin-bottom: 10px!important;
-  padding: 3px 2px!important;
-  gap: 4px!important;
-  border: 0!important;
-  border-bottom: 1px solid var(--df-cmd-border)!important;
-  border-radius: 0!important;
-  background: transparent!important;
-}
-
-.dashflow-command-shell:not(.is-personal-home) .dashflow-command-bar::before {
-  padding-left: 2px!important;
-  padding-right: 10px!important;
-  font-size: 12px!important;
-}
-
-.dashflow-command-shell:not(.is-personal-home) .dashflow-command-button {
-  height: 29px!important;
-  padding: 0 9px!important;
-}
-
-.dashflow-command-shell:not(.is-personal-home) .dashflow-command-button.is-active {
-  border-color: transparent!important;
-  background: var(--df-cmd-soft)!important;
-}
+/* Shared shell width, top padding and Command Bar geometry intentionally come
+ * from ProductDesignService + PersonalHomeDesignService. Do not override them here.
+ */
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget {
   border-color: color-mix(in srgb, var(--df-cmd-border) 78%, transparent)!important;
@@ -186,7 +148,7 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   min-height: 28px!important;
 }
 
-/* The Gemini pass accidentally left a 3-column project row for 2 DOM children. */
+/* Renderer has two project-row children: content + statistics. */
 .dashflow-command-shell:not(.is-personal-home) .dashflow-project-row {
   grid-template-columns: minmax(0, 1fr) auto!important;
   gap: 16px!important;
@@ -254,16 +216,7 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   border-radius: 2px!important;
 }
 
-@media (max-width: 980px) {
-  .dashflow-command-shell:not(.is-personal-home) {
-    width: calc(100% - 20px)!important;
-  }
-}
-
 @media (max-width: 760px) {
-  .dashflow-command-shell:not(.is-personal-home) .dashflow-command-bar {
-    border-bottom: 0!important;
-  }
   .dashflow-home-weread:has(.dashflow-home-weread-mark) .dashflow-home-weread-body {
     grid-template-columns: 34px minmax(0, 1fr)!important;
   }
@@ -277,6 +230,7 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   .dashflow-command-shell *,
   .dashflow-personal-home * {
     transition: none!important;
+    animation: none!important;
   }
 }
 `;
