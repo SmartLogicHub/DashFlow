@@ -15,6 +15,8 @@ export type DataFilterState = "active" | "completed" | "all";
 export type DataFilterDateRange = "all" | "overdue" | "today" | "next7" | "next30" | "none";
 export type DataFilterSort = "date" | "name" | "type";
 export type DataFilterTaskStatus = "all" | "has-tasks" | "pending" | "completed" | "none";
+export type FocusMode = "focus" | "short-break" | "long-break";
+export type FocusStatus = "idle" | "running" | "paused";
 
 export interface SourceLocation {
   path: string;
@@ -130,16 +132,31 @@ export interface DailyActivity {
   tasksCreated: number;
   tasksCompleted: number;
   habitsCompleted: number;
+  focusSessions?: number;
+  focusMinutes?: number;
   createdNoteKeys: string[];
   modifiedNoteKeys: string[];
   createdTaskKeys: string[];
   completedTaskKeys: string[];
   completedHabitKeys: string[];
+  completedFocusSessionKeys?: string[];
 }
 
 export interface ActivityStore {
   startedAt: string;
   days: Record<string, DailyActivity>;
+}
+
+export interface FocusTimerState {
+  mode: FocusMode;
+  status: FocusStatus;
+  completedFocusSessions: number;
+  sessionId?: string;
+  startedAt?: number;
+  endsAt?: number;
+  pausedRemainingMs?: number;
+  durationMinutes?: number;
+  longBreakEvery?: number;
 }
 
 export interface WidgetLayout {
@@ -297,6 +314,7 @@ export interface DashFlowData {
   customTemplates: CustomDashboardTemplate[];
   activity: ActivityStore;
   aiCache: AICache;
+  focus: FocusTimerState;
 }
 
 export interface VaultSnapshot {
@@ -333,6 +351,16 @@ export interface DataFilterWidgetConfig extends Record<string, unknown> {
   noteTaskStatus: DataFilterTaskStatus;
   sort: DataFilterSort;
   limit: number;
+}
+export interface FocusWidgetConfig extends Record<string, unknown> {
+  focusMinutes: number;
+  shortBreakMinutes: number;
+  longBreakMinutes: number;
+  longBreakEvery: number;
+}
+export interface MagicEmbedWidgetConfig extends Record<string, unknown> {
+  url: string;
+  allowForms: boolean;
 }
 export interface CalendarWidgetConfig extends Record<string, unknown> {
   weekStart: CalendarWeekStart;
