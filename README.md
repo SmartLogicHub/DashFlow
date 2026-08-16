@@ -1,8 +1,47 @@
-# DashFlow v0.5.0
+# DashFlow v0.5.1
 
 DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project / Habit / Daily Progress 都以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
 
-> v0.5.0 开始进入 **DashFlow Intelligence**：新增统一的 OpenAI-compatible AI Client 与 AI 晨间简报。每天首次打开 Home 时，可在明确授权后读取昨日 Daily Note，生成简短复盘与一个今日建议；同一天优先使用缓存，避免重复请求。
+> v0.5.1 聚焦 **极速工作流**：Quick Capture 现在可以写入 DashFlow Inbox、当天 Daily Note，或每次提交时选择；同时新增 Morning / Work / Review 情景模式，直接映射现有 Dashboard，一键切换工作状态而不复制布局。
+
+## v0.5.1 · Quick Capture + Context Switcher
+
+### Quick Capture 目标
+
+默认行为保持兼容：升级后仍然写入 `DashFlow/Inbox.md`。你可以在「配置 Quick Capture 与情景模式」中切换为：
+
+- **DashFlow Inbox**：写成 `- [ ]` 待整理任务，并进入 Activity task-created 统计。
+- **今天的 Daily Note**：写成普通 Markdown bullet，原样保留 `#标签` 与 `[[双链]]`。
+- **每次询问**：提交时用轻量选择器决定 Inbox / Daily Note。
+
+Daily Note 写入复用 AI Morning Briefing 的同一套路径规则，支持文件夹与 `YYYY / MM / DD` 日期格式；已有笔记使用 `Vault.process()` 安全修改。可以指定目标标题，例如：
+
+```text
+Daily Note: Daily Notes/2026-08-16.md
+目标标题:  ## 闪念
+
+## 闪念
+
+- 研究 #AI [[DashFlow 0.5]]
+```
+
+如果目标标题不存在，DashFlow 会自动创建；留空则追加到笔记末尾。
+
+### Context Switcher
+
+工作台顶部可以映射三个情景：
+
+```text
+☀ Morning   ⚡ Work   ↻ Review   ⚙
+```
+
+它不会创建第二套 `layouts` 数据。每个 Tab 只保存一个**现有 Dashboard ID**，切换时继续调用 `DashboardManager.setActiveDashboard()`：
+
+- **Morning**：适合 Home / Daily Focus
+- **Work**：适合 Project Management / 执行工作台
+- **Review**：适合 Weekly Review / 复盘工作台
+
+需要新布局时，先用已有 Dashboard 模板创建，再把它映射到情景即可。Context Switcher 使用 Dashboard / Vault / Workspace 事件同步状态，没有新增全局 `MutationObserver`。
 
 ## v0.5.0 · Intelligence Core + AI Morning Briefing
 
@@ -62,8 +101,6 @@ v0.5.0 把原本 AI Planning 内部的网络请求抽成共享 `AIClient`：
 - Ollama / localhost 本地端点
 - 文本 completion
 - JSON completion 解析
-
-这样后续 AI News Curation 不会再复制一套请求、鉴权和 JSON 解析代码。
 
 ## v0.4.6 · Daily Progress Integration
 
@@ -132,8 +169,6 @@ daily_notes:
 
 ## v0.4.4 · Interaction & Flexible Dashboard
 
-v0.4.4 已加入：
-
 - 统一 Motion System：卡片 stagger 入场、数字反馈、hover、拖拽和 resize 状态
 - Desktop 卡片自由拖拽排序与持久化
 - Desktop 卡片自由 resize
@@ -142,15 +177,11 @@ v0.4.4 已加入：
 - Light / Dark 交互阴影与性能细节
 - `prefers-reduced-motion` 完整支持
 
-Desktop 支持自由拖拽和 resize；移动端保持稳定单列顺序与触控友好交互。
-
 ## 产品结构
 
 ### Home · Personal Home
 
-Home 是个人状态和长期成长入口：
-
-1. 约 194px Hero：日期、个人标题、副标题、开始今天、收集灵感
+1. Hero：日期、个人标题、副标题、开始今天、收集灵感
 2. AI 晨间简报：昨日 Daily Note → 复盘摘要 → 今日建议（明确授权后）
 3. 微信读书每日划线：真实书籍、章节和个人划线
 4. Today + 今日状态：Task / Habit / Daily Progress / Project / Activity streak
@@ -160,32 +191,19 @@ Home 是个人状态和长期成长入口：
 
 ### Work · 执行工作台
 
+- Morning / Work / Review Context Switcher
 - 紧凑命令栏与 compact Hero
 - Task 列表与真实优先级 / 日期 / 项目关联
 - Project 行式结构与真实进度
-- Today / All Tasks Progress
 - Inbox / Calendar / Habits / Review 独立工作流
 - Dashboard drag / resize / config / add / remove / reset
 - Resize 后自动切换信息密度
 
 ### Habits · 长期节奏
 
-Habits Widget 同时承载普通 Habit 和 Daily Progress：
-
-```text
-每天运动                 🔥 12
-■■■■■□■                 ○ 打卡
-
-DashFlow 0.5     日更 · ↗ DashFlow   连续 8 天
-■■■■■■■                 📝 已记录  ✓ 今日已推进
-████████████░░           18/46 · 39%
-```
-
-Daily Progress 的历史格子可以点击回填完成状态；今日可以直接写推进备注。
+Habits Widget 同时承载普通 Habit 和 Daily Progress。Daily Progress 的历史格子可以点击回填完成状态；今日可以直接写推进备注。
 
 ### Weekly Review · 周复盘
-
-Weekly Review 会分别展示：
 
 - 本周完成任务与 Activity 变化
 - 普通 Habit 完成率
@@ -194,25 +212,15 @@ Weekly Review 会分别展示：
 - 活动 Project 进度
 - 下周任务 / Project 截止日
 
-复制周报时，Habit 与 Daily Progress 也会保持独立章节。
-
 ### 自定义 Countdown
 
-在「编辑布局」中可以添加多个 Countdown：
-
-```text
-距 DashFlow 0.5 发布   46 DAYS
-距考试                 23 DAYS
-距旅行                128 DAYS
-```
-
-每个实例独立保存卡片标题、倒计时标签和目标日期。
+在「编辑布局」中可以添加多个 Countdown，每个实例独立保存标题和目标日期。
 
 ### Quick Add
 
 全局 Quick Add 支持：
 
-- 一句话进入 Inbox
+- 一句话按配置进入 Inbox / Daily Note / 每次询问
 - 详细任务
 - 新建项目
 - 习惯 / 日更长期任务
@@ -235,36 +243,26 @@ Model:    你的本地模型
 API Key:  可留空
 ```
 
-Morning Briefing 的 Daily Note 路径支持配置文件夹和 `YYYY / MM / DD` 日期格式。例如：
+Morning Briefing 与 Daily Note Quick Capture 共用路径设置：
 
 ```text
 Daily Note 文件夹: Daily Notes
 日期格式:          YYYY-MM-DD
-结果:              Daily Notes/2026-08-15.md
+结果:              Daily Notes/2026-08-16.md
 ```
 
 ## 微信读书
 
-DashFlow 使用腾讯公开的微信读书 Agent API Gateway，只展示用户自己的真实个人划线，不伪造名言、封面或来源。
-
-```text
-POST https://i.weread.qq.com/api/agent/gateway
-Authorization: Bearer wrk-...
-skill_version: 1.0.4
-```
-
-API Key 只保存在 Obsidian SecretStorage / Keychain；不使用 Cookie 抓取；不伪造内容或 deep link。
+DashFlow 使用腾讯公开的微信读书 Agent API Gateway，只展示用户自己的真实个人划线，不伪造名言、封面或来源。API Key 只保存在 Obsidian SecretStorage / Keychain。
 
 ## 核心能力
 
 - Vault 增量索引
-- Task 创建 / 编辑 / 完成 / 计划日 / 截止日 / 优先级 / 项目关联
-- Project 创建 / 编辑 / 详情 / 自动任务进度
-- Habit 创建 / 编辑 / 打卡 / streak / 目标
-- Daily Progress 日更打卡 / 历史回填 / 每日备注 / Project 关联 / Home / Weekly Review 整合
-- AIClient：统一 OpenAI-compatible AI 请求层
-- AI Morning Briefing：昨日 Daily Note 复盘 / 今日建议 / source-hash cache
-- 可选 AI 日计划
+- Task / Project / Habit / Daily Progress
+- AIClient + AI Morning Briefing + 可选 AI 日计划
+- Quick Capture：Inbox / Daily Note / Ask
+- DailyNoteService：统一 Daily Note 路径与安全写入
+- Context Switcher：Morning / Work / Review → existing Dashboard IDs
 - Activity Tracker + Heatmap
 - Calendar + Agenda
 - Weekly Review
@@ -337,9 +335,9 @@ daily_notes:
 
 DashFlow 不把 Task / Project / Habit / Daily Progress 锁进专有数据库。删除插件后，这些业务数据仍完整留在 Vault Markdown 中。
 
-插件私有数据主要保存 Dashboard 布局、Widget config、模板、Personal Home 外观、Activity 派生统计、AI 晨间简报缓存和 UI state。AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
+插件私有数据主要保存 Dashboard 布局、Widget config、模板、Context 映射、Quick Capture 偏好、Personal Home 外观、Activity 派生统计、AI 晨间简报缓存和 UI state。AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
 
-AI 晨间简报是例外的“主动读取笔记正文”能力：默认关闭，并需要独立授权。启用后，昨日 Daily Note 正文会发送给用户配置的 AI Base URL；如果使用 localhost Ollama，则请求留在本机。
+AI 晨间简报默认关闭并需要独立授权。启用后，昨日 Daily Note 正文会发送给用户配置的 AI Base URL；如果使用 localhost Ollama，则请求留在本机。
 
 ## 开发
 

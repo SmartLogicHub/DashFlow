@@ -3,6 +3,7 @@ import type DashFlowPlugin from "../main";
 import { HabitEditorModal } from "./HabitEditorModal";
 import { ProjectEditorModal } from "./ProjectEditorModal";
 import { TaskEditorModal } from "./TaskEditorModal";
+import { WorkflowSettingsModal } from "./WorkflowSettingsModal";
 
 export class QuickAddModal extends Modal {
   constructor(private readonly plugin: DashFlowPlugin) {
@@ -19,7 +20,7 @@ export class QuickAddModal extends Modal {
     contentEl.createEl("h2", { text: "先记下来，再整理。" });
     contentEl.createEl("p", {
       cls: "dashflow-modal-lead dashflow-quick-add-lead",
-      text: "输入一句话按 Enter 会进入收集箱；需要日期、项目或优先级时，再进入完整任务编辑器。",
+      text: "输入一句话按 Enter 会按 Quick Capture 设置保存；写入 Daily Note 时 #标签 与 [[双链]] 会原样保留。",
     });
 
     const composer = contentEl.createDiv("dashflow-quick-add-composer");
@@ -27,10 +28,20 @@ export class QuickAddModal extends Modal {
     setIcon(mark, "plus");
     const input = composer.createEl("input", {
       type: "text",
-      placeholder: "例如：整理 DashFlow 首页视觉…",
+      placeholder: "例如：研究 #AI [[DashFlow 0.5]]…",
     });
     const hint = composer.createSpan("dashflow-quick-add-hint");
     hint.setText("ENTER");
+
+    const target = contentEl.createDiv("dashflow-quick-add-target");
+    const targetLabel = target.createSpan();
+    targetLabel.textContent = this.captureTargetLabel();
+    const configure = target.createEl("button", { text: "配置" });
+    configure.type = "button";
+    configure.addEventListener("click", () => {
+      this.close();
+      new WorkflowSettingsModal(this.plugin).open();
+    });
 
     const capture = async (): Promise<void> => {
       const text = input.value.trim();
@@ -67,6 +78,13 @@ export class QuickAddModal extends Modal {
 
   onClose(): void {
     this.contentEl.empty();
+  }
+
+  private captureTargetLabel(): string {
+    const target = this.plugin.data.settings.quickCaptureTarget;
+    if (target === "daily-note") return "目标：今天的 Daily Note";
+    if (target === "ask") return "目标：每次询问";
+    return "目标：DashFlow Inbox";
   }
 
   private actionButton(iconName: string, title: string, description: string, action: () => void): HTMLButtonElement {

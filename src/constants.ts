@@ -2,7 +2,7 @@ import type { DashFlowSettings } from "./models";
 
 export const VIEW_TYPE = "dashflow-dashboard";
 export const SCHEMA_VERSION = 7 as const;
-export const PLUGIN_VERSION = "0.5.0";
+export const PLUGIN_VERSION = "0.5.1";
 
 export const DEFAULT_SETTINGS: DashFlowSettings = {
   inboxPath: "DashFlow/Inbox.md",
@@ -25,4 +25,9 @@ export const DEFAULT_SETTINGS: DashFlowSettings = {
   aiMorningBriefingEnabled: false,
   dailyNoteFolder: "",
   dailyNoteDateFormat: "YYYY-MM-DD",
+  quickCaptureTarget: "inbox",
+  dailyCaptureHeading: "## 闪念",
+  contextMorningDashboardId: "home",
+  contextWorkDashboardId: "",
+  contextReviewDashboardId: "",
 };

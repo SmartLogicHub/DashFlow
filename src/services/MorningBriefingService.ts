@@ -1,4 +1,3 @@
-import { TFile, normalizePath } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { MorningBriefingCacheEntry } from "../models";
 import { addDays, localDate } from "../utils/date";
@@ -8,18 +7,6 @@ const MAX_NOTE_CHARS = 24_000;
 interface MorningBriefingResponse {
   summary?: unknown;
   advice?: unknown;
-}
-
-function two(value: number): string {
-  return String(value).padStart(2, "0");
-}
-
-function formatDate(dateText: string, format: string): string {
-  const date = new Date(`${dateText}T12:00:00`);
-  return (format || "YYYY-MM-DD")
-    .replace(/YYYY/g, String(date.getFullYear()))
-    .replace(/MM/g, two(date.getMonth() + 1))
-    .replace(/DD/g, two(date.getDate()));
 }
 
 function hashText(value: string): string {
@@ -49,11 +36,7 @@ export class MorningBriefingService {
   }
 
   dailyNotePath(dateText: string): string {
-    const settings = this.plugin.data.settings;
-    const folder = settings.dailyNoteFolder.trim().replace(/^\/+|\/+$/g, "");
-    const formatted = formatDate(dateText, settings.dailyNoteDateFormat.trim() || "YYYY-MM-DD");
-    const name = formatted.toLowerCase().endsWith(".md") ? formatted : `${formatted}.md`;
-    return normalizePath(folder ? `${folder}/${name}` : name);
+    return this.plugin.dailyNotes.path(dateText);
   }
 
   cached(): MorningBriefingCacheEntry | null {
@@ -70,13 +53,11 @@ export class MorningBriefingService {
 
     const date = localDate();
     const sourceDate = addDays(date, -1);
-    const sourcePath = this.dailyNotePath(sourceDate);
-    const abstract = this.plugin.app.vault.getAbstractFileByPath(sourcePath);
-    if (!(abstract instanceof TFile)) {
-      throw new Error(`未找到昨日 Daily Note：${sourcePath}`);
-    }
+    const sourcePath = this.plugin.dailyNotes.path(sourceDate);
+    const dailyNote = await this.plugin.dailyNotes.read(sourceDate);
+    if (!dailyNote) throw new Error(`未找到昨日 Daily Note：${sourcePath}`);
 
-    const content = await this.plugin.app.vault.read(abstract);
+    const content = dailyNote.content;
     if (!content.trim()) throw new Error(`昨日 Daily Note 是空的：${sourcePath}`);
     const sourceHash = hashText(content);
     const cached = this.cached();

@@ -6,6 +6,7 @@ import { DEFAULT_SETTINGS, SCHEMA_VERSION } from "../src/constants";
 const aiClient = readFileSync("src/services/AIClient.ts", "utf8");
 const aiPlanning = readFileSync("src/services/AIPlanningService.ts", "utf8");
 const morning = readFileSync("src/services/MorningBriefingService.ts", "utf8");
+const dailyNotes = readFileSync("src/services/DailyNoteService.ts", "utf8");
 const morningSettings = readFileSync("src/ui/MorningBriefingSettingsModal.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
 const home = readFileSync("src/services/PersonalHomeService.ts", "utf8");
@@ -27,7 +28,8 @@ test("Morning Briefing requires separate opt-in before reading note bodies", () 
   assert.equal(DEFAULT_SETTINGS.dailyNoteDateFormat, "YYYY-MM-DD");
   assert.equal(SCHEMA_VERSION, 7);
   assert.ok(morning.includes("aiMorningBriefingEnabled"));
-  assert.ok(morning.includes("vault.read"));
+  assert.ok(morning.includes("this.plugin.dailyNotes.read"));
+  assert.ok(dailyNotes.includes("this.app.vault.read(file)"));
   assert.ok(morningSettings.includes("允许读取昨日 Daily Note"));
   assert.ok(morningSettings.includes("笔记正文发送到你配置的 AI Base URL"));
   assert.ok(home.includes("this.plugin.morningBriefing.isEnabled()"));

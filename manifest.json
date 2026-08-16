@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "minAppVersion": "1.11.4",
-  "description": "A Personal OS for Obsidian with AI Morning Briefing, flexible dashboards, Daily Progress, tasks, projects, habits, calendar and review.",
+  "description": "A Personal OS for Obsidian with AI Morning Briefing, configurable Quick Capture, context switching, Daily Progress, tasks, projects, habits, calendar and review.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }
