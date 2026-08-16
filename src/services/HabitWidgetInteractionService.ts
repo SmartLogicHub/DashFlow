@@ -52,48 +52,32 @@ button.dashflow-habit-day:hover{outline:1px solid color-mix(in srgb,var(--intera
 `;
 
 export class HabitWidgetInteractionService {
-  private observer: MutationObserver | null = null;
-  private unsubscribeIndex: (() => void) | null = null;
-  private scheduled = false;
+  private unsubscribeRender: (() => void) | null = null;
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
     this.ensureStyles();
-    this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.decorate(true));
-    this.observer = new MutationObserver(() => this.schedule());
-    this.observer.observe(document.body, { childList: true, subtree: true });
-    this.schedule();
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => this.decorate(root));
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root));
   }
 
   stop(): void {
-    this.observer?.disconnect();
-    this.observer = null;
-    this.unsubscribeIndex?.();
-    this.unsubscribeIndex = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
     document.getElementById(STYLE_ID)?.remove();
   }
 
-  private schedule(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorate(false);
-    }, 0);
-  }
-
-  private decorate(force: boolean): void {
+  private decorate(root: HTMLElement): void {
     const dashboard = this.plugin.dashboardManager.active();
     const widgets = new Map(dashboard.widgets.map((widget) => [widget.id, widget]));
 
-    for (const card of document.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
+    for (const card of root.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
       const widgetId = card.dataset.widgetId;
       const widget = widgetId ? widgets.get(widgetId) : undefined;
       if (!widget || widget.type !== "habits") continue;
       const body = card.querySelector<HTMLElement>(".dashflow-widget-body");
       if (!body) continue;
-      if (!force && body.dataset.dashflowHabits === widget.id) continue;
       this.renderHabits(body, widget);
     }
   }
