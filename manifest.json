@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.4.5",
+  "version": "0.4.6",
   "minAppVersion": "1.11.4",
-  "description": "A Personal OS for Obsidian with flexible dashboards, custom countdowns, daily progress, tasks, projects, habits, calendar and review.",
+  "description": "A Personal OS for Obsidian with flexible dashboards, Daily Progress integration, tasks, projects, habits, calendar and review.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }
