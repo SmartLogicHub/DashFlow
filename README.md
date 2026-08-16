@@ -1,12 +1,73 @@
-# DashFlow v0.4.6
+# DashFlow v0.5.0
 
 DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project / Habit / Daily Progress 都以 Markdown / frontmatter 为真实数据源；DashFlow 负责索引、聚合、展示和直接操作。
 
-> v0.4.6 把长期任务「Daily Progress」从单独的 Habit Widget 能力整合进整个 Personal OS：Home / Today 会显示今天真正需要推进的长期任务，Weekly Review 会单独统计日更完成率并汇总本周推进备注。
+> v0.5.0 开始进入 **DashFlow Intelligence**：新增统一的 OpenAI-compatible AI Client 与 AI 晨间简报。每天首次打开 Home 时，可在明确授权后读取昨日 Daily Note，生成简短复盘与一个今日建议；同一天优先使用缓存，避免重复请求。
+
+## v0.5.0 · Intelligence Core + AI Morning Briefing
+
+### AI 晨间简报
+
+晨间简报是独立可选功能，不会因为你开启了“AI 日计划”就自动读取笔记正文。
+
+开启后：
+
+1. DashFlow 根据配置定位昨日 Daily Note。
+2. 使用 Obsidian Vault API 读取正文。
+3. 将昨日笔记发送给你配置的 AI Base URL。
+4. AI 返回 50–100 字昨日摘要与一个今日建议。
+5. 结果按 `日期 + 来源路径 + 笔记内容 hash` 缓存在插件数据中。
+6. 当天再次打开 Home 直接使用缓存；昨日笔记发生修改后会自动失效并重新生成。
+
+```text
+AI 晨间简报                         YESTERDAY → TODAY
+
+昨日复盘 · 2026-08-15
+完成了 DashFlow Daily Progress 的主要整合，剩余工作集中在
+首页信息密度与周复盘验证，整体推进稳定，但发布收尾仍需聚焦。
+
+今日建议
+先完成发布验证，再进入下一项功能，避免同时拉开多个未收口工作流。
+
+Daily Notes/2026-08-15.md                  [重新生成]
+```
+
+### 隐私边界
+
+- **默认关闭**：`aiMorningBriefingEnabled` 默认为 `false`。
+- **独立授权**：用户必须明确开启“允许读取昨日 Daily Note”。
+- **AI 日计划不读取正文**：原有 AI Planning 仍只发送 Task / Project / Habit 摘要。
+- **远程 Provider**：笔记正文会发送到用户配置的 AI Base URL，请自行确认服务商隐私政策。
+- **本地 AI**：`localhost` / `127.0.0.1` / `::1` 可不配置 API Key，适合 Ollama 等本地 OpenAI-compatible 服务。
+- **Key 不进入 data.json**：远程 API Key 仍保存在 Obsidian SecretStorage / Keychain。
+- **Prompt Injection 防护**：Daily Note 内容被明确视为“不可信数据”，不会把笔记里的提示词当系统指令执行。
+
+### Intelligence Core
+
+v0.5.0 把原本 AI Planning 内部的网络请求抽成共享 `AIClient`：
+
+```text
+                    AIClient
+                       │
+          ┌────────────┼────────────┐
+          │            │            │
+     AI Planning   Morning Brief   AI News (next)
+```
+
+统一支持：
+
+- OpenAI-compatible `/chat/completions`
+- Base URL / Model / SecretStorage API Key
+- DeepSeek 等兼容服务
+- Ollama / localhost 本地端点
+- 文本 completion
+- JSON completion 解析
+
+这样后续 AI News Curation 不会再复制一套请求、鉴权和 JSON 解析代码。
 
 ## v0.4.6 · Daily Progress Integration
 
-Daily Progress 现在不再被当成普通 Habit 混合统计：
+Daily Progress 不再被当成普通 Habit 混合统计：
 
 - **Home / Today 独立指标**：习惯、日更、项目、连续活跃分别展示。
 - **今日推进卡片**：直接完成 / 取消今天的长期任务进度。
@@ -90,11 +151,12 @@ Desktop 支持自由拖拽和 resize；移动端保持稳定单列顺序与触�
 Home 是个人状态和长期成长入口：
 
 1. 约 194px Hero：日期、个人标题、副标题、开始今天、收集灵感
-2. 微信读书每日划线：真实书籍、章节和个人划线
-3. Today + 今日状态：Task / Habit / Daily Progress / Project / Activity streak
-4. 长期任务今日推进：直接打卡和写当天备注
-5. 长期成长入口：工作 / 生活 / 时间 / 复盘
-6. 最近 Activity 与最近修改的 Vault Markdown
+2. AI 晨间简报：昨日 Daily Note → 复盘摘要 → 今日建议（明确授权后）
+3. 微信读书每日划线：真实书籍、章节和个人划线
+4. Today + 今日状态：Task / Habit / Daily Progress / Project / Activity streak
+5. 长期任务今日推进：直接打卡和写当天备注
+6. 长期成长入口：工作 / 生活 / 时间 / 复盘
+7. 最近 Activity 与最近修改的 Vault Markdown
 
 ### Work · 执行工作台
 
@@ -155,6 +217,32 @@ Weekly Review 会分别展示：
 - 新建项目
 - 习惯 / 日更长期任务
 
+## AI 配置
+
+DashFlow AI 使用 OpenAI-compatible 接口：
+
+```text
+Base URL: https://api.deepseek.com
+Model:    你的服务支持的模型
+API Key:  Obsidian SecretStorage / Keychain
+```
+
+本地 Ollama 示例：
+
+```text
+Base URL: http://localhost:11434/v1
+Model:    你的本地模型
+API Key:  可留空
+```
+
+Morning Briefing 的 Daily Note 路径支持配置文件夹和 `YYYY / MM / DD` 日期格式。例如：
+
+```text
+Daily Note 文件夹: Daily Notes
+日期格式:          YYYY-MM-DD
+结果:              Daily Notes/2026-08-15.md
+```
+
 ## 微信读书
 
 DashFlow 使用腾讯公开的微信读书 Agent API Gateway，只展示用户自己的真实个人划线，不伪造名言、封面或来源。
@@ -174,6 +262,9 @@ API Key 只保存在 Obsidian SecretStorage / Keychain；不使用 Cookie 抓取
 - Project 创建 / 编辑 / 详情 / 自动任务进度
 - Habit 创建 / 编辑 / 打卡 / streak / 目标
 - Daily Progress 日更打卡 / 历史回填 / 每日备注 / Project 关联 / Home / Weekly Review 整合
+- AIClient：统一 OpenAI-compatible AI 请求层
+- AI Morning Briefing：昨日 Daily Note 复盘 / 今日建议 / source-hash cache
+- 可选 AI 日计划
 - Activity Tracker + Heatmap
 - Calendar + Agenda
 - Weekly Review
@@ -184,7 +275,6 @@ API Key 只保存在 Obsidian SecretStorage / Keychain；不使用 Cookie 抓取
 - 多 Dashboard、内置模板、自定义模板、JSON 导入 / 导出
 - Desktop Grid 与移动端单列体验
 - 全局搜索与 Quick Add
-- 可选 AI 日计划
 
 ## 数据格式
 
@@ -245,9 +335,11 @@ daily_notes:
 
 ## 数据边界
 
-DashFlow 不把业务数据锁进专有数据库。删除插件后，Task / Project / Habit / Daily Progress 仍完整留在 Vault Markdown 中。
+DashFlow 不把 Task / Project / Habit / Daily Progress 锁进专有数据库。删除插件后，这些业务数据仍完整留在 Vault Markdown 中。
 
-插件私有数据主要保存 Dashboard 布局、Widget config、模板、Personal Home 外观、Activity 派生统计和 UI state。AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
+插件私有数据主要保存 Dashboard 布局、Widget config、模板、Personal Home 外观、Activity 派生统计、AI 晨间简报缓存和 UI state。AI / 微信读书 API Key 保存在 Obsidian SecretStorage 中。
+
+AI 晨间简报是例外的“主动读取笔记正文”能力：默认关闭，并需要独立授权。启用后，昨日 Daily Note 正文会发送给用户配置的 AI Base URL；如果使用 localhost Ollama，则请求留在本机。
 
 ## 开发
 
