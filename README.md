@@ -14,6 +14,8 @@ DashFlow 是建立在 Obsidian Vault 之上的 **Personal OS**。Task / Project 
 - **无障碍动效**：完整支持 `prefers-reduced-motion`，减少动效用户不会被强制播放入场、数字或拖拽动画。
 - **数据边界不变**：这次交互升级只影响 Dashboard presentation / layout，不修改 Task / Project / Habit Markdown 真实数据。
 
+> Desktop 支持自由拖拽和 resize；移动端继续采用稳定的单列顺序与触控友好交互，避免自由缩放带来的误触。
+
 ## 产品结构
 
 ### Home · Personal Home
