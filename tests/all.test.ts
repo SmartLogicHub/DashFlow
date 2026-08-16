@@ -15,6 +15,8 @@ import "./ui-refinement-final.test";
 import "./visual-continuity.test";
 import "./typography-modal.test";
 import "./final-ui-system.test";
+import "./design-system-consolidation.test";
+import "./data-boundary.test";
 import "./product-navigation.test";
 import "./studio-ui.test";
 import "./personal-home.test";
