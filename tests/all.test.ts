@@ -27,3 +27,4 @@ import "./intelligence-core.test";
 import "./workflow-context.test";
 import "./ai-news.test";
 import "./data-filter.test";
+import "./focus-embed.test";
