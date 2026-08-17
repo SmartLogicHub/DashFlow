@@ -1,6 +1,8 @@
 import { TFile, type App, type Plugin } from "obsidian";
 import type { Habit, NoteRecord, Project, Task, VaultSnapshot } from "../models";
+import type { LearningEvidence, LearningGoal, LearningMistake, LearningSession } from "../learning/models";
 import { parseHabit } from "../parsers/habitParser";
+import { parseLearningGoal, parseLearningSession } from "../parsers/learningParser";
 import { parseProject } from "../parsers/projectParser";
 import { parseTasks } from "../parsers/taskParser";
 
@@ -45,10 +47,34 @@ function normalizeFrontmatter(cache: ReturnType<App["metadataCache"]["getFileCac
   return result;
 }
 
+function deriveLearningEvidence(sessions: LearningSession[]): LearningEvidence[] {
+  return sessions.flatMap((session) => session.evidence.map((ref, index) => ({
+    id: `${session.id}:evidence:${index}`,
+    goalId: session.goalId,
+    sessionId: session.id,
+    date: session.date,
+    ref,
+    source: session.source,
+  })));
+}
+
+function deriveLearningMistakes(sessions: LearningSession[]): LearningMistake[] {
+  return sessions.flatMap((session) => session.mistakes.map((text, index) => ({
+    id: `${session.id}:mistake:${index}`,
+    goalId: session.goalId,
+    sessionId: session.id,
+    date: session.date,
+    text,
+    source: session.source,
+  })));
+}
+
 export class VaultIndexService {
   private readonly tasksByPath = new Map<string, Task[]>();
   private readonly projectByPath = new Map<string, Project>();
   private readonly habitByPath = new Map<string, Habit>();
+  private readonly learningGoalByPath = new Map<string, LearningGoal>();
+  private readonly learningSessionByPath = new Map<string, LearningSession>();
   private readonly noteByPath = new Map<string, NoteRecord>();
   private readonly listeners = new Set<(snapshot: VaultSnapshot) => void>();
   private readonly fileTimers = new Map<string, number>();
@@ -59,6 +85,10 @@ export class VaultIndexService {
     tasks: [],
     projects: [],
     habits: [],
+    learningGoals: [],
+    learningSessions: [],
+    learningEvidence: [],
+    learningMistakes: [],
   };
   private initialized = false;
   private timer: number | null = null;
@@ -113,6 +143,8 @@ export class VaultIndexService {
     this.tasksByPath.clear();
     this.projectByPath.clear();
     this.habitByPath.clear();
+    this.learningGoalByPath.clear();
+    this.learningSessionByPath.clear();
     this.noteByPath.clear();
     await this.indexFiles(this.app.vault.getMarkdownFiles());
     this.rebuildSnapshot();
@@ -145,6 +177,14 @@ export class VaultIndexService {
       const habit = parseHabit(file, cache, this.getHabitTypeValue());
       if (habit) this.habitByPath.set(file.path, habit);
       else this.habitByPath.delete(file.path);
+
+      const learningGoal = parseLearningGoal(file, cache);
+      if (learningGoal) this.learningGoalByPath.set(file.path, learningGoal);
+      else this.learningGoalByPath.delete(file.path);
+
+      const learningSession = parseLearningSession(file, cache);
+      if (learningSession) this.learningSessionByPath.set(file.path, learningSession);
+      else this.learningSessionByPath.delete(file.path);
 
       if (notify && this.initialized) this.scheduleSnapshot();
     } catch (error) {
@@ -198,6 +238,8 @@ export class VaultIndexService {
     this.tasksByPath.delete(path);
     this.projectByPath.delete(path);
     this.habitByPath.delete(path);
+    this.learningGoalByPath.delete(path);
+    this.learningSessionByPath.delete(path);
     this.noteByPath.delete(path);
     if (notify && this.initialized) this.scheduleSnapshot();
   }
@@ -211,6 +253,7 @@ export class VaultIndexService {
   }
 
   private rebuildSnapshot(): void {
+    const learningSessions = [...this.learningSessionByPath.values()];
     this.snapshot = {
       revision: this.snapshot.revision + 1,
       notes: this.noteByPath.size,
@@ -218,6 +261,10 @@ export class VaultIndexService {
       tasks: [...this.tasksByPath.values()].flat(),
       projects: [...this.projectByPath.values()],
       habits: [...this.habitByPath.values()],
+      learningGoals: [...this.learningGoalByPath.values()],
+      learningSessions,
+      learningEvidence: deriveLearningEvidence(learningSessions),
+      learningMistakes: deriveLearningMistakes(learningSessions),
     };
     for (const listener of this.listeners) listener(this.snapshot);
   }
