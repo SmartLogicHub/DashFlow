@@ -32,3 +32,4 @@ import "./query-performance.test";
 import "./runtime-render.test";
 import "./product-hierarchy-reset.test";
 import "./learning-core.test";
+import "./learning-workspace.test";
