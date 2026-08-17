@@ -52,6 +52,8 @@ export const PRODUCT_HIERARCHY_RESET_STYLES = `
   text-shadow: 0 2px 14px rgba(0,0,0,.38) !important;
 }
 
+.dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="learning"].is-active) > .dashflow-hero::after { content: "学习 · LEARNING"; }
+
 /* Do not request resized/quality-reduced Unsplash variants for built-in scenes.
  * User-selected local Vault images already resolve directly to their original
  * Vault resource and remain untouched. */
