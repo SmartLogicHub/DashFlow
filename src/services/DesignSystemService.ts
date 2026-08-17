@@ -2,6 +2,7 @@ import { AI_NEWS_STYLES } from "../styles/AINewsStyles";
 import { DATA_FILTER_STYLES } from "../styles/DataFilterStyles";
 import { FOCUS_EMBED_STYLES } from "../styles/FocusEmbedStyles";
 import { INTERACTION_MOTION_STYLES } from "../styles/InteractionMotionStyles";
+import { LEARNING_STYLES } from "../styles/LearningStyles";
 import { PRODUCT_HIERARCHY_RESET_STYLES } from "../styles/ProductHierarchyResetStyles";
 import { UI_REFINEMENT_POLISH_STYLES } from "../styles/UiRefinementStyles";
 import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles";
@@ -240,6 +241,7 @@ const CONSOLIDATED_STYLES = [
   FOCUS_EMBED_STYLES,
   INTERACTION_MOTION_STYLES,
   PRODUCT_HIERARCHY_RESET_STYLES,
+  LEARNING_STYLES,
 ].join("\n\n");
 
 export class DesignSystemService {

@@ -34,6 +34,8 @@ import { PresentationRuntimeService } from "./services/PresentationRuntimeServic
 import { ProductDesignService } from "./services/ProductDesignService";
 import { ProductExperienceService } from "./services/ProductExperienceService";
 import { ProjectService } from "./services/ProjectService";
+import { LearningService } from "./services/LearningService";
+import { LearningExperienceService } from "./services/LearningExperienceService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
 import { VaultIndexService } from "./services/VaultIndexService";
@@ -47,6 +49,8 @@ import { GlobalSearchModal } from "./ui/GlobalSearchModal";
 import { MorningBriefingSettingsModal } from "./ui/MorningBriefingSettingsModal";
 import { ProjectEditorModal } from "./ui/ProjectEditorModal";
 import { QuickAddModal } from "./ui/QuickAddModal";
+import { LearningGoalEditorModal } from "./ui/LearningGoalEditorModal";
+import { LearningSessionEditorModal } from "./ui/LearningSessionEditorModal";
 import { TaskEditorModal } from "./ui/TaskEditorModal";
 import { WorkflowSettingsModal } from "./ui/WorkflowSettingsModal";
 import { localDate } from "./utils/date";
@@ -77,6 +81,8 @@ export default class DashFlowPlugin extends Plugin {
   habitWidgets!: HabitWidgetInteractionService;
   taskService!: TaskService;
   projectService!: ProjectService;
+  learningService!: LearningService;
+  learningExperience!: LearningExperienceService;
   dailyNotes!: DailyNoteService;
   captureService!: CaptureService;
   taskInteractions!: TaskInteractionService;
@@ -130,6 +136,8 @@ export default class DashFlowPlugin extends Plugin {
       () => this.data.settings.projectTypeValue,
       this.vaultQuery,
     );
+    this.learningService = new LearningService(this.app, this.vaultIndex);
+    this.learningExperience = new LearningExperienceService(this);
     this.calendarService = new CalendarService(this.vaultIndex);
     this.weeklyReviewService = new WeeklyReviewService(
       this.vaultIndex,
@@ -193,6 +201,8 @@ export default class DashFlowPlugin extends Plugin {
     this.addCommand({ id: "search-dashflow", name: "搜索任务、项目与习惯", callback: () => new GlobalSearchModal(this).open() });
     this.addCommand({ id: "new-task", name: "新建任务", callback: () => new TaskEditorModal(this).open() });
     this.addCommand({ id: "new-project", name: "新建项目", callback: () => new ProjectEditorModal(this).open() });
+    this.addCommand({ id: "new-learning-goal", name: "学习 · 建立目标", callback: () => new LearningGoalEditorModal(this).open() });
+    this.addCommand({ id: "new-learning-session", name: "学习 · 记录一次训练", callback: () => new LearningSessionEditorModal(this).open() });
     this.addCommand({ id: "ai-plan-today", name: "AI 规划今天", callback: () => new AIPlanModal(this).open() });
     this.addCommand({
       id: "configure-ai-morning-briefing",
@@ -209,7 +219,7 @@ export default class DashFlowPlugin extends Plugin {
     });
 
     const sections: Array<[ProductSection, string]> = [
-      ["today", "打开 · 主页"], ["work", "打开 · 工作台"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
+      ["today", "打开 · 主页"], ["work", "打开 · 工作台"], ["learning", "打开 · 学习"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
       ["calendar", "打开 · 日历"], ["habits", "打开 · 习惯"], ["review", "打开 · 复盘"],
     ];
     for (const [section, name] of sections) {
@@ -245,6 +255,7 @@ export default class DashFlowPlugin extends Plugin {
     this.focusWidgets.start();
     this.magicEmbedWidgets.start();
     this.productExperience.start();
+    this.learningExperience.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
     this.contextSwitcher.start();
@@ -254,6 +265,7 @@ export default class DashFlowPlugin extends Plugin {
     this.contextSwitcher?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
+    this.learningExperience?.stop();
     this.productExperience?.stop();
     this.magicEmbedWidgets?.stop();
     this.focusWidgets?.stop();
@@ -284,6 +296,11 @@ export default class DashFlowPlugin extends Plugin {
 
   async activateSection(section: ProductSection): Promise<void> {
     await this.activateDashboard();
+    if (section === "learning") {
+      this.learningExperience.open();
+      return;
+    }
+    this.learningExperience.close();
     this.productExperience.openSection(section);
   }
 
