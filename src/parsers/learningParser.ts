@@ -81,9 +81,8 @@ export function parseLearningSession(file: TFile, cache: CachedMetadata | null):
 
   const duration = Number(frontmatter.duration_minutes ?? frontmatter.duration);
   const durationMinutes = Number.isFinite(duration) && duration > 0 ? Math.round(duration) : undefined;
-  const date = normalizeDate(frontmatter.date) ?? file.stat.mtime
-    ? new Date(file.stat.mtime).toISOString().slice(0, 10)
-    : new Date().toISOString().slice(0, 10);
+  const date = normalizeDate(frontmatter.date)
+    ?? (file.stat.mtime ? new Date(file.stat.mtime).toISOString().slice(0, 10) : new Date().toISOString().slice(0, 10));
 
   return {
     id: String(frontmatter.learning_session_id ?? frontmatter.session_id ?? frontmatter.id ?? file.basename),
