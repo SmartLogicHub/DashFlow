@@ -32,11 +32,16 @@ test("Learning workspace prioritizes goals, evidence, mistakes and next action",
   assert.equal(workspace.includes("progressPercent"), false);
 });
 
-test("Learning editors persist through LearningService and distinguish assistance", () => {
+test("Learning editors enforce attempt-first active learning semantics", () => {
   assert.ok(goalEditor.includes("plugin.learningService.updateGoal"));
   assert.ok(goalEditor.includes("plugin.learningService.createGoal"));
   assert.ok(sessionEditor.includes("plugin.learningService.updateSession"));
   assert.ok(sessionEditor.includes("plugin.learningService.createSession"));
+  assert.ok(sessionEditor.includes("第一次尝试"));
+  assert.ok(sessionEditor.includes("使用的来源 / 帮助"));
+  assert.ok(sessionEditor.includes("主动输出"));
+  assert.ok(sessionEditor.includes("查看答案、资料或请求帮助前"));
+  assert.ok(sessionEditor.includes("合上材料后"));
   assert.ok(sessionEditor.includes('"none", "无辅助"'));
   assert.ok(sessionEditor.includes('"ai", "AI 辅助"'));
   assert.ok(sessionEditor.includes("证据"));
