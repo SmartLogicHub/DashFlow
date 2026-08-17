@@ -40,6 +40,9 @@ export interface LearningSession {
   date: string;
   kind: LearningSessionKind;
   task: string;
+  firstAttempt?: string;
+  sources: string[];
+  activeOutput?: string;
   outcome: LearningSessionOutcome;
   assistance: LearningAssistance;
   durationMinutes?: number;
@@ -57,6 +60,9 @@ export interface LearningSessionEditInput {
   date: string;
   kind: LearningSessionKind;
   task: string;
+  firstAttempt?: string;
+  sources: string[];
+  activeOutput?: string;
   outcome: LearningSessionOutcome;
   assistance: LearningAssistance;
   durationMinutes?: number;
