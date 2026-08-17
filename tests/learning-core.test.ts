@@ -14,6 +14,9 @@ test("learning core models the evidence-driven loop without an AI dependency", (
   assert.ok(models.includes("successCriteria: string[]"));
   assert.ok(models.includes("nextStep?: string"));
   assert.ok(models.includes("export interface LearningSession"));
+  assert.ok(models.includes("firstAttempt?: string"));
+  assert.ok(models.includes("sources: string[]"));
+  assert.ok(models.includes("activeOutput?: string"));
   assert.ok(models.includes("evidence: string[]"));
   assert.ok(models.includes("mistakes: string[]"));
   assert.ok(models.includes('LearningAssistance = "none" | "ai" | "human" | "mixed"'));
@@ -27,6 +30,9 @@ test("learning parser keeps goal and session semantics explicit", () => {
   assert.ok(parser.includes('"completed", "partial", "blocked"'));
   assert.ok(parser.includes('"none", "ai", "human", "mixed"'));
   assert.ok(parser.includes("frontmatter.success_criteria"));
+  assert.ok(parser.includes("frontmatter.first_attempt"));
+  assert.ok(parser.includes("frontmatter.sources ?? frontmatter.source_refs"));
+  assert.ok(parser.includes("frontmatter.active_output ?? frontmatter.output"));
   assert.ok(parser.includes("frontmatter.mistakes ?? frontmatter.gaps"));
 });
 
@@ -48,11 +54,17 @@ test("LearningService writes business truth to Vault Markdown", () => {
   assert.ok(service.includes("fileManager.processFrontMatter"));
   assert.ok(service.includes('frontmatter.type = "learning-goal"'));
   assert.ok(service.includes('frontmatter.type = "learning-session"'));
+  assert.ok(service.includes("first_attempt"));
+  assert.ok(service.includes('"sources"'));
+  assert.ok(service.includes("active_output"));
   assert.equal(service.includes("saveData("), false);
   assert.equal(service.includes("data.json"), false);
 });
 
-test("learning sessions can distinguish independent and assisted practice", () => {
+test("learning sessions distinguish exposure, independent output and assistance", () => {
+  assert.ok(service.includes("input.firstAttempt"));
+  assert.ok(service.includes("input.sources"));
+  assert.ok(service.includes("input.activeOutput"));
   assert.ok(service.includes("assistance: ${input.assistance}"));
   assert.ok(service.includes("frontmatter.assistance = input.assistance"));
   assert.ok(service.includes("evidence"));
