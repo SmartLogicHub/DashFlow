@@ -59,6 +59,9 @@ export class LearningSessionEditorModal extends Modal {
       date: this.session?.date ?? this.initial.date ?? todayLocal(),
       kind: this.session?.kind ?? this.initial.kind ?? "practice",
       task: this.session?.task ?? this.initial.task ?? "",
+      firstAttempt: this.session?.firstAttempt ?? this.initial.firstAttempt,
+      sources: this.session?.sources ?? this.initial.sources ?? [],
+      activeOutput: this.session?.activeOutput ?? this.initial.activeOutput,
       outcome: this.session?.outcome ?? this.initial.outcome ?? "completed",
       assistance: this.session?.assistance ?? this.initial.assistance ?? "none",
       durationMinutes: this.session?.durationMinutes ?? this.initial.durationMinutes,
@@ -73,7 +76,7 @@ export class LearningSessionEditorModal extends Modal {
     contentEl.createEl("h2", { text: this.session ? "编辑学习记录" : "记录一次学习" });
     contentEl.createEl("p", {
       cls: "setting-item-description dashflow-modal-lead",
-      text: "先做尝试，再记录证据和错误。辅助方式单独记录，避免把 AI 代做当成自己的能力。",
+      text: "先独立尝试，再查看来源或使用辅助；最后合上材料主动输出。把“看过答案”和“已经会了”分开记录。",
     });
 
     new Setting(contentEl).setName("学习目标").addDropdown((c) => {
@@ -104,6 +107,33 @@ export class LearningSessionEditorModal extends Modal {
       c.onChange((value) => { draft.task = value; });
       window.setTimeout(() => c.inputEl.focus(), 0);
     });
+
+    new Setting(contentEl)
+      .setName("第一次尝试")
+      .setDesc("查看答案、资料或请求帮助前，你独立做到了什么？失败也要保留，它是最有价值的基线证据。")
+      .addTextArea((c) => {
+        c.setPlaceholder("例如：能注册 command，但忘记生命周期清理；第一次运行报错。 ");
+        c.setValue(draft.firstAttempt ?? "");
+        c.onChange((value) => { draft.firstAttempt = value || undefined; });
+      });
+
+    new Setting(contentEl)
+      .setName("使用的来源 / 帮助")
+      .setDesc("每行一个：官方文档、教材、论文、真实案例、老师或 AI 对话。记录来源，不把输入误算成能力。")
+      .addTextArea((c) => {
+        c.setPlaceholder("Obsidian Plugin API docs\n[[我的异步生命周期笔记]]\nAI：只询问错误原因");
+        c.setValue(draft.sources.join("\n"));
+        c.onChange((value) => { draft.sources = splitLines(value); });
+      });
+
+    new Setting(contentEl)
+      .setName("主动输出")
+      .setDesc("合上材料后，你实际说、写、做、计算、编码或演示出了什么？这是判断是否真的学会的核心。")
+      .addTextArea((c) => {
+        c.setPlaceholder("例如：重新从空文件独立实现 command 注册与卸载清理，并能解释为什么。 ");
+        c.setValue(draft.activeOutput ?? "");
+        c.onChange((value) => { draft.activeOutput = value || undefined; });
+      });
 
     new Setting(contentEl).setName("辅助方式").setDesc("独立完成与辅助完成必须区分。 ").addDropdown((c) => {
       for (const [value, label] of ASSISTANCE_OPTIONS) c.addOption(value, label);
