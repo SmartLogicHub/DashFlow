@@ -113,7 +113,7 @@ export class LearningExperienceService {
     const grid = shell.querySelector<HTMLElement>(".dashflow-grid");
     const nav = shell.querySelector<HTMLElement>(".dashflow-command-nav");
     const learningButton = nav?.querySelector<HTMLButtonElement>('.dashflow-command-button[data-section="learning"]');
-    if (!grid || !learningButton) return;
+    if (!grid || !nav || !learningButton) return;
 
     this.syncNavigation(nav, learningButton);
     grid.dataset.productSection = "learning";
