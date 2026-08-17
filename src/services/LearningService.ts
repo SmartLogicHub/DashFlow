@@ -150,16 +150,21 @@ export class LearningService {
       `date: ${input.date}`,
       `kind: ${input.kind}`,
       `task: ${yamlString(task)}`,
-      `outcome: ${input.outcome}`,
-      `assistance: ${input.assistance}`,
     ];
+    if (input.firstAttempt?.trim()) lines.push(`first_attempt: ${yamlString(input.firstAttempt.trim())}`);
+    appendYamlList(lines, "sources", input.sources);
+    if (input.activeOutput?.trim()) lines.push(`active_output: ${yamlString(input.activeOutput.trim())}`);
+    lines.push(`outcome: ${input.outcome}`, `assistance: ${input.assistance}`);
     if (input.durationMinutes && input.durationMinutes > 0) lines.push(`duration_minutes: ${Math.round(input.durationMinutes)}`);
     appendYamlList(lines, "evidence", input.evidence);
     appendYamlList(lines, "mistakes", input.mistakes);
     if (input.feedback?.trim()) lines.push(`feedback: ${yamlString(input.feedback.trim())}`);
     if (input.nextStep?.trim()) lines.push(`next_step: ${yamlString(input.nextStep.trim())}`);
     appendYamlList(lines, "tags", input.tags ?? []);
-    lines.push("---", "", `# ${goal.name} · ${input.date}`, "", `## Practice`, "", task, "", "## Reflection", "");
+    lines.push("---", "", `# ${goal.name} · ${input.date}`, "", "## Practice", "", task, "");
+    if (input.firstAttempt?.trim()) lines.push("## First Attempt", "", input.firstAttempt.trim(), "");
+    if (input.activeOutput?.trim()) lines.push("## Active Output", "", input.activeOutput.trim(), "");
+    lines.push("## Reflection", "");
 
     const file = await this.app.vault.create(path, lines.join("\n"));
     await this.index.indexFile(file);
@@ -177,6 +182,9 @@ export class LearningService {
       frontmatter.date = input.date;
       frontmatter.kind = input.kind;
       frontmatter.task = input.task.trim();
+      this.setOptional(frontmatter, "first_attempt", input.firstAttempt);
+      this.setList(frontmatter, "sources", input.sources);
+      this.setOptional(frontmatter, "active_output", input.activeOutput);
       frontmatter.outcome = input.outcome;
       frontmatter.assistance = input.assistance;
       if (input.durationMinutes && input.durationMinutes > 0) frontmatter.duration_minutes = Math.round(input.durationMinutes);
