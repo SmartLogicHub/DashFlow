@@ -18,6 +18,7 @@ const productExperience = readFileSync("src/services/ProductExperienceService.ts
 const dashboardSwitcher = readFileSync("src/services/DashboardSwitcherInteractionService.ts", "utf8");
 const dashboardTransfer = readFileSync("src/services/DashboardTransferInteractionService.ts", "utf8");
 const contextSwitcher = readFileSync("src/services/ContextSwitcherService.ts", "utf8");
+const mobileDashboard = readFileSync("src/services/MobileDashboardInteractionService.ts", "utf8");
 
 const renderDrivenServices: Array<[string, string]> = [
   ["TaskInteractionService", taskInteractions],
@@ -114,6 +115,21 @@ test("dashboard transfer injection is an explicit manager-modal hook", () => {
 test("Visual Data Filter previews use the revision-aware query service", () => {
   assert.ok(dataFilterWidgets.includes("this.plugin.vaultQuery.filterData"));
   assert.equal(dataFilterWidgets.includes("filterVaultSnapshot("), false);
+});
+
+test("mobile dashboard intentionally keeps a document.body observer and is lifecycle-managed", () => {
+  assert.ok(mobileDashboard.includes("new MutationObserver"));
+  assert.ok(mobileDashboard.includes("observe(document.body"));
+  assert.ok(main.includes("this.mobileDashboard = new MobileDashboardInteractionService(this)"));
+  assert.ok(main.includes("this.mobileDashboard.start()"));
+  assert.ok(main.includes("this.mobileDashboard?.stop()"));
+});
+
+test("desktop drag preview intentionally uses all-card FLIP measurements on pointermove", () => {
+  assert.ok(renderer.includes("const previous = new Map<HTMLElement, DOMRect>()"));
+  assert.ok(renderer.includes("previous.set(element, element.getBoundingClientRect())"));
+  assert.ok(renderer.includes("const after = element.getBoundingClientRect()"));
+  assert.ok(renderer.includes('element.style.transition = "transform 180ms cubic-bezier(.2, .8, .2, 1)"'));
 });
 
 test("command workspace is created before switcher and context decorators subscribe", () => {

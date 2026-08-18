@@ -11,6 +11,7 @@ const morningSettings = readFileSync("src/ui/MorningBriefingSettingsModal.ts", "
 const main = readFileSync("src/main.ts", "utf8");
 const home = readFileSync("src/services/PersonalHomeService.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
+const settings = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 
 test("Intelligence Core centralizes OpenAI-compatible transport", () => {
   assert.ok(aiClient.includes('requestUrl'));
@@ -21,6 +22,13 @@ test("Intelligence Core centralizes OpenAI-compatible transport", () => {
   assert.equal(aiPlanning.includes("requestUrl"), false);
   assert.ok(aiPlanning.includes("this.plugin.aiClient.complete"));
   assert.ok(main.includes("this.aiClient = new AIClient(this)"));
+});
+
+test("AI API key is intentionally stored directly in plugin settings data", () => {
+  assert.ok(aiClient.includes("const apiKey = settings.aiSecretId.trim()"));
+  assert.equal(aiClient.includes("secretStorage.getSecret"), false);
+  assert.ok(settings.includes("明文保存在插件 data.json"));
+  assert.ok(settings.includes("this.dashFlow.data.settings.aiSecretId = value.trim()"));
 });
 
 test("Morning Briefing requires separate opt-in before reading note bodies", () => {

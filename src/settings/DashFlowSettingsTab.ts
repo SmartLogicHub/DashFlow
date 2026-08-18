@@ -264,11 +264,12 @@ export class DashFlowSettingsTab extends PluginSettingTab {
 
     new Setting(ai)
       .setName("API Key")
-      .setDesc("从 Obsidian Keychain 选择或创建密钥。DashFlow 的 data.json 只保存密钥名称，不保存 Key 本身。")
-      .addComponent((el) => new SecretComponent(this.app, el)
+      .setDesc("直接粘贴 API Key。DashFlow 会将它明文保存在插件 data.json 中，便于直接迁移和编辑配置。")
+      .addText((text) => text
+        .setPlaceholder("sk-...")
         .setValue(this.dashFlow.data.settings.aiSecretId)
         .onChange(async (value) => {
-          this.dashFlow.data.settings.aiSecretId = value;
+          this.dashFlow.data.settings.aiSecretId = value.trim();
           await this.dashFlow.savePluginData();
         }));
 

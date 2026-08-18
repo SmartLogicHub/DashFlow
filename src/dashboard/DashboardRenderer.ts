@@ -410,27 +410,25 @@ export class DashboardRenderer {
       : 0;
 
     const wrap = createElement("div", "dashflow-countdown");
-    wrap.append(
-      createElement("span", "", config.title ?? "COUNTDOWN"),
-      createElement("strong", "", String(days)),
-      createElement("small", "", "DAYS"),
-    );
+    wrap.appendChild(createElement("div", "dashflow-countdown-value", String(days).padStart(2, "0")));
+    wrap.appendChild(createElement("div", "dashflow-countdown-unit", "DAYS"));
+    wrap.appendChild(createElement("div", "dashflow-countdown-label", config.label ?? "COUNTDOWN"));
     body.appendChild(wrap);
   }
 
   private renderVaultStats(body: HTMLElement): void {
     const snapshot = this.plugin.vaultIndex.getSnapshot();
-    const stats: Array<[string, number]> = [
-      ["NOTES", snapshot.notes],
-      ["PENDING", snapshot.tasks.filter((task) => !task.completed).length],
-      ["PROJECTS", snapshot.projects.filter((project) => project.status === "active").length],
-      ["DONE", snapshot.tasks.filter((task) => task.completed).length],
-    ];
-
-    const grid = createElement("div", "dashflow-stats-grid");
+    const stats = [
+      ["Notes", snapshot.notes],
+      ["Tasks", snapshot.tasks.length],
+      ["Projects", snapshot.projects.length],
+      ["Habits", snapshot.habits.length],
+    ] as const;
+    const grid = createElement("div", "dashflow-vault-stats");
     for (const [label, value] of stats) {
-      const item = createElement("div", "dashflow-stat");
-      item.append(createElement("strong", "", String(value)), createElement("span", "", label));
+      const item = createElement("div");
+      item.appendChild(createElement("strong", "", String(value)));
+      item.appendChild(createElement("span", "", label));
       grid.appendChild(item);
     }
     body.appendChild(grid);
@@ -438,22 +436,30 @@ export class DashboardRenderer {
 
   private renderEditBar(dashboard: DashboardDefinition): HTMLElement {
     const bar = createElement("div", "dashflow-edit-bar");
+
     const select = createElement("select");
-    for (const definition of this.plugin.widgetRegistry.list()) {
+    const definitions = this.plugin.widgetRegistry.list();
+    for (const definition of definitions) {
       const option = createElement("option", "", definition.name);
       option.value = definition.type;
       select.appendChild(option);
     }
 
-    const add = createElement("button", "", "＋ 添加卡片");
-    add.type = "button";
+    const add = createElement("button", "", "添加 Widget");
     add.addEventListener("click", async () => {
-      await this.plugin.dashboardManager.addWidget(dashboard.id, select.value);
+      const definition = this.plugin.widgetRegistry.get(select.value);
+      if (!definition) return;
+      const layout = this.plugin.dashboardManager.nextFreeLayout(dashboard, definition.defaultSize);
+      await this.plugin.dashboardManager.addWidget(dashboard.id, {
+        id: this.plugin.dashboardManager.createWidgetId(definition.type),
+        type: definition.type,
+        config: definition.defaultConfig(),
+        layout,
+      });
       this.render();
     });
 
     const reset = createElement("button", "", "重置布局");
-    reset.type = "button";
     reset.addEventListener("click", async () => {
       await this.plugin.dashboardManager.resetLayout(dashboard.id);
       this.render();
@@ -726,10 +732,36 @@ export class DashboardRenderer {
 
   private applyGridLayouts(grid: HTMLElement, widgets: WidgetInstance[]): void {
     const byId = new Map(widgets.map((widget) => [widget.id, widget.layout]));
-    for (const element of grid.querySelectorAll<HTMLElement>("[data-widget-id]")) {
+    const elements = [...grid.querySelectorAll<HTMLElement>("[data-widget-id]")];
+
+    // FLIP preview: pointermove intentionally measures every non-dragging card
+    // before and after layout resolution so pushed cards visibly glide into place.
+    const previous = new Map<HTMLElement, DOMRect>();
+    for (const element of elements) {
+      if (element.classList.contains("is-dragging")) continue;
+      element.style.transition = "none";
+      element.style.transform = "";
+      previous.set(element, element.getBoundingClientRect());
+    }
+
+    for (const element of elements) {
       const id = element.dataset.widgetId;
       const layout = id ? byId.get(id) : undefined;
       if (layout) this.applyGridStyle(element, layout);
+    }
+
+    for (const element of elements) {
+      const before = previous.get(element);
+      if (!before) continue;
+      const after = element.getBoundingClientRect();
+      const dx = before.left - after.left;
+      const dy = before.top - after.top;
+      if (dx === 0 && dy === 0) continue;
+      element.style.transform = `translate(${dx}px, ${dy}px)`;
+      window.requestAnimationFrame(() => {
+        element.style.transition = "transform 180ms cubic-bezier(.2, .8, .2, 1)";
+        element.style.transform = "";
+      });
     }
   }
 
