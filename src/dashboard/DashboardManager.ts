@@ -49,6 +49,7 @@ export class DashboardManager {
     if (!active) {
       active = createDefaultDashboard(this.registry);
       this.plugin.data.dashboards.push(active);
+      void this.plugin.savePluginData();
     }
     this.plugin.data.activeDashboardId = active.id;
     return active;

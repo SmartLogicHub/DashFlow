@@ -1,4 +1,5 @@
 import { Notice, PluginSettingTab, SecretComponent, Setting, setIcon, type App } from "obsidian";
+import { DEFAULT_SETTINGS } from "../constants";
 import type DashFlowPlugin from "../main";
 import type { HomeTheme } from "../models";
 import { HeroImagePickerModal } from "../ui/HeroImagePickerModal";
@@ -165,7 +166,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .setPlaceholder("我的成长")
         .setValue(this.dashFlow.data.settings.homeHeroTitle)
         .onChange((value) => {
-          this.dashFlow.data.settings.homeHeroTitle = value.trim() || "我的成长";
+          this.dashFlow.data.settings.homeHeroTitle = value.trim() || DEFAULT_SETTINGS.homeHeroTitle;
           this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
@@ -177,7 +178,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .setPlaceholder("把输入变成理解，把理解变成行动。")
         .setValue(this.dashFlow.data.settings.homeHeroSubtitle)
         .onChange((value) => {
-          this.dashFlow.data.settings.homeHeroSubtitle = value.trim() || "把输入变成理解，把理解变成行动。";
+          this.dashFlow.data.settings.homeHeroSubtitle = value.trim() || DEFAULT_SETTINGS.homeHeroSubtitle;
           this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
@@ -205,7 +206,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .setPlaceholder("DashFlow/Inbox.md")
         .setValue(this.dashFlow.data.settings.inboxPath)
         .onChange((value) => {
-          this.dashFlow.data.settings.inboxPath = value.trim() || "DashFlow/Inbox.md";
+          this.dashFlow.data.settings.inboxPath = value.trim() || DEFAULT_SETTINGS.inboxPath;
           this.scheduleSave();
         }));
 
@@ -216,7 +217,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .setPlaceholder("DashFlow/Projects")
         .setValue(this.dashFlow.data.settings.projectFolder)
         .onChange((value) => {
-          this.dashFlow.data.settings.projectFolder = value.trim() || "DashFlow/Projects";
+          this.dashFlow.data.settings.projectFolder = value.trim() || DEFAULT_SETTINGS.projectFolder;
           this.scheduleSave();
         }));
 
@@ -227,7 +228,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .setPlaceholder("DashFlow/Habits")
         .setValue(this.dashFlow.data.settings.habitFolder)
         .onChange((value) => {
-          this.dashFlow.data.settings.habitFolder = value.trim() || "DashFlow/Habits";
+          this.dashFlow.data.settings.habitFolder = value.trim() || DEFAULT_SETTINGS.habitFolder;
           this.scheduleSave();
         }));
 
@@ -238,7 +239,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setValue(this.dashFlow.data.settings.projectTypeValue)
         .onChange((value) => {
-          this.dashFlow.data.settings.projectTypeValue = value.trim() || "project";
+          this.dashFlow.data.settings.projectTypeValue = value.trim() || DEFAULT_SETTINGS.projectTypeValue;
           this.scheduleSave();
           this.scheduleReindex();
         }));
@@ -249,7 +250,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setValue(this.dashFlow.data.settings.habitTypeValue)
         .onChange((value) => {
-          this.dashFlow.data.settings.habitTypeValue = value.trim() || "habit";
+          this.dashFlow.data.settings.habitTypeValue = value.trim() || DEFAULT_SETTINGS.habitTypeValue;
           this.scheduleSave();
           this.scheduleReindex();
         }));
@@ -275,7 +276,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .setPlaceholder("https://api.deepseek.com")
         .setValue(this.dashFlow.data.settings.aiBaseUrl)
         .onChange((value) => {
-          this.dashFlow.data.settings.aiBaseUrl = value.trim() || "https://api.deepseek.com";
+          this.dashFlow.data.settings.aiBaseUrl = value.trim() || DEFAULT_SETTINGS.aiBaseUrl;
           this.scheduleSave();
         }));
 
@@ -286,7 +287,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .setPlaceholder("deepseek-v4-flash")
         .setValue(this.dashFlow.data.settings.aiModel)
         .onChange((value) => {
-          this.dashFlow.data.settings.aiModel = value.trim() || "deepseek-v4-flash";
+          this.dashFlow.data.settings.aiModel = value.trim() || DEFAULT_SETTINGS.aiModel;
           this.scheduleSave();
         }));
 

@@ -122,6 +122,7 @@ export class ProjectDetailModal extends Modal {
     check.type = "checkbox";
     check.checked = task.completed;
     check.addEventListener("change", async () => {
+      check.disabled = true;
       await this.plugin.taskService.toggle(task);
       this.render();
     });
