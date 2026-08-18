@@ -5,6 +5,7 @@ import { INTERACTION_MOTION_STYLES } from "../styles/InteractionMotionStyles";
 import { PRODUCT_HIERARCHY_RESET_STYLES } from "../styles/ProductHierarchyResetStyles";
 import { UI_REFINEMENT_POLISH_STYLES } from "../styles/UiRefinementStyles";
 import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles";
+import { SETTINGS_STYLES } from "../styles/SettingsStyles";
 
 const STYLE_ID = "dashflow-design-system-v044";
 
@@ -35,25 +36,6 @@ export const DESIGN_SYSTEM_STYLES = `
 
   --df-control-sm: 28px;
   --df-control-md: 32px;
-  --df-page-hero-height: 88px;
-}
-
-.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
-  height: var(--df-page-hero-height)!important;
-  min-height: var(--df-page-hero-height)!important;
-  margin-bottom: 10px!important;
-  padding: var(--df-space-4) 20px!important;
-  border-radius: var(--df-radius-md)!important;
-}
-
-.dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="inbox"].is-active) {
-  --df-page-hero-height: 72px;
-}
-
-.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after {
-  font-size: 18px!important;
-  line-height: 1.1!important;
-  letter-spacing: -.015em!important;
 }
 
 .dashflow-home-hero-actions > button:nth-child(1) { min-width: 92px; }
@@ -146,7 +128,7 @@ export const DESIGN_SYSTEM_STYLES = `
   border-color: color-mix(in srgb, var(--df-home-accent) 28%, var(--df-home-border))!important;
   background:
     linear-gradient(135deg, color-mix(in srgb, var(--df-home-accent) 7%, transparent), transparent 58%),
-    var(--df-home-card)!important;
+    var(--df-home-surface)!important;
 }
 
 .dashflow-home-morning-body {
@@ -217,13 +199,6 @@ export const DESIGN_SYSTEM_STYLES = `
 }
 
 @media (max-width: 760px) {
-  .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
-    height: 72px!important;
-    min-height: 72px!important;
-    padding: 14px var(--df-space-4)!important;
-  }
-
-  .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after { font-size: 17px!important; }
   .dashflow-home-status-metrics { grid-template-columns: repeat(2, minmax(0, 1fr))!important; }
   .dashflow-home-morning-body { grid-template-columns: 1fr; }
   .dashflow-home-morning-actions { grid-column: auto; flex-wrap: wrap; justify-content: flex-start; }
@@ -240,6 +215,7 @@ const CONSOLIDATED_STYLES = [
   FOCUS_EMBED_STYLES,
   INTERACTION_MOTION_STYLES,
   PRODUCT_HIERARCHY_RESET_STYLES,
+  SETTINGS_STYLES,
 ].join("\n\n");
 
 export class DesignSystemService {
