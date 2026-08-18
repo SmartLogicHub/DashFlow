@@ -27,7 +27,8 @@ test("Intelligence Core centralizes OpenAI-compatible transport", () => {
 test("AI API key is intentionally stored directly in plugin settings data", () => {
   assert.ok(aiClient.includes("const apiKey = settings.aiSecretId.trim()"));
   assert.equal(aiClient.includes("secretStorage.getSecret"), false);
-  assert.ok(settings.includes("明文保存在插件 data.json"));
+  assert.ok(settings.includes('.setName("API Key")'));
+  assert.ok(settings.includes("保存在 data.json 中"));
   assert.ok(settings.includes("this.dashFlow.data.settings.aiSecretId = value.trim()"));
 });
 
