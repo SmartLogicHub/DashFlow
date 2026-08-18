@@ -1,0 +1,140 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import { existsSync, readFileSync } from "node:fs";
+import { DashboardRenderService } from "../src/services/DashboardRenderService";
+
+const main = readFileSync("src/main.ts", "utf8");
+const renderer = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
+const taskInteractions = readFileSync("src/services/TaskInteractionService.ts", "utf8");
+const activityWidgets = readFileSync("src/services/ActivityWidgetInteractionService.ts", "utf8");
+const habitWidgets = readFileSync("src/services/HabitWidgetInteractionService.ts", "utf8");
+const calendarWidgets = readFileSync("src/services/CalendarWidgetInteractionService.ts", "utf8");
+const weeklyReviewWidgets = readFileSync("src/services/WeeklyReviewWidgetInteractionService.ts", "utf8");
+const aiNewsWidgets = readFileSync("src/services/AINewsWidgetInteractionService.ts", "utf8");
+const dataFilterWidgets = readFileSync("src/services/DataFilterWidgetInteractionService.ts", "utf8");
+const focusWidgets = readFileSync("src/services/FocusWidgetInteractionService.ts", "utf8");
+const magicEmbedWidgets = readFileSync("src/services/MagicEmbedWidgetInteractionService.ts", "utf8");
+const productExperience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
+const dashboardSwitcher = readFileSync("src/services/DashboardSwitcherInteractionService.ts", "utf8");
+const dashboardTransfer = readFileSync("src/services/DashboardTransferInteractionService.ts", "utf8");
+const contextSwitcher = readFileSync("src/services/ContextSwitcherService.ts", "utf8");
+const mobileDashboard = readFileSync("src/services/MobileDashboardInteractionService.ts", "utf8");
+
+const renderDrivenServices: Array<[string, string]> = [
+  ["TaskInteractionService", taskInteractions],
+  ["ActivityWidgetInteractionService", activityWidgets],
+  ["HabitWidgetInteractionService", habitWidgets],
+  ["CalendarWidgetInteractionService", calendarWidgets],
+  ["WeeklyReviewWidgetInteractionService", weeklyReviewWidgets],
+  ["AINewsWidgetInteractionService", aiNewsWidgets],
+  ["DataFilterWidgetInteractionService", dataFilterWidgets],
+  ["FocusWidgetInteractionService", focusWidgets],
+  ["MagicEmbedWidgetInteractionService", magicEmbedWidgets],
+  ["ProductExperienceService", productExperience],
+  ["DashboardSwitcherInteractionService", dashboardSwitcher],
+  ["ContextSwitcherService", contextSwitcher],
+];
+
+test("dashboard render lifecycle tracks mounted roots and monotonic render sequence", () => {
+  const service = new DashboardRenderService();
+  const root = { isConnected: true } as HTMLElement;
+  const sequences: number[] = [];
+  const unsubscribe = service.subscribe((event) => {
+    assert.equal(event.root, root);
+    sequences.push(event.sequence);
+  });
+
+  service.rendered(root);
+  service.rendered(root);
+  assert.deepEqual(sequences, [1, 2]);
+  assert.equal(service.rootCount(), 1);
+
+  unsubscribe();
+  service.unmount(root);
+  assert.equal(service.rootCount(), 0);
+});
+
+test("render profiling distinguishes requests, coalescing and committed render cost", () => {
+  const service = new DashboardRenderService();
+  service.requested(false);
+  service.requested(true);
+  service.requested(true);
+  service.committed(12);
+  service.requested(false);
+  service.committed(8);
+
+  assert.deepEqual(service.metrics(), {
+    requests: 4,
+    commits: 2,
+    coalesced: 2,
+    lastMs: 8,
+    averageMs: 10,
+    maxMs: 12,
+  });
+});
+
+test("DashboardRenderer coalesces requests to one animation frame, profiles commits and publishes after render", () => {
+  assert.ok(renderer.includes("window.requestAnimationFrame"));
+  assert.ok(renderer.includes("window.cancelAnimationFrame"));
+  assert.ok(renderer.includes("this.plugin.dashboardManager.subscribe(() => this.render())"));
+  assert.ok(renderer.includes("this.plugin.dashboardRender.requested(coalesced)"));
+  assert.ok(renderer.includes("this.plugin.dashboardRender.committed(performance.now() - startedAt)"));
+  assert.ok(renderer.includes("this.plugin.dashboardRender.rendered(this.container)"));
+  assert.ok(renderer.includes("this.plugin.dashboardRender.unmount(this.container)"));
+});
+
+test("active dashboard decorators no longer observe document.body", () => {
+  for (const [name, source] of [...renderDrivenServices, ["DashboardTransferInteractionService", dashboardTransfer] as const]) {
+    assert.equal(source.includes("new MutationObserver"), false, name);
+    assert.equal(source.includes("observe(document.body"), false, name);
+  }
+  assert.equal(existsSync("src/services/AuroraInteractionService.ts"), false, "obsolete Aurora observer service should stay removed");
+});
+
+test("dashboard decorators subscribe to the render lifecycle and stay root-scoped", () => {
+  for (const [name, source] of renderDrivenServices) {
+    assert.ok(source.includes("dashboardRender.subscribe"), name);
+    assert.ok(source.includes("root.querySelectorAll"), name);
+    assert.equal(source.includes('workspace.on("layout-change"'), false, name);
+    assert.equal(source.includes('workspace.on("active-leaf-change"'), false, name);
+  }
+});
+
+test("product experience explicitly refreshes non-Vault Activity changes", () => {
+  assert.ok(productExperience.includes("activityService.subscribe"));
+  assert.ok(productExperience.includes("this.refresh(true)"));
+  assert.equal(productExperience.includes("decorateSafely"), false);
+});
+
+test("dashboard transfer injection is an explicit manager-modal hook", () => {
+  assert.ok(dashboardTransfer.includes("decorateManagerActions(root: ParentNode)"));
+  assert.ok(dashboardSwitcher.includes("dashboardTransfer.decorateManagerActions(container)"));
+  assert.ok(dashboardSwitcher.includes("dashflow-command-workspace"));
+});
+
+test("Visual Data Filter previews use the revision-aware query service", () => {
+  assert.ok(dataFilterWidgets.includes("this.plugin.vaultQuery.filterData"));
+  assert.equal(dataFilterWidgets.includes("filterVaultSnapshot("), false);
+});
+
+test("mobile dashboard intentionally keeps a document.body observer and is lifecycle-managed", () => {
+  assert.ok(mobileDashboard.includes("new MutationObserver"));
+  assert.ok(mobileDashboard.includes("observe(document.body"));
+  assert.ok(main.includes("this.mobileDashboard = new MobileDashboardInteractionService(this)"));
+  assert.ok(main.includes("this.mobileDashboard.start()"));
+  assert.ok(main.includes("this.mobileDashboard?.stop()"));
+});
+
+test("desktop drag preview intentionally uses all-card FLIP measurements on pointermove", () => {
+  assert.ok(renderer.includes("const previous = new Map<HTMLElement, DOMRect>()"));
+  assert.ok(renderer.includes("previous.set(element, element.getBoundingClientRect())"));
+  assert.ok(renderer.includes("const after = element.getBoundingClientRect()"));
+  assert.ok(renderer.includes('element.style.transition = "transform 180ms cubic-bezier(.2, .8, .2, 1)"'));
+});
+
+test("command workspace is created before switcher and context decorators subscribe", () => {
+  const productStart = main.indexOf("this.productExperience.start();");
+  const switcherStart = main.indexOf("this.dashboardSwitcher.start();");
+  const contextStart = main.indexOf("this.contextSwitcher.start();");
+  assert.ok(productStart >= 0 && switcherStart > productStart && contextStart > switcherStart);
+});

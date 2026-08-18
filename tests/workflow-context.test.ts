@@ -6,6 +6,7 @@ import { DEFAULT_SETTINGS, SCHEMA_VERSION } from "../src/constants";
 const capture = readFileSync("src/services/CaptureService.ts", "utf8");
 const dailyNotes = readFileSync("src/services/DailyNoteService.ts", "utf8");
 const context = readFileSync("src/services/ContextSwitcherService.ts", "utf8");
+const renderer = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
 const settings = readFileSync("src/ui/WorkflowSettingsModal.ts", "utf8");
 const picker = readFileSync("src/ui/CaptureDestinationModal.ts", "utf8");
 const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
@@ -47,7 +48,8 @@ test("Morning Briefing and capture share the same Daily Note service", () => {
 });
 
 test("Context Switcher reuses DashboardManager instead of storing a second layout model", () => {
-  assert.ok(context.includes("dashboardManager.subscribe"));
+  assert.ok(renderer.includes("dashboardManager.subscribe(() => this.render())"));
+  assert.ok(context.includes("dashboardRender.subscribe"));
   assert.ok(context.includes("dashboardManager.setActiveDashboard"));
   assert.ok(context.includes("contextMorningDashboardId"));
   assert.ok(context.includes("contextWorkDashboardId"));

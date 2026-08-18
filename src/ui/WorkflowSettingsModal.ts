@@ -90,7 +90,6 @@ export class WorkflowSettingsModal extends Modal {
       settings.contextReviewDashboardId = this.reviewId;
       await this.plugin.savePluginData();
       this.plugin.refreshDashboardViews();
-      this.plugin.contextSwitcher.scheduleDecorate();
       new Notice("DashFlow: 极速工作流设置已保存");
       this.close();
     });

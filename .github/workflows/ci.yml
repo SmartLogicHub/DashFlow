@@ -24,3 +24,23 @@ jobs:
             main.js
             manifest.json
             styles.css
+      - name: Package full development source
+        run: |
+          zip -r DashFlow-v0.5.6-full-source.zip \
+            .github \
+            .gitignore \
+            ARCHITECTURE.md \
+            README.md \
+            esbuild.config.mjs \
+            examples \
+            manifest.json \
+            package.json \
+            src \
+            styles.css \
+            tests \
+            tsconfig.json \
+            versions.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dashflow-source
+          path: DashFlow-v0.5.6-full-source.zip

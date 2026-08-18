@@ -66,37 +66,26 @@ const SWITCHER_STYLES = `
 `;
 
 export class DashboardSwitcherInteractionService {
-  private observer: MutationObserver | null = null;
-  private scheduled = false;
+  private unsubscribeRender: (() => void) | null = null;
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
     this.ensureStyles();
-    this.observer = new MutationObserver(() => this.schedule());
-    this.observer.observe(document.body, { childList: true, subtree: true });
-    this.schedule();
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => this.decorate(root));
+    this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root));
   }
 
   stop(): void {
-    this.observer?.disconnect();
-    this.observer = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
     document.getElementById(STYLE_ID)?.remove();
     this.closeModal();
     for (const switcher of document.querySelectorAll(".dashflow-dashboard-switcher")) switcher.remove();
   }
 
-  private schedule(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorate();
-    }, 0);
-  }
-
-  private decorate(): void {
-    for (const shell of document.querySelectorAll<HTMLElement>(".dashflow-shell")) {
+  private decorate(root: HTMLElement): void {
+    for (const shell of root.querySelectorAll<HTMLElement>(".dashflow-shell")) {
       this.decorateShell(shell);
     }
   }
@@ -104,6 +93,7 @@ export class DashboardSwitcherInteractionService {
   private decorateShell(shell: HTMLElement): void {
     const hero = shell.querySelector<HTMLElement>(".dashflow-hero");
     if (!hero) return;
+    const workspace = shell.querySelector<HTMLElement>(".dashflow-command-workspace");
     let switcher = shell.querySelector<HTMLElement>(".dashflow-dashboard-switcher");
     if (!switcher) {
       switcher = document.createElement("div");
@@ -112,10 +102,7 @@ export class DashboardSwitcherInteractionService {
       const select = document.createElement("select");
       select.setAttribute("aria-label", "切换工作台");
       select.addEventListener("change", async () => {
-        if (await this.plugin.dashboardManager.setActiveDashboard(select.value)) {
-          this.plugin.refreshDashboardViews();
-          this.schedule();
-        }
+        await this.plugin.dashboardManager.setActiveDashboard(select.value);
       });
 
       const create = this.button("＋", "新建工作台");
@@ -125,7 +112,10 @@ export class DashboardSwitcherInteractionService {
       const count = document.createElement("span");
       count.className = "dashflow-dashboard-count";
       switcher.append(select, create, manage, count);
-      hero.insertAdjacentElement("afterend", switcher);
+      if (workspace) workspace.appendChild(switcher);
+      else hero.insertAdjacentElement("afterend", switcher);
+    } else if (workspace && switcher.parentElement !== workspace) {
+      workspace.appendChild(switcher);
     }
     this.syncSwitcher(switcher);
   }
@@ -241,8 +231,6 @@ export class DashboardSwitcherInteractionService {
         return;
       }
       close();
-      this.plugin.refreshDashboardViews();
-      this.schedule();
     };
     create.addEventListener("click", () => void submit());
     input.addEventListener("keydown", (event) => {
@@ -286,8 +274,6 @@ export class DashboardSwitcherInteractionService {
         return;
       }
       close();
-      this.plugin.refreshDashboardViews();
-      this.schedule();
     };
     rename.addEventListener("click", () => void saveName());
     input.addEventListener("keydown", (event) => {
@@ -310,8 +296,6 @@ export class DashboardSwitcherInteractionService {
     duplicate.addEventListener("click", async () => {
       await this.plugin.dashboardManager.duplicateDashboard(active.id);
       close();
-      this.plugin.refreshDashboardViews();
-      this.schedule();
     });
     const saveTemplate = this.button("✦ 保存为模板", "把当前工作台保存为自定义模板");
     saveTemplate.addEventListener("click", () => {
@@ -333,11 +317,7 @@ export class DashboardSwitcherInteractionService {
         }, 3500);
         return;
       }
-      if (await this.plugin.dashboardManager.deleteDashboard(active.id)) {
-        close();
-        this.plugin.refreshDashboardViews();
-        this.schedule();
-      }
+      if (await this.plugin.dashboardManager.deleteDashboard(active.id)) close();
     });
     actions.append(create, duplicate, saveTemplate, remove);
     content.appendChild(actions);
@@ -360,6 +340,7 @@ export class DashboardSwitcherInteractionService {
       content.append(heading, customList);
     }
 
+    this.plugin.dashboardTransfer.decorateManagerActions(container);
     document.body.appendChild(container);
   }
 
@@ -559,8 +540,6 @@ export class DashboardSwitcherInteractionService {
     main.addEventListener("click", async () => {
       if (dashboard.id !== activeId) await this.plugin.dashboardManager.setActiveDashboard(dashboard.id);
       close();
-      this.plugin.refreshDashboardViews();
-      this.schedule();
     });
     row.appendChild(main);
     const badge = document.createElement("span");

@@ -1,11 +1,15 @@
-import { Notice, PluginSettingTab, SecretComponent, Setting, type App } from "obsidian";
+import { Notice, PluginSettingTab, SecretComponent, Setting, setIcon, type App } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { HomeTheme } from "../models";
 import { HeroImagePickerModal } from "../ui/HeroImagePickerModal";
 
 const WEREAD_KEY_URL = "https://weread.qq.com/r/weread-skills";
 
+type SettingsSection = "appearance" | "workflow" | "integration" | "advanced";
+
 export class DashFlowSettingsTab extends PluginSettingTab {
+  private activeSection: SettingsSection = "appearance";
+
   constructor(app: App, private readonly dashFlow: DashFlowPlugin) {
     super(app, dashFlow);
   }
@@ -21,7 +25,57 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       text: "主页负责个人节奏与长期状态；工作台负责任务、项目和时间执行。",
     });
 
-    const appearance = this.panel(containerEl, "外观与首页", "默认场景经过低饱和与文字安全区筛选；也可以用 Vault 本地图片完全替换。")
+    const nav = containerEl.createDiv("dashflow-settings-tabs");
+    const content = containerEl.createDiv("dashflow-settings-tab-content");
+
+    const sections: Array<{ id: SettingsSection; label: string; icon: string }> = [
+      { id: "appearance", label: "外观", icon: "palette" },
+      { id: "workflow", label: "工作流", icon: "settings-2" },
+      { id: "integration", label: "AI 与集成", icon: "sparkles" },
+      { id: "advanced", label: "高级", icon: "code-2" },
+    ];
+
+    const render = (): void => {
+      content.empty();
+      for (const button of nav.querySelectorAll<HTMLButtonElement>("button")) {
+        button.classList.toggle("is-active", button.dataset.section === this.activeSection);
+      }
+      switch (this.activeSection) {
+        case "appearance":
+          this.renderAppearance(content);
+          break;
+        case "workflow":
+          this.renderWorkflow(content);
+          break;
+        case "integration":
+          this.renderIntegration(content);
+          break;
+        case "advanced":
+          this.renderAdvanced(content);
+          break;
+      }
+    };
+
+    for (const section of sections) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "dashflow-settings-tab";
+      button.dataset.section = section.id;
+      const icon = document.createElement("span");
+      setIcon(icon, section.icon);
+      button.append(icon, document.createTextNode(section.label));
+      button.addEventListener("click", () => {
+        this.activeSection = section.id;
+        render();
+      });
+      nav.appendChild(button);
+    }
+
+    render();
+  }
+
+  private renderAppearance(parent: HTMLElement): void {
+    const appearance = this.panel(parent, "外观与首页", "默认场景经过低饱和与文字安全区筛选；也可以用 Vault 本地图片完全替换。");
     const preview = appearance.createDiv("dashflow-home-theme-preview");
     preview.createEl("strong", { text: this.dashFlow.data.settings.homeHeroTitle || "我的成长" });
     preview.createEl("span", { text: this.dashFlow.data.settings.homeHeroSubtitle || "把输入变成理解，把理解变成行动。" });
@@ -108,8 +162,133 @@ export class DashFlowSettingsTab extends PluginSettingTab {
           await this.dashFlow.savePluginData();
           this.dashFlow.refreshDashboardViews();
         }));
+  }
 
-    const reading = this.panel(containerEl, "微信读书 · 可选", "只读取你授权账户中的笔记本和个人划线，用于首页每日摘录；不会伪造名言，也不使用 Cookie 抓取。")
+  private renderWorkflow(parent: HTMLElement): void {
+    const workflow = this.panel(parent, "工作流", "决定新内容保存到哪里；已有 Markdown 数据不会被移动。");
+    new Setting(workflow)
+      .setName("收集箱")
+      .setDesc("快速新建但尚未整理的任务会进入这个文件。")
+      .addText((text) => text
+        .setPlaceholder("DashFlow/Inbox.md")
+        .setValue(this.dashFlow.data.settings.inboxPath)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.inboxPath = value.trim() || "DashFlow/Inbox.md";
+          await this.dashFlow.savePluginData();
+        }));
+
+    new Setting(workflow)
+      .setName("项目文件夹")
+      .setDesc("从 DashFlow 新建项目时，项目笔记会创建在这里。")
+      .addText((text) => text
+        .setPlaceholder("DashFlow/Projects")
+        .setValue(this.dashFlow.data.settings.projectFolder)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.projectFolder = value.trim() || "DashFlow/Projects";
+          await this.dashFlow.savePluginData();
+        }));
+
+    new Setting(workflow)
+      .setName("习惯文件夹")
+      .setDesc("从 DashFlow 新建习惯时，习惯笔记会创建在这里。")
+      .addText((text) => text
+        .setPlaceholder("DashFlow/Habits")
+        .setValue(this.dashFlow.data.settings.habitFolder)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.habitFolder = value.trim() || "DashFlow/Habits";
+          await this.dashFlow.savePluginData();
+        }));
+
+    const recognition = this.panel(parent, "识别规则", "只有你已经有自己的 Markdown 约定时才需要修改。");
+    new Setting(recognition)
+      .setName("项目类型")
+      .setDesc("frontmatter 中用于识别项目的 type 值。")
+      .addText((text) => text
+        .setValue(this.dashFlow.data.settings.projectTypeValue)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.projectTypeValue = value.trim() || "project";
+          await this.dashFlow.savePluginData();
+          await this.dashFlow.vaultIndex.reindexAll();
+        }));
+
+    new Setting(recognition)
+      .setName("习惯类型")
+      .setDesc("frontmatter 中用于识别习惯的 type 值。")
+      .addText((text) => text
+        .setValue(this.dashFlow.data.settings.habitTypeValue)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.habitTypeValue = value.trim() || "habit";
+          await this.dashFlow.savePluginData();
+          await this.dashFlow.vaultIndex.reindexAll();
+        }));
+  }
+
+  private renderIntegration(parent: HTMLElement): void {
+    const ai = this.panel(parent, "AI 日计划 · 可选", "只在你主动点击“AI 规划”时发送任务、项目和习惯摘要；不会发送笔记正文，也不会自动修改 Vault。");
+    new Setting(ai)
+      .setName("启用 AI 规划")
+      .setDesc("关闭时 DashFlow 完全不会发起 AI 请求。")
+      .addToggle((toggle) => toggle
+        .setValue(this.dashFlow.data.settings.aiEnabled)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.aiEnabled = value;
+          await this.dashFlow.savePluginData();
+          this.dashFlow.refreshDashboardViews();
+        }));
+
+    new Setting(ai)
+      .setName("API Base URL")
+      .setDesc("默认使用 DeepSeek OpenAI-compatible API；也可以填写兼容 /chat/completions 的服务。")
+      .addText((text) => text
+        .setPlaceholder("https://api.deepseek.com")
+        .setValue(this.dashFlow.data.settings.aiBaseUrl)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.aiBaseUrl = value.trim() || "https://api.deepseek.com";
+          await this.dashFlow.savePluginData();
+        }));
+
+    new Setting(ai)
+      .setName("模型")
+      .setDesc("填写所用服务支持的模型名称。")
+      .addText((text) => text
+        .setPlaceholder("deepseek-v4-flash")
+        .setValue(this.dashFlow.data.settings.aiModel)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.aiModel = value.trim() || "deepseek-v4-flash";
+          await this.dashFlow.savePluginData();
+        }));
+
+    new Setting(ai)
+      .setName("API Key")
+      .setDesc("直接粘贴你的 API Key（sk- 开头）。保存在 data.json 中。")
+      .addText((text) => text
+        .setPlaceholder("sk-...")
+        .setValue(this.dashFlow.data.settings.aiSecretId)
+        .onChange(async (value) => {
+          this.dashFlow.data.settings.aiSecretId = value.trim();
+          await this.dashFlow.savePluginData();
+        }));
+
+    new Setting(ai)
+      .setName("连接测试")
+      .setDesc("发送一个极小的测试请求，确认 Base URL、模型与 Key 可用。")
+      .addButton((button) => button
+        .setButtonText("测试连接")
+        .onClick(async () => {
+          button.setDisabled(true);
+          button.setButtonText("测试中…");
+          try {
+            const response = await this.dashFlow.aiPlanning.testConnection();
+            new Notice(`DashFlow AI 已连接${response ? ` · ${response.slice(0, 20)}` : ""}`);
+          } catch {
+            // AIPlanningService already surfaces the concrete error.
+          } finally {
+            button.setDisabled(false);
+            button.setButtonText("测试连接");
+          }
+        }));
+
+    const reading = this.panel(parent, "微信读书 · 可选", "只读取你授权账户中的笔记本和个人划线，用于首页每日摘录；不会伪造名言，也不使用 Cookie 抓取。");
     new Setting(reading)
       .setName("启用微信读书")
       .setDesc("关闭时 DashFlow 不会请求微信读书。")
@@ -170,129 +349,11 @@ export class DashFlowSettingsTab extends PluginSettingTab {
             button.setButtonText("测试连接");
           }
         }));
+  }
 
-    const workflow = this.panel(containerEl, "工作流", "决定新内容保存到哪里；已有 Markdown 数据不会被移动。");
-    new Setting(workflow)
-      .setName("收集箱")
-      .setDesc("快速新建但尚未整理的任务会进入这个文件。")
-      .addText((text) => text
-        .setPlaceholder("DashFlow/Inbox.md")
-        .setValue(this.dashFlow.data.settings.inboxPath)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.inboxPath = value.trim() || "DashFlow/Inbox.md";
-          await this.dashFlow.savePluginData();
-        }));
-
-    new Setting(workflow)
-      .setName("项目文件夹")
-      .setDesc("从 DashFlow 新建项目时，项目笔记会创建在这里。")
-      .addText((text) => text
-        .setPlaceholder("DashFlow/Projects")
-        .setValue(this.dashFlow.data.settings.projectFolder)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.projectFolder = value.trim() || "DashFlow/Projects";
-          await this.dashFlow.savePluginData();
-        }));
-
-    new Setting(workflow)
-      .setName("习惯文件夹")
-      .setDesc("从 DashFlow 新建习惯时，习惯笔记会创建在这里。")
-      .addText((text) => text
-        .setPlaceholder("DashFlow/Habits")
-        .setValue(this.dashFlow.data.settings.habitFolder)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.habitFolder = value.trim() || "DashFlow/Habits";
-          await this.dashFlow.savePluginData();
-        }));
-
-    const recognition = this.panel(containerEl, "识别规则", "只有你已经有自己的 Markdown 约定时才需要修改。");
-    new Setting(recognition)
-      .setName("项目类型")
-      .setDesc("frontmatter 中用于识别项目的 type 值。")
-      .addText((text) => text
-        .setValue(this.dashFlow.data.settings.projectTypeValue)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.projectTypeValue = value.trim() || "project";
-          await this.dashFlow.savePluginData();
-          await this.dashFlow.vaultIndex.reindexAll();
-        }));
-
-    new Setting(recognition)
-      .setName("习惯类型")
-      .setDesc("frontmatter 中用于识别习惯的 type 值。")
-      .addText((text) => text
-        .setValue(this.dashFlow.data.settings.habitTypeValue)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.habitTypeValue = value.trim() || "habit";
-          await this.dashFlow.savePluginData();
-          await this.dashFlow.vaultIndex.reindexAll();
-        }));
-
-    const ai = this.panel(containerEl, "AI 日计划 · 可选", "只在你主动点击“AI 规划”时发送任务、项目和习惯摘要；不会发送笔记正文，也不会自动修改 Vault。");
-    new Setting(ai)
-      .setName("启用 AI 规划")
-      .setDesc("关闭时 DashFlow 完全不会发起 AI 请求。")
-      .addToggle((toggle) => toggle
-        .setValue(this.dashFlow.data.settings.aiEnabled)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.aiEnabled = value;
-          await this.dashFlow.savePluginData();
-          this.dashFlow.refreshDashboardViews();
-        }));
-
-    new Setting(ai)
-      .setName("API Base URL")
-      .setDesc("默认使用 DeepSeek OpenAI-compatible API；也可以填写兼容 /chat/completions 的服务。")
-      .addText((text) => text
-        .setPlaceholder("https://api.deepseek.com")
-        .setValue(this.dashFlow.data.settings.aiBaseUrl)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.aiBaseUrl = value.trim() || "https://api.deepseek.com";
-          await this.dashFlow.savePluginData();
-        }));
-
-    new Setting(ai)
-      .setName("模型")
-      .setDesc("填写所用服务支持的模型名称。")
-      .addText((text) => text
-        .setPlaceholder("deepseek-v4-flash")
-        .setValue(this.dashFlow.data.settings.aiModel)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.aiModel = value.trim() || "deepseek-v4-flash";
-          await this.dashFlow.savePluginData();
-        }));
-
-    new Setting(ai)
-      .setName("API Key")
-      .setDesc("从 Obsidian Keychain 选择或创建密钥。DashFlow 的 data.json 只保存密钥名称，不保存 Key 本身。")
-      .addComponent((el) => new SecretComponent(this.app, el)
-        .setValue(this.dashFlow.data.settings.aiSecretId)
-        .onChange(async (value) => {
-          this.dashFlow.data.settings.aiSecretId = value;
-          await this.dashFlow.savePluginData();
-        }));
-
-    new Setting(ai)
-      .setName("连接测试")
-      .setDesc("发送一个极小的测试请求，确认 Base URL、模型与 Key 可用。")
-      .addButton((button) => button
-        .setButtonText("测试连接")
-        .onClick(async () => {
-          button.setDisabled(true);
-          button.setButtonText("测试中…");
-          try {
-            const response = await this.dashFlow.aiPlanning.testConnection();
-            new Notice(`DashFlow AI 已连接${response ? ` · ${response.slice(0, 20)}` : ""}`);
-          } catch {
-            // AIPlanningService already surfaces the concrete error.
-          } finally {
-            button.setDisabled(false);
-            button.setButtonText("测试连接");
-          }
-        }));
-
-    const advanced = containerEl.createEl("details", { cls: "dashflow-settings-advanced" });
-    advanced.createEl("summary", { text: "高级 · Markdown 数据格式" });
+  private renderAdvanced(parent: HTMLElement): void {
+    const advanced = parent.createEl("details", { cls: "dashflow-settings-advanced", attr: { open: "open" } });
+    advanced.createEl("summary", { text: "Markdown 数据格式" });
     const grid = advanced.createDiv("dashflow-settings-guide-grid");
 
     const projectCard = grid.createDiv("dashflow-settings-code-card");

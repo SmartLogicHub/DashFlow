@@ -17,6 +17,7 @@ import { CalendarWidgetInteractionService } from "./services/CalendarWidgetInter
 import { CaptureService } from "./services/CaptureService";
 import { ContextSwitcherService } from "./services/ContextSwitcherService";
 import { DailyNoteService } from "./services/DailyNoteService";
+import { DashboardRenderService } from "./services/DashboardRenderService";
 import { DashboardSwitcherInteractionService } from "./services/DashboardSwitcherInteractionService";
 import { DashboardTransferInteractionService } from "./services/DashboardTransferInteractionService";
 import { DataFilterWidgetInteractionService } from "./services/DataFilterWidgetInteractionService";
@@ -26,6 +27,7 @@ import { FocusWidgetInteractionService } from "./services/FocusWidgetInteraction
 import { HabitService } from "./services/HabitService";
 import { HabitWidgetInteractionService } from "./services/HabitWidgetInteractionService";
 import { MagicEmbedWidgetInteractionService } from "./services/MagicEmbedWidgetInteractionService";
+import { MobileDashboardInteractionService } from "./services/MobileDashboardInteractionService";
 import { MorningBriefingService } from "./services/MorningBriefingService";
 import { NewsCurationService } from "./services/NewsCurationService";
 import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService";
@@ -60,6 +62,7 @@ export default class DashFlowPlugin extends Plugin {
   data!: DashFlowData;
   widgetRegistry!: WidgetRegistry;
   dashboardManager!: DashboardManager;
+  dashboardRender!: DashboardRenderService;
   dashboardSwitcher!: DashboardSwitcherInteractionService;
   dashboardTransfer!: DashboardTransferInteractionService;
   contextSwitcher!: ContextSwitcherService;
@@ -87,6 +90,7 @@ export default class DashFlowPlugin extends Plugin {
   focusService!: FocusService;
   focusWidgets!: FocusWidgetInteractionService;
   magicEmbedWidgets!: MagicEmbedWidgetInteractionService;
+  mobileDashboard!: MobileDashboardInteractionService;
   weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
@@ -104,6 +108,7 @@ export default class DashFlowPlugin extends Plugin {
     await this.loadPluginData();
 
     this.dashboardManager = new DashboardManager(this, this.widgetRegistry);
+    this.dashboardRender = new DashboardRenderService();
     this.vaultIndex = new VaultIndexService(
       this.app,
       this,
@@ -169,6 +174,7 @@ export default class DashFlowPlugin extends Plugin {
     this.dataFilterWidgets = new DataFilterWidgetInteractionService(this);
     this.focusWidgets = new FocusWidgetInteractionService(this);
     this.magicEmbedWidgets = new MagicEmbedWidgetInteractionService(this);
+    this.mobileDashboard = new MobileDashboardInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.contextSwitcher = new ContextSwitcherService(this);
@@ -241,18 +247,20 @@ export default class DashFlowPlugin extends Plugin {
     this.dataFilterWidgets.start();
     this.focusWidgets.start();
     this.magicEmbedWidgets.start();
+    this.mobileDashboard.start();
+    this.productExperience.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
     this.contextSwitcher.start();
-    this.productExperience.start();
   }
 
   onunload(): void {
-    this.productExperience?.stop();
     this.contextSwitcher?.stop();
     this.dashboardTransfer?.stop();
     this.dashboardSwitcher?.stop();
+    this.productExperience?.stop();
     this.magicEmbedWidgets?.stop();
+    this.mobileDashboard?.stop();
     this.focusWidgets?.stop();
     this.dataFilterWidgets?.stop();
     this.aiNewsWidgets?.stop();

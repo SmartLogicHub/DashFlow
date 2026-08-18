@@ -22,25 +22,33 @@ function formatTime(milliseconds: number): string {
 }
 
 export class FocusWidgetInteractionService {
-  private unsubscribeDashboard: (() => void) | null = null;
+  private unsubscribeRender: (() => void) | null = null;
   private unsubscribeFocus: (() => void) | null = null;
-  private scheduled = false;
   private displayTimer: number | null = null;
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
   start(): void {
-    this.unsubscribeDashboard = this.plugin.dashboardManager.subscribe(() => this.schedule());
-    this.unsubscribeFocus = this.plugin.focusService.subscribe(() => this.schedule());
-    this.plugin.registerEvent(this.plugin.app.workspace.on("layout-change", () => this.schedule()));
-    this.plugin.registerEvent(this.plugin.app.workspace.on("active-leaf-change", () => this.schedule()));
+    this.unsubscribeRender = this.plugin.dashboardRender.subscribe(({ root }) => {
+      this.decorate(root);
+      this.updateClocksIn(root);
+    });
+    this.unsubscribeFocus = this.plugin.focusService.subscribe(() => {
+      this.plugin.dashboardRender.forEachRoot((root) => {
+        this.decorate(root);
+        this.updateClocksIn(root);
+      });
+    });
     this.displayTimer = window.setInterval(() => this.updateClocks(), 1000);
-    this.schedule();
+    this.plugin.dashboardRender.forEachRoot((root) => {
+      this.decorate(root);
+      this.updateClocksIn(root);
+    });
   }
 
   stop(): void {
-    this.unsubscribeDashboard?.();
-    this.unsubscribeDashboard = null;
+    this.unsubscribeRender?.();
+    this.unsubscribeRender = null;
     this.unsubscribeFocus?.();
     this.unsubscribeFocus = null;
     if (this.displayTimer !== null) {
@@ -49,21 +57,11 @@ export class FocusWidgetInteractionService {
     }
   }
 
-  schedule(): void {
-    if (this.scheduled) return;
-    this.scheduled = true;
-    window.setTimeout(() => {
-      this.scheduled = false;
-      this.decorate();
-      this.updateClocks();
-    }, 0);
-  }
-
-  private decorate(): void {
+  private decorate(root: HTMLElement): void {
     const dashboard = this.plugin.dashboardManager.active();
     const widgets = new Map(dashboard.widgets.map((widget) => [widget.id, widget]));
     const state = this.plugin.focusService.getState();
-    for (const card of document.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
+    for (const card of root.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
       const id = card.dataset.widgetId;
       const widget = id ? widgets.get(id) : undefined;
       if (!widget || widget.type !== "focus") continue;
@@ -147,9 +145,13 @@ export class FocusWidgetInteractionService {
   }
 
   private updateClocks(): void {
+    this.plugin.dashboardRender.forEachRoot((root) => this.updateClocksIn(root));
+  }
+
+  private updateClocksIn(root: HTMLElement): void {
     const state = this.plugin.focusService.getState();
     const remaining = focusRemainingMs(state);
-    for (const time of document.querySelectorAll<HTMLElement>(".dashflow-focus-time[data-focus-widget-id]")) {
+    for (const time of root.querySelectorAll<HTMLElement>(".dashflow-focus-time[data-focus-widget-id]")) {
       if (state.status === "idle") {
         const minutes = Math.max(1, Number(time.dataset.idleMinutes) || 25);
         time.textContent = formatTime(minutes * 60_000);
@@ -157,7 +159,7 @@ export class FocusWidgetInteractionService {
         time.textContent = formatTime(remaining);
       }
     }
-    for (const fill of document.querySelectorAll<HTMLElement>("[data-focus-progress-widget-id]")) {
+    for (const fill of root.querySelectorAll<HTMLElement>("[data-focus-progress-widget-id]")) {
       if (state.status === "idle") {
         fill.style.width = "0%";
         continue;

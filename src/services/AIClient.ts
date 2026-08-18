@@ -41,8 +41,7 @@ export class AIClient {
     const baseUrl = trimBaseUrl(settings.aiBaseUrl);
     if (!settings.aiEnabled || !baseUrl || !settings.aiModel.trim()) return false;
     if (isLocalEndpoint(baseUrl)) return true;
-    const secretId = settings.aiSecretId.trim();
-    return Boolean(secretId && this.plugin.app.secretStorage.getSecret(secretId));
+    return Boolean(settings.aiSecretId.trim());
   }
 
   async testConnection(): Promise<string> {
@@ -60,10 +59,9 @@ export class AIClient {
     const model = settings.aiModel.trim();
     if (!baseUrl || !model) throw new Error("AI Base URL 或模型尚未配置。");
 
-    const secretId = settings.aiSecretId.trim();
-    const apiKey = secretId ? this.plugin.app.secretStorage.getSecret(secretId) : null;
+    const apiKey = settings.aiSecretId.trim();
     if (!apiKey && !isLocalEndpoint(baseUrl)) {
-      throw new Error("没有可用的 API Key。请先在 DashFlow 设置中选择 Keychain 密钥；localhost / 127.0.0.1 本地端点可不填写 Key。");
+      throw new Error("没有可用的 API Key。请先在 DashFlow 设置中填写 API Key；localhost / 127.0.0.1 本地端点可不填写 Key。");
     }
 
     const headers: Record<string, string> = { "Content-Type": "application/json" };
