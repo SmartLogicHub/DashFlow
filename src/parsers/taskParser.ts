@@ -6,6 +6,7 @@ const SCHEDULED_RE = /⏳\s*(\d{4}-\d{2}-\d{2})/;
 const START_RE = /🛫\s*(\d{4}-\d{2}-\d{2})/;
 const COMPLETED_RE = /✅\s*(\d{4}-\d{2}-\d{2})/;
 const PROJECT_RE = /#project\/([^\s#]+)/i;
+const PROJECT_RE_GLOBAL = /#project\/[^\s#]+/gi;
 const TAG_RE = /(^|\s)#([\p{L}\p{N}_\-/.]+)/gu;
 const TASK_RE = /^\s*[-*+]\s+\[([ xX])\]\s+(.*)$/;
 
@@ -29,7 +30,7 @@ export function cleanTaskText(text: string): string {
     .replace(SCHEDULED_RE, "")
     .replace(START_RE, "")
     .replace(COMPLETED_RE, "")
-    .replace(PROJECT_RE, "")
+    .replace(PROJECT_RE_GLOBAL, "")
     .replace(/[⏫🔺🔼🔽]/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
@@ -82,7 +83,8 @@ export function parseTasks(path: string, content: string): Task[] {
     const sourceText = match[2] ?? "";
     const tags: string[] = [];
     for (const tagMatch of sourceText.matchAll(TAG_RE)) {
-      if (tagMatch[2]) tags.push(tagMatch[2]);
+      const tag = tagMatch[2];
+      if (tag && !/^project\//i.test(tag)) tags.push(tag);
     }
 
     tasks.push({

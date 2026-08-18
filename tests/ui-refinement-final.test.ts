@@ -9,8 +9,8 @@ const main = readFileSync("src/main.ts", "utf8");
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 
 test("v0.4.3 carries the Home scene into non-home surfaces without a DOM observer", () => {
-  assert.ok(polish.includes("var(--df-ambient-image, var(--df-home-scene))"));
-  assert.ok(polish.includes("dashflow-command-shell:not(.is-personal-home)::before"));
+  assert.ok(continuity.includes("var(--df-ambient-image, var(--df-home-scene))"));
+  assert.ok(continuity.includes(".dashflow-command-shell:not(.is-personal-home) > .dashflow-hero"));
   assert.ok(runtime.includes("resolveLocalHeroImage"));
   assert.ok(runtime.includes("--df-ambient-image"));
   assert.equal(runtime.includes("new MutationObserver"), false);

@@ -1,7 +1,10 @@
 import { requestUrl } from "obsidian";
 import type DashFlowPlugin from "../main";
+import { withTimeout } from "../utils/requestTimeout";
 
 export type AIMessage = { role: "system" | "user" | "assistant"; content: string };
+
+const AI_REQUEST_TIMEOUT_MS = 120_000;
 
 interface ChatCompletionResponse {
   choices?: Array<{ message?: { content?: string | null } }>;
@@ -67,12 +70,12 @@ export class AIClient {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (apiKey) headers.Authorization = `Bearer ${apiKey}`;
 
-    const response = await requestUrl({
+    const response = await withTimeout(requestUrl({
       url: `${baseUrl}/chat/completions`,
       method: "POST",
       headers,
       body: JSON.stringify({ model, messages, max_tokens: maxTokens, stream: false }),
-    });
+    }), AI_REQUEST_TIMEOUT_MS, "AI 请求超时，请稍后重试。");
     const data = response.json as ChatCompletionResponse;
     if (response.status < 200 || response.status >= 300) {
       throw new Error(data.error?.message || `HTTP ${response.status}`);

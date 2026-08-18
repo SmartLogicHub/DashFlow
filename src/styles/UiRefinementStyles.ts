@@ -15,38 +15,6 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   z-index: 1;
 }
 
-/* Keep the full photographic Hero unique to Home, but let every working
- * surface inherit a quiet trace of the same scene. This avoids the abrupt
- * jump from a personal homepage into a sterile admin canvas. */
-.dashflow-command-shell:not(.is-personal-home)::before {
-  content: "";
-  position: absolute;
-  z-index: -1;
-  pointer-events: none;
-  left: -10px;
-  right: -10px;
-  top: -6px;
-  height: 154px;
-  border-radius: 16px;
-  background-image:
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--df-cmd-bg) 28%, transparent) 0%,
-      color-mix(in srgb, var(--df-cmd-bg) 68%, transparent) 52%,
-      var(--df-cmd-bg) 100%),
-    var(--df-ambient-image, var(--df-home-scene));
-  background-size: cover;
-  background-position: center 48%;
-  filter: saturate(.72) contrast(.92);
-  opacity: .16;
-  -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.82) 48%, transparent 100%);
-  mask-image: linear-gradient(180deg, #000 0%, rgba(0,0,0,.82) 48%, transparent 100%);
-}
-
-.theme-dark .dashflow-command-shell:not(.is-personal-home)::before {
-  opacity: .20;
-  filter: saturate(.62) brightness(.76) contrast(.96);
-}
-
 .dashflow-command-shell:not(.is-personal-home) .dashflow-command-bar,
 .dashflow-command-shell:not(.is-personal-home) .dashflow-command-page,
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget {

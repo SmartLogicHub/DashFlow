@@ -1,10 +1,12 @@
 import { requestUrl } from "obsidian";
 import type DashFlowPlugin from "../main";
 import { localDate } from "../utils/date";
+import { withTimeout } from "../utils/requestTimeout";
 
 const WEREAD_GATEWAY = "https://i.weread.qq.com/api/agent/gateway";
 const WEREAD_SKILL_VERSION = "1.0.4";
 const CACHE_TTL_MS = 10 * 60 * 1000;
+const WEREAD_TIMEOUT_MS = 15_000;
 
 interface WeReadUpgradeInfo {
   message?: string;
@@ -229,7 +231,7 @@ export class WeReadService {
     const apiKey = secretId ? this.plugin.app.secretStorage.getSecret(secretId) : null;
     if (!apiKey) throw new Error("没有可用的微信读书 API Key。请先在 DashFlow 设置中连接微信读书。");
 
-    const response = await requestUrl({
+    const response = await withTimeout(requestUrl({
       url: WEREAD_GATEWAY,
       method: "POST",
       headers: {
@@ -241,7 +243,7 @@ export class WeReadService {
         ...params,
         skill_version: WEREAD_SKILL_VERSION,
       }),
-    });
+    }), WEREAD_TIMEOUT_MS, "微信读书连接超时，请稍后重试。");
 
     const data = response.json as T;
     if (data.upgrade_info) {

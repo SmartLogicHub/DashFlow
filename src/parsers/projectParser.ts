@@ -1,6 +1,16 @@
 import type { CachedMetadata, TFile } from "obsidian";
 import type { Project, ProjectProgressMode, ProjectStatus } from "../models";
 
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+function normalizeDate(value: unknown): string | undefined {
+  if (value instanceof Date && Number.isFinite(value.getTime())) {
+    return value.toISOString().slice(0, 10);
+  }
+  const text = String(value ?? "").trim().slice(0, 10);
+  return DATE_RE.test(text) ? text : undefined;
+}
+
 function normalizeTags(value: unknown): string[] {
   if (Array.isArray(value)) {
     return value.map(String).map((tag) => tag.replace(/^#/, ""));
@@ -41,12 +51,8 @@ export function parseProject(
     name: String(frontmatter.name ?? file.basename),
     description: frontmatter.description ? String(frontmatter.description) : undefined,
     status,
-    start: frontmatter.start ? String(frontmatter.start) : undefined,
-    deadline: frontmatter.deadline
-      ? String(frontmatter.deadline)
-      : frontmatter.due
-        ? String(frontmatter.due)
-        : undefined,
+    start: normalizeDate(frontmatter.start),
+    deadline: normalizeDate(frontmatter.deadline) ?? normalizeDate(frontmatter.due),
     tags: normalizeTags(frontmatter.tags),
     progressMode,
     manualProgress: Number.isFinite(manual) ? Math.max(0, Math.min(100, manual)) : undefined,

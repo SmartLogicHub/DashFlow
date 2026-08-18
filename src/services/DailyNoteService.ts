@@ -5,7 +5,8 @@ function two(value: number): string {
 }
 
 function formatDate(dateText: string, format: string): string {
-  const date = new Date(`${dateText}T12:00:00`);
+  const parsed = new Date(`${dateText}T12:00:00`);
+  const date = Number.isNaN(parsed.getTime()) ? new Date() : parsed;
   return (format || "YYYY-MM-DD")
     .replace(/YYYY/g, String(date.getFullYear()))
     .replace(/MM/g, two(date.getMonth() + 1))

@@ -1,5 +1,5 @@
 import type { CalendarEvent, CalendarWidgetConfig, Habit, Project, Task } from "../models";
-import { habitCompletedOn, habitScheduledOn } from "../habits/habitMath";
+import { habitScheduledOn } from "../habits/habitMath";
 import { addDays } from "../utils/date";
 import type { VaultIndexService } from "./VaultIndexService";
 
@@ -107,8 +107,12 @@ export class CalendarService {
 
   private addHabitEvents(target: CalendarEvent[], habit: Habit, start: string, end: string): void {
     if (habit.status !== "active") return;
+    const completedDates = new Set(habit.completedDates);
+    const daySpan = Math.max(0, Math.round(
+      (Date.parse(`${end}T12:00:00`) - Date.parse(`${start}T12:00:00`)) / 86_400_000,
+    )) + 1;
     let cursor = start;
-    for (let guard = 0; guard < 370 && cursor <= end; guard += 1) {
+    for (let index = 0; index < daySpan; index += 1) {
       if (habitScheduledOn(habit, cursor)) {
         target.push({
           id: `${habit.id}:${cursor}:habit`,
@@ -117,7 +121,7 @@ export class CalendarService {
           title: habit.name,
           entityId: habit.id,
           source: habit.source,
-          completed: habitCompletedOn(habit, cursor),
+          completed: completedDates.has(cursor),
         });
       }
       cursor = addDays(cursor, 1);

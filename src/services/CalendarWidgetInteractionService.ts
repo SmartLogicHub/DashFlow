@@ -58,12 +58,20 @@ export class CalendarWidgetInteractionService {
   stop(): void {
     this.unsubscribeRender?.();
     this.unsubscribeRender = null;
+    this.monthByWidget.clear();
+    this.selectedByWidget.clear();
     document.getElementById(STYLE_ID)?.remove();
   }
 
   private decorate(root: HTMLElement): void {
     const dashboard = this.plugin.dashboardManager.active();
     const widgets = new Map(dashboard.widgets.map((widget) => [widget.id, widget]));
+    for (const id of [...this.monthByWidget.keys()]) {
+      if (!widgets.has(id)) this.monthByWidget.delete(id);
+    }
+    for (const id of [...this.selectedByWidget.keys()]) {
+      if (!widgets.has(id)) this.selectedByWidget.delete(id);
+    }
 
     for (const card of root.querySelectorAll<HTMLElement>(".dashflow-widget[data-widget-id]")) {
       const widgetId = card.dataset.widgetId;

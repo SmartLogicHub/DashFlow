@@ -4,13 +4,21 @@ export interface SafeEmbedUrl {
   hostname: string;
 }
 
+function isIpv4Loopback(host: string): boolean {
+  const parts = host.split(".");
+  if (parts.length !== 4) return false;
+  if (!parts.every((part) => /^\d{1,3}$/.test(part))) return false;
+  const octets = parts.map(Number);
+  if (octets.some((octet) => octet < 0 || octet > 255)) return false;
+  return octets[0] === 127;
+}
+
 function isLoopback(hostname: string): boolean {
   const host = hostname.toLowerCase().replace(/^\[|\]$/g, "");
-  return host === "localhost"
-    || host.endsWith(".localhost")
-    || host === "127.0.0.1"
-    || host.startsWith("127.")
-    || host === "::1";
+  if (host === "localhost" || host.endsWith(".localhost")) return true;
+  if (host === "::1") return true;
+  if (host.startsWith("::ffff:")) return isIpv4Loopback(host.slice("::ffff:".length));
+  return isIpv4Loopback(host);
 }
 
 export function parseSafeEmbedUrl(value: string): SafeEmbedUrl | null {

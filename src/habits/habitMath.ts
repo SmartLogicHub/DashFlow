@@ -26,12 +26,13 @@ export function habitHistory(
 ): Array<{ date: string; scheduled: boolean; completed: boolean }> {
   const safeCount = Math.max(1, Math.floor(count));
   const start = addDays(endDate, -(safeCount - 1));
+  const completedDates = new Set(habit.completedDates);
   return Array.from({ length: safeCount }, (_, index) => {
     const date = addDays(start, index);
     return {
       date,
       scheduled: habitScheduledOn(habit, date),
-      completed: habitCompletedOn(habit, date),
+      completed: completedDates.has(date),
     };
   });
 }
@@ -39,11 +40,12 @@ export function habitHistory(
 export function habitCurrentStreak(habit: Habit, endDate = localDate()): number {
   let cursor = endDate;
   let streak = 0;
+  const completedDates = new Set(habit.completedDates);
 
   for (let guard = 0; guard < 800; guard += 1) {
     if (habit.start && cursor < habit.start) break;
     if (habitScheduledOn(habit, cursor)) {
-      if (!habitCompletedOn(habit, cursor)) break;
+      if (!completedDates.has(cursor)) break;
       streak += 1;
     }
     cursor = addDays(cursor, -1);

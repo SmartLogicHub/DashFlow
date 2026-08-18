@@ -1,8 +1,10 @@
 import { requestUrl } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { AINewsWidgetConfig, CuratedNewsItem, NewsCurationCacheEntry, NewsItem } from "../models";
+import { withTimeout } from "../utils/requestTimeout";
 
 const MAX_SOURCES = 12;
+const FEED_TIMEOUT_MS = 15_000;
 const MAX_PER_SOURCE = 12;
 const MAX_CANDIDATES = 40;
 const MAX_DESCRIPTION = 320;
@@ -158,7 +160,7 @@ export class NewsCurationService {
 
   private async fetchFeed(sourceUrl: string): Promise<{ items: NewsItem[]; warning?: string }> {
     try {
-      const response = await requestUrl({ url: sourceUrl, method: "GET" });
+      const response = await withTimeout(requestUrl({ url: sourceUrl, method: "GET" }), FEED_TIMEOUT_MS, `${sourceUrl}: 请求超时`);
       if (response.status < 200 || response.status >= 300) {
         return { items: [], warning: `${sourceUrl}: HTTP ${response.status}` };
       }

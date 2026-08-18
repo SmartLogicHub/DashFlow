@@ -1,4 +1,4 @@
-import { TFile, type App, type Plugin } from "obsidian";
+import { TFile, type App, type EventRef, type Plugin } from "obsidian";
 import type { ActivityStore, DailyActivity, Task, VaultSnapshot } from "../models";
 import { emptyDailyActivity } from "../activity/activityMath";
 import { localDate } from "../utils/date";
@@ -16,6 +16,8 @@ export class ActivityService {
   private hasHabitBaseline = false;
   private saveTimer: number | null = null;
   private started = false;
+  private createRef: EventRef | null = null;
+  private modifyRef: EventRef | null = null;
 
   constructor(
     private readonly app: App,
@@ -31,18 +33,22 @@ export class ActivityService {
 
     this.unsubscribeIndex = this.index.subscribe((snapshot) => this.handleSnapshot(snapshot));
 
-    this.plugin.registerEvent(this.app.vault.on("create", (file) => {
+    this.createRef = this.app.vault.on("create", (file) => {
       if (file instanceof TFile && file.extension === "md") this.recordNoteCreated(file.path);
-    }));
+    });
 
-    this.plugin.registerEvent(this.app.vault.on("modify", (file) => {
+    this.modifyRef = this.app.vault.on("modify", (file) => {
       if (file instanceof TFile && file.extension === "md") this.recordNoteModified(file.path);
-    }));
+    });
   }
 
   stop(): void {
     this.unsubscribeIndex?.();
     this.unsubscribeIndex = null;
+    if (this.createRef) this.app.vault.offref(this.createRef);
+    this.createRef = null;
+    if (this.modifyRef) this.app.vault.offref(this.modifyRef);
+    this.modifyRef = null;
     this.started = false;
     if (this.saveTimer !== null) {
       window.clearTimeout(this.saveTimer);
