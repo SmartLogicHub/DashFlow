@@ -4,16 +4,18 @@ import { readFileSync } from "node:fs";
 
 const visual = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
+const hierarchy = readFileSync("src/styles/ProductHierarchyResetStyles.ts", "utf8");
 const home = readFileSync("src/services/PersonalHomeDesignService.ts", "utf8");
 const habit = readFileSync("src/ui/HabitEditorModal.ts", "utf8");
 const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const search = readFileSync("src/ui/GlobalSearchModal.ts", "utf8");
 
-test("Home keeps the full Hero while working sections use a compact frame", () => {
+test("Home and primary working sections keep full photographic Heroes", () => {
   assert.ok(home.includes("height:194px!important") || home.includes("height: 194px!important"));
-  assert.ok(design.includes("--df-page-hero-height: 88px"));
-  assert.ok(design.includes("--df-page-hero-height: 72px"));
-  assert.ok(design.includes('data-section="inbox"'));
+  assert.ok(hierarchy.includes("height: 194px !important"));
+  assert.ok(hierarchy.includes("height: 172px !important"));
+  assert.equal(design.includes("--df-page-hero-height: 88px"), false);
+  assert.equal(design.includes("height: 72px!important"), false);
 });
 
 test("v0.4.3 introduces shared spacing, radius and typography tokens", () => {
@@ -74,9 +76,10 @@ test("calendar and review use one calm visual language", () => {
   assert.ok(visual.includes("border-right: 1px solid var(--df-cmd-border)!important"));
 });
 
-test("mobile collapses editors and work rows without horizontal overflow", () => {
+test("mobile collapses editors and work rows while preserving the Hero artwork", () => {
   assert.ok(visual.includes("@media (max-width: 760px)"));
   assert.ok(visual.includes("grid-template-columns: 1fr!important"));
   assert.ok(visual.includes("grid-template-columns: minmax(0, 1fr) 54px!important"));
-  assert.ok(design.includes("height: 72px!important"));
+  assert.ok(hierarchy.includes("height: 172px !important"));
+  assert.equal(design.includes("height: 72px!important"), false);
 });
