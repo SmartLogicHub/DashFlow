@@ -158,8 +158,8 @@ export function moveLayout(
   metrics: GridMetrics,
 ): WidgetLayout {
   const columnWidth = (metrics.containerWidth - metrics.gap * (metrics.columns - 1)) / metrics.columns;
-  const stepX = columnWidth + metrics.gap;
-  const stepY = metrics.rowHeight + metrics.gap;
+  const stepX = Math.max(1, columnWidth + metrics.gap);
+  const stepY = Math.max(1, metrics.rowHeight + metrics.gap);
 
   return clampLayout({
     ...initial,
@@ -177,8 +177,8 @@ export function resizeLayout(
   max?: WidgetSize,
 ): WidgetLayout {
   const columnWidth = (metrics.containerWidth - metrics.gap * (metrics.columns - 1)) / metrics.columns;
-  const stepX = columnWidth + metrics.gap;
-  const stepY = metrics.rowHeight + metrics.gap;
+  const stepX = Math.max(1, columnWidth + metrics.gap);
+  const stepY = Math.max(1, metrics.rowHeight + metrics.gap);
   const minW = Math.max(1, min?.w ?? 2);
   const minH = Math.max(1, min?.h ?? 2);
   const maxW = Math.min(max?.w ?? metrics.columns, metrics.columns - initial.x);

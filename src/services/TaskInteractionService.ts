@@ -27,11 +27,13 @@ export class TaskInteractionService {
       if (!widget || (widget.type !== "tasks" && widget.type !== "upcoming")) continue;
 
       const tasks = this.tasksFor(widget);
+      const taskById = new Map(tasks.map((task) => [task.id, task]));
       const rows = Array.from(card.querySelectorAll<HTMLElement>(".dashflow-task"));
-      rows.forEach((row, index) => {
-        const task = tasks[index];
+      for (const row of rows) {
+        const taskId = row.dataset.taskId;
+        const task = taskId ? taskById.get(taskId) : undefined;
         const text = row.querySelector<HTMLElement>("span");
-        if (!task || !text || text.dataset.dashflowTaskEditor === task.id) return;
+        if (!task || !text || text.dataset.dashflowTaskEditor === task.id) continue;
 
         text.dataset.dashflowTaskEditor = task.id;
         text.setAttribute("role", "button");
@@ -50,7 +52,7 @@ export class TaskInteractionService {
           event.stopPropagation();
           new TaskEditorModal(this.plugin, task).open();
         });
-      });
+      }
 
       if (widget.type === "tasks") this.decorateCreateTask(card);
     }

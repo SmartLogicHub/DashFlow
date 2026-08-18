@@ -143,7 +143,15 @@ export class DataFilterWidgetInteractionService {
       }
     };
 
-    for (const input of [query, tag, folder, frontmatter]) input.addEventListener("input", renderPreview);
+    let previewTimer: number | null = null;
+    const schedulePreview = (): void => {
+      if (previewTimer !== null) window.clearTimeout(previewTimer);
+      previewTimer = window.setTimeout(() => {
+        previewTimer = null;
+        renderPreview();
+      }, 180);
+    };
+    for (const input of [query, tag, folder, frontmatter]) input.addEventListener("input", schedulePreview);
     query.addEventListener("change", () => void this.persist(dashboardId, widget.id, { query: query.value }));
     tag.addEventListener("change", () => void this.persist(dashboardId, widget.id, { tag: tag.value }));
     folder.addEventListener("change", () => void this.persist(dashboardId, widget.id, { folder: folder.value }));

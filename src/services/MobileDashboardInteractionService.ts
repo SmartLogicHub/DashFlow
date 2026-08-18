@@ -51,7 +51,7 @@ export class MobileDashboardInteractionService {
   start(): void {
     this.ensureStyles();
     this.media.addEventListener("change", this.onMediaChange);
-    this.observer = new MutationObserver(() => this.schedule());
+    this.observer = new MutationObserver((records) => this.onMutation(records));
     this.observer.observe(document.body, { childList: true, subtree: true });
     this.schedule();
   }
@@ -71,6 +71,22 @@ export class MobileDashboardInteractionService {
       this.scheduled = false;
       this.decorate();
     }, 0);
+  }
+
+  private onMutation(records: MutationRecord[]): void {
+    for (const record of records) {
+      for (const node of record.addedNodes) {
+        if (node instanceof Element
+          && (node.matches(".dashflow-shell") || node.querySelector(".dashflow-shell"))) {
+          this.schedule();
+          return;
+        }
+      }
+      if (record.target instanceof Element && record.target.closest(".dashflow-shell")) {
+        this.schedule();
+        return;
+      }
+    }
   }
 
   private decorate(): void {

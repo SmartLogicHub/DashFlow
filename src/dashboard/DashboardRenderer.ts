@@ -22,6 +22,9 @@ import { PLUGIN_VERSION } from "../constants";
 export class DashboardRenderer {
   private editing = false;
   private configuringWidgetId: string | null = null;
+  private modalDraft: { widgetId: string; title: string; config: Record<string, unknown> } | null = null;
+  private readonly captureDrafts = new Map<string, string>();
+  private pointerCleanup: (() => void) | null = null;
   private frameId: number | null = null;
   private destroyed = false;
   private readonly unsubscribeIndex: () => void;
@@ -37,6 +40,8 @@ export class DashboardRenderer {
 
   destroy(): void {
     this.destroyed = true;
+    this.pointerCleanup?.();
+    this.pointerCleanup = null;
     this.unsubscribeIndex();
     this.unsubscribeDashboard();
     if (this.frameId !== null) window.cancelAnimationFrame(this.frameId);
@@ -126,7 +131,10 @@ export class DashboardRenderer {
     );
     button.addEventListener("click", () => {
       this.editing = !this.editing;
-      if (!this.editing) this.configuringWidgetId = null;
+      if (!this.editing) {
+        this.configuringWidgetId = null;
+        this.modalDraft = null;
+      }
       this.render();
     });
 
@@ -195,7 +203,10 @@ export class DashboardRenderer {
       remove.title = "移除";
       remove.addEventListener("click", async () => {
         await this.plugin.dashboardManager.removeWidget(dashboard.id, widget.id);
-        if (this.configuringWidgetId === widget.id) this.configuringWidgetId = null;
+        if (this.configuringWidgetId === widget.id) {
+          this.configuringWidgetId = null;
+          this.modalDraft = null;
+        }
         this.render();
       });
       controls.append(drag, settings, remove);
@@ -260,6 +271,10 @@ export class DashboardRenderer {
     const wrap = createElement("div", "dashflow-capture");
     const textarea = createElement("textarea");
     textarea.placeholder = config.placeholder ?? "现在脑子里在想什么？";
+    textarea.value = this.captureDrafts.get(widget.id) ?? "";
+    textarea.addEventListener("input", () => {
+      this.captureDrafts.set(widget.id, textarea.value);
+    });
     const footer = createElement("div", "dashflow-capture-footer");
     footer.appendChild(createElement("span", "", "⌘/Ctrl + Enter"));
     const button = createElement("button", "", "捕捉");
@@ -269,7 +284,10 @@ export class DashboardRenderer {
       if (!textarea.value.trim()) return;
       button.disabled = true;
       const ok = await this.plugin.captureService.capture(textarea.value);
-      if (ok) textarea.value = "";
+      if (ok) {
+        textarea.value = "";
+        this.captureDrafts.delete(widget.id);
+      }
       button.disabled = false;
     };
 
@@ -295,6 +313,7 @@ export class DashboardRenderer {
     const list = createElement("div", "dashflow-task-list");
     for (const task of tasks) {
       const row = createElement("label", "dashflow-task");
+      row.dataset.taskId = task.id;
       const checkbox = createElement("input");
       checkbox.type = "checkbox";
       checkbox.checked = task.completed;
@@ -480,11 +499,15 @@ export class DashboardRenderer {
     closeButton.type = "button";
     closeButton.setAttribute("aria-label", "关闭");
     const content = createElement("div", "modal-content");
-    const draftConfig: Record<string, unknown> = { ...widget.config };
-    let draftTitle = widget.title ?? "";
+    const draft = this.modalDraft?.widgetId === widget.id
+      ? this.modalDraft
+      : { widgetId: widget.id, title: widget.title ?? "", config: { ...widget.config } };
+    this.modalDraft = draft;
+    const draftConfig = draft.config;
 
     const close = (): void => {
       this.configuringWidgetId = null;
+      this.modalDraft = null;
       this.render();
     };
 
@@ -504,10 +527,10 @@ export class DashboardRenderer {
 
     const titleInput = createElement("input");
     titleInput.type = "text";
-    titleInput.value = draftTitle;
+    titleInput.value = draft.title;
     titleInput.placeholder = definition.name;
     titleInput.addEventListener("input", () => {
-      draftTitle = titleInput.value;
+      draft.title = titleInput.value;
     });
     content.appendChild(this.renderSettingRow(
       "卡片标题",
@@ -561,7 +584,7 @@ export class DashboardRenderer {
         widget.id,
         (current) => ({
           ...current,
-          title: draftTitle.trim() || undefined,
+          title: draft.title.trim() || undefined,
           config: { ...draftConfig },
         }),
       );
@@ -673,39 +696,55 @@ export class DashboardRenderer {
 
     card.classList.add("is-dragging");
 
+    let rafId: number | null = null;
+    let pendingMove: PointerEvent | null = null;
+
     const onMove = (moveEvent: PointerEvent): void => {
-      const metrics = {
-        columns: dashboard.settings.columns,
-        gap: dashboard.settings.gap,
-        rowHeight: dashboard.settings.rowHeight,
-        containerWidth: width,
-      };
+      pendingMove = moveEvent;
+      if (rafId !== null) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = null;
+        const latest = pendingMove;
+        pendingMove = null;
+        if (!latest) return;
 
-      const activeLayout = mode === "move"
-        ? moveLayout(initial, moveEvent.clientX - startX, moveEvent.clientY - startY, metrics)
-        : resizeLayout(
-          initial,
-          moveEvent.clientX - startX,
-          moveEvent.clientY - startY,
-          metrics,
-          definition.minSize,
-          definition.maxSize,
+        const metrics = {
+          columns: dashboard.settings.columns,
+          gap: dashboard.settings.gap,
+          rowHeight: dashboard.settings.rowHeight,
+          containerWidth: width,
+        };
+
+        const activeLayout = mode === "move"
+          ? moveLayout(initial, latest.clientX - startX, latest.clientY - startY, metrics)
+          : resizeLayout(
+            initial,
+            latest.clientX - startX,
+            latest.clientY - startY,
+            metrics,
+            definition.minSize,
+            definition.maxSize,
+          );
+
+        previewWidgets = resolveWidgetLayout(
+          dashboard.widgets,
+          widget.id,
+          activeLayout,
+          dashboard.settings.columns,
         );
-
-      previewWidgets = resolveWidgetLayout(
-        dashboard.widgets,
-        widget.id,
-        activeLayout,
-        dashboard.settings.columns,
-      );
-      this.applyGridLayouts(grid, previewWidgets);
+        this.applyGridLayouts(grid, previewWidgets);
+      });
     };
 
     const cleanup = (): void => {
+      if (rafId !== null) window.cancelAnimationFrame(rafId);
+      rafId = null;
+      pendingMove = null;
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
       window.removeEventListener("pointercancel", onCancel);
       card.classList.remove("is-dragging");
+      this.pointerCleanup = null;
     };
 
     const onUp = (): void => {
@@ -719,6 +758,7 @@ export class DashboardRenderer {
       this.render();
     };
 
+    this.pointerCleanup = cleanup;
     window.addEventListener("pointermove", onMove);
     window.addEventListener("pointerup", onUp, { once: true });
     window.addEventListener("pointercancel", onCancel, { once: true });

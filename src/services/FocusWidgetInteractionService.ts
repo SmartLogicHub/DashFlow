@@ -39,11 +39,11 @@ export class FocusWidgetInteractionService {
         this.updateClocksIn(root);
       });
     });
-    this.displayTimer = window.setInterval(() => this.updateClocks(), 1000);
     this.plugin.dashboardRender.forEachRoot((root) => {
       this.decorate(root);
       this.updateClocksIn(root);
     });
+    this.syncClockTimer();
   }
 
   stop(): void {
@@ -52,6 +52,17 @@ export class FocusWidgetInteractionService {
     this.unsubscribeFocus?.();
     this.unsubscribeFocus = null;
     if (this.displayTimer !== null) {
+      window.clearInterval(this.displayTimer);
+      this.displayTimer = null;
+    }
+  }
+
+  private syncClockTimer(): void {
+    const hasFocusWidget = this.plugin.dashboardManager.active()
+      .widgets.some((widget) => widget.type === "focus" && !widget.hidden);
+    if (hasFocusWidget && this.displayTimer === null) {
+      this.displayTimer = window.setInterval(() => this.updateClocks(), 1000);
+    } else if (!hasFocusWidget && this.displayTimer !== null) {
       window.clearInterval(this.displayTimer);
       this.displayTimer = null;
     }
@@ -72,6 +83,7 @@ export class FocusWidgetInteractionService {
       body.dataset.dashflowFocus = signature;
       this.render(body, widget);
     }
+    this.syncClockTimer();
   }
 
   private render(body: HTMLElement, widget: WidgetInstance): void {

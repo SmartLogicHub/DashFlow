@@ -4,6 +4,8 @@ import type DashFlowPlugin from "../main";
 const IMAGE_EXTENSIONS = new Set(["jpg", "jpeg", "png", "webp", "avif", "gif"]);
 
 export class HeroImagePickerModal extends SuggestModal<TFile> {
+  private cachedImages: TFile[] | null = null;
+
   constructor(
     private readonly plugin: DashFlowPlugin,
     private readonly onPick: (path: string) => void | Promise<void>,
@@ -19,11 +21,18 @@ export class HeroImagePickerModal extends SuggestModal<TFile> {
 
   getSuggestions(query: string): TFile[] {
     const normalized = query.trim().toLocaleLowerCase();
-    return this.plugin.app.vault.getFiles()
-      .filter((file) => IMAGE_EXTENSIONS.has(file.extension.toLocaleLowerCase()))
+    return this.imageFiles()
       .filter((file) => !normalized || `${file.basename} ${file.path}`.toLocaleLowerCase().includes(normalized))
       .sort((a, b) => b.stat.mtime - a.stat.mtime)
       .slice(0, 80);
+  }
+
+  private imageFiles(): TFile[] {
+    if (!this.cachedImages) {
+      this.cachedImages = this.plugin.app.vault.getFiles()
+        .filter((file) => IMAGE_EXTENSIONS.has(file.extension.toLocaleLowerCase()));
+    }
+    return this.cachedImages;
   }
 
   renderSuggestion(file: TFile, el: HTMLElement): void {

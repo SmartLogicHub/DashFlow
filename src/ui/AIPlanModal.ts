@@ -3,6 +3,7 @@ import type DashFlowPlugin from "../main";
 
 export class AIPlanModal extends Modal {
   private result = "";
+  private requestToken = 0;
 
   constructor(private readonly plugin: DashFlowPlugin) {
     super(plugin.app);
@@ -13,10 +14,12 @@ export class AIPlanModal extends Modal {
   }
 
   onClose(): void {
+    this.requestToken += 1;
     this.contentEl.empty();
   }
 
   private async renderPlan(): Promise<void> {
+    const token = ++this.requestToken;
     const { contentEl } = this;
     contentEl.empty();
     contentEl.addClass("dashflow-ai-plan", "dashflow-editor-modal");
@@ -35,7 +38,9 @@ export class AIPlanModal extends Modal {
     state.createSpan({ text: "正在整理今天的重点…" });
 
     try {
-      this.result = await this.plugin.aiPlanning.planToday();
+      const plan = await this.plugin.aiPlanning.planToday();
+      if (token !== this.requestToken) return;
+      this.result = plan;
       state.remove();
       const output = contentEl.createDiv("dashflow-ai-plan-output");
       output.setText(this.result);
@@ -51,6 +56,7 @@ export class AIPlanModal extends Modal {
       const close = actions.createEl("button", { text: "关闭", cls: "mod-cta", attr: { type: "button" } });
       close.addEventListener("click", () => this.close());
     } catch (error) {
+      if (token !== this.requestToken) return;
       state.empty();
       setIcon(state.createDiv("dashflow-ai-plan-spinner"), "triangle-alert");
       state.createSpan({ text: error instanceof Error ? error.message : "AI 规划失败，请检查设置。" });

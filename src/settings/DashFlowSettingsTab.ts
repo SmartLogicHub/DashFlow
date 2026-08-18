@@ -14,6 +14,38 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     super(app, dashFlow);
   }
 
+  private saveTimer: number | null = null;
+  private reindexTimer: number | null = null;
+
+  private scheduleSave(): void {
+    if (this.saveTimer !== null) window.clearTimeout(this.saveTimer);
+    this.saveTimer = window.setTimeout(() => {
+      this.saveTimer = null;
+      void this.dashFlow.savePluginData();
+    }, 300);
+  }
+
+  private scheduleReindex(): void {
+    if (this.reindexTimer !== null) window.clearTimeout(this.reindexTimer);
+    this.reindexTimer = window.setTimeout(() => {
+      this.reindexTimer = null;
+      void this.dashFlow.vaultIndex.reindexAll();
+    }, 400);
+  }
+
+  hide(): void {
+    if (this.saveTimer !== null) {
+      window.clearTimeout(this.saveTimer);
+      this.saveTimer = null;
+      void this.dashFlow.savePluginData();
+    }
+    if (this.reindexTimer !== null) {
+      window.clearTimeout(this.reindexTimer);
+      this.reindexTimer = null;
+      void this.dashFlow.vaultIndex.reindexAll();
+    }
+  }
+
   display(): void {
     const { containerEl } = this;
     containerEl.empty();
@@ -89,9 +121,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .addOption("midnight", "Midnight · 雾林深色")
         .addOption("obsidian", "Obsidian · 跟随主题")
         .setValue(this.dashFlow.data.settings.homeTheme)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.homeTheme = value as HomeTheme;
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
 
@@ -101,9 +133,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("Assets/hero/mountain.jpg")
         .setValue(this.dashFlow.data.settings.homeHeroImagePath)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.homeHeroImagePath = value.trim();
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }))
       .addButton((button) => button
@@ -132,9 +164,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("我的成长")
         .setValue(this.dashFlow.data.settings.homeHeroTitle)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.homeHeroTitle = value.trim() || "我的成长";
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
 
@@ -144,9 +176,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("把输入变成理解，把理解变成行动。")
         .setValue(this.dashFlow.data.settings.homeHeroSubtitle)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.homeHeroSubtitle = value.trim() || "把输入变成理解，把理解变成行动。";
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
 
@@ -157,9 +189,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         .setLimits(18, 62, 1)
         .setDynamicTooltip()
         .setValue(this.dashFlow.data.settings.homeHeroOverlay)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.homeHeroOverlay = value;
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
   }
@@ -172,9 +204,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("DashFlow/Inbox.md")
         .setValue(this.dashFlow.data.settings.inboxPath)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.inboxPath = value.trim() || "DashFlow/Inbox.md";
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
         }));
 
     new Setting(workflow)
@@ -183,9 +215,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("DashFlow/Projects")
         .setValue(this.dashFlow.data.settings.projectFolder)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.projectFolder = value.trim() || "DashFlow/Projects";
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
         }));
 
     new Setting(workflow)
@@ -194,9 +226,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("DashFlow/Habits")
         .setValue(this.dashFlow.data.settings.habitFolder)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.habitFolder = value.trim() || "DashFlow/Habits";
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
         }));
 
     const recognition = this.panel(parent, "识别规则", "只有你已经有自己的 Markdown 约定时才需要修改。");
@@ -205,10 +237,10 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .setDesc("frontmatter 中用于识别项目的 type 值。")
       .addText((text) => text
         .setValue(this.dashFlow.data.settings.projectTypeValue)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.projectTypeValue = value.trim() || "project";
-          await this.dashFlow.savePluginData();
-          await this.dashFlow.vaultIndex.reindexAll();
+          this.scheduleSave();
+          this.scheduleReindex();
         }));
 
     new Setting(recognition)
@@ -216,10 +248,10 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .setDesc("frontmatter 中用于识别习惯的 type 值。")
       .addText((text) => text
         .setValue(this.dashFlow.data.settings.habitTypeValue)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.habitTypeValue = value.trim() || "habit";
-          await this.dashFlow.savePluginData();
-          await this.dashFlow.vaultIndex.reindexAll();
+          this.scheduleSave();
+          this.scheduleReindex();
         }));
   }
 
@@ -230,9 +262,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .setDesc("关闭时 DashFlow 完全不会发起 AI 请求。")
       .addToggle((toggle) => toggle
         .setValue(this.dashFlow.data.settings.aiEnabled)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.aiEnabled = value;
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
 
@@ -242,9 +274,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("https://api.deepseek.com")
         .setValue(this.dashFlow.data.settings.aiBaseUrl)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.aiBaseUrl = value.trim() || "https://api.deepseek.com";
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
         }));
 
     new Setting(ai)
@@ -253,9 +285,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("deepseek-v4-flash")
         .setValue(this.dashFlow.data.settings.aiModel)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.aiModel = value.trim() || "deepseek-v4-flash";
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
         }));
 
     new Setting(ai)
@@ -264,9 +296,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .addText((text) => text
         .setPlaceholder("sk-...")
         .setValue(this.dashFlow.data.settings.aiSecretId)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.aiSecretId = value.trim();
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
         }));
 
     new Setting(ai)
@@ -294,10 +326,10 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .setDesc("关闭时 DashFlow 不会请求微信读书。")
       .addToggle((toggle) => toggle
         .setValue(this.dashFlow.data.settings.weReadEnabled)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.weReadEnabled = value;
           this.dashFlow.weRead.clearCache();
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
 
@@ -306,10 +338,10 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .setDesc("先从微信读书官方页面获取 wrk-… API Key，再从 Obsidian Keychain 选择或创建密钥。data.json 只保存密钥名称。")
       .addComponent((el) => new SecretComponent(this.app, el)
         .setValue(this.dashFlow.data.settings.weReadSecretId)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.weReadSecretId = value;
           this.dashFlow.weRead.clearCache();
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }))
       .addButton((button) => button
@@ -321,9 +353,9 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       .setDesc("连接后在首页显示你的真实划线、书名、作者、章节和阅读进度。没有数据时只显示真实空状态。")
       .addToggle((toggle) => toggle
         .setValue(this.dashFlow.data.settings.weReadShowOnHome)
-        .onChange(async (value) => {
+        .onChange((value) => {
           this.dashFlow.data.settings.weReadShowOnHome = value;
-          await this.dashFlow.savePluginData();
+          this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
 
