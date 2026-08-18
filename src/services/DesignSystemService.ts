@@ -1,11 +1,12 @@
 import { AI_NEWS_STYLES } from "../styles/AINewsStyles";
 import { DATA_FILTER_STYLES } from "../styles/DataFilterStyles";
+import { DEEPSEEK_POLISH_STYLES } from "../styles/DeepSeekPolishStyles";
 import { FOCUS_EMBED_STYLES } from "../styles/FocusEmbedStyles";
 import { INTERACTION_MOTION_STYLES } from "../styles/InteractionMotionStyles";
 import { PRODUCT_HIERARCHY_RESET_STYLES } from "../styles/ProductHierarchyResetStyles";
+import { SETTINGS_STYLES } from "../styles/SettingsStyles";
 import { UI_REFINEMENT_POLISH_STYLES } from "../styles/UiRefinementStyles";
 import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles";
-import { SETTINGS_STYLES } from "../styles/SettingsStyles";
 
 const STYLE_ID = "dashflow-design-system-v044";
 
@@ -215,6 +216,7 @@ const CONSOLIDATED_STYLES = [
   FOCUS_EMBED_STYLES,
   INTERACTION_MOTION_STYLES,
   PRODUCT_HIERARCHY_RESET_STYLES,
+  DEEPSEEK_POLISH_STYLES,
   SETTINGS_STYLES,
 ].join("\n\n");
 
