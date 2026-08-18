@@ -410,25 +410,27 @@ export class DashboardRenderer {
       : 0;
 
     const wrap = createElement("div", "dashflow-countdown");
-    wrap.appendChild(createElement("div", "dashflow-countdown-value", String(days).padStart(2, "0")));
-    wrap.appendChild(createElement("div", "dashflow-countdown-unit", "DAYS"));
-    wrap.appendChild(createElement("div", "dashflow-countdown-label", config.label ?? "COUNTDOWN"));
+    wrap.append(
+      createElement("span", "", config.title ?? "COUNTDOWN"),
+      createElement("strong", "", String(days)),
+      createElement("small", "", "DAYS"),
+    );
     body.appendChild(wrap);
   }
 
   private renderVaultStats(body: HTMLElement): void {
     const snapshot = this.plugin.vaultIndex.getSnapshot();
-    const stats = [
-      ["Notes", snapshot.notes],
-      ["Tasks", snapshot.tasks.length],
-      ["Projects", snapshot.projects.length],
-      ["Habits", snapshot.habits.length],
-    ] as const;
-    const grid = createElement("div", "dashflow-vault-stats");
+    const stats: Array<[string, number]> = [
+      ["NOTES", snapshot.notes],
+      ["PENDING", snapshot.tasks.filter((task) => !task.completed).length],
+      ["PROJECTS", snapshot.projects.filter((project) => project.status === "active").length],
+      ["DONE", snapshot.tasks.filter((task) => task.completed).length],
+    ];
+
+    const grid = createElement("div", "dashflow-stats-grid");
     for (const [label, value] of stats) {
-      const item = createElement("div");
-      item.appendChild(createElement("strong", "", String(value)));
-      item.appendChild(createElement("span", "", label));
+      const item = createElement("div", "dashflow-stat");
+      item.append(createElement("strong", "", String(value)), createElement("span", "", label));
       grid.appendChild(item);
     }
     body.appendChild(grid);
@@ -436,30 +438,22 @@ export class DashboardRenderer {
 
   private renderEditBar(dashboard: DashboardDefinition): HTMLElement {
     const bar = createElement("div", "dashflow-edit-bar");
-
     const select = createElement("select");
-    const definitions = this.plugin.widgetRegistry.list();
-    for (const definition of definitions) {
+    for (const definition of this.plugin.widgetRegistry.list()) {
       const option = createElement("option", "", definition.name);
       option.value = definition.type;
       select.appendChild(option);
     }
 
-    const add = createElement("button", "", "添加 Widget");
+    const add = createElement("button", "", "＋ 添加卡片");
+    add.type = "button";
     add.addEventListener("click", async () => {
-      const definition = this.plugin.widgetRegistry.get(select.value);
-      if (!definition) return;
-      const layout = this.plugin.dashboardManager.nextFreeLayout(dashboard, definition.defaultSize);
-      await this.plugin.dashboardManager.addWidget(dashboard.id, {
-        id: this.plugin.dashboardManager.createWidgetId(definition.type),
-        type: definition.type,
-        config: definition.defaultConfig(),
-        layout,
-      });
+      await this.plugin.dashboardManager.addWidget(dashboard.id, select.value);
       this.render();
     });
 
     const reset = createElement("button", "", "重置布局");
+    reset.type = "button";
     reset.addEventListener("click", async () => {
       await this.plugin.dashboardManager.resetLayout(dashboard.id);
       this.render();
