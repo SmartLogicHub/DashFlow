@@ -1,4 +1,4 @@
-import { Modal, Setting } from "obsidian";
+import { Modal, Notice, Setting } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { Habit, HabitEditInput, HabitFrequency, HabitKind, HabitStatus } from "../models";
 import { localDate } from "../utils/date";
@@ -210,7 +210,10 @@ export class HabitEditorModal extends Modal {
   }
 
   private async save(draft: HabitEditInput): Promise<void> {
-    if (!draft.name.trim()) return;
+    if (!draft.name.trim()) {
+      new Notice("名称不能为空。");
+      return;
+    }
     if (draft.kind === "daily-progress") draft.frequency = "daily";
     else draft.linkedProjectId = undefined;
 

@@ -1,4 +1,4 @@
-import { Modal, Setting } from "obsidian";
+import { Modal, Notice, Setting } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { Task, TaskEditInput, TaskPriority } from "../models";
 import { formatTaskBody } from "../parsers/taskParser";
@@ -145,7 +145,10 @@ export class TaskEditorModal extends Modal {
   }
 
   private async save(draft: TaskEditInput): Promise<void> {
-    if (!draft.text.trim()) return;
+    if (!draft.text.trim()) {
+      new Notice("任务内容不能为空。");
+      return;
+    }
 
     if (this.task) {
       const ok = await this.plugin.taskService.update(this.task, draft);

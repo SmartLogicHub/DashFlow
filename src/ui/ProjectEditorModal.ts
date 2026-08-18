@@ -1,4 +1,4 @@
-import { Modal, Setting } from "obsidian";
+import { Modal, Notice, Setting } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { Project, ProjectEditInput, ProjectProgressMode, ProjectStatus } from "../models";
 
@@ -144,7 +144,10 @@ export class ProjectEditorModal extends Modal {
   }
 
   private async save(draft: ProjectEditInput): Promise<void> {
-    if (!draft.name.trim()) return;
+    if (!draft.name.trim()) {
+      new Notice("项目名称不能为空。");
+      return;
+    }
     if (this.project) {
       if (await this.plugin.projectService.update(this.project, draft)) this.close();
       return;
