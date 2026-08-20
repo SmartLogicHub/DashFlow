@@ -1,5 +1,6 @@
 import { requestUrl } from "obsidian";
 import type DashFlowPlugin from "../main";
+import { resolveAiApiKey } from "../core/aiCredentialMigration";
 import { withTimeout } from "../utils/requestTimeout";
 
 export type AIMessage = { role: "system" | "user" | "assistant"; content: string };
@@ -44,7 +45,7 @@ export class AIClient {
     const baseUrl = trimBaseUrl(settings.aiBaseUrl);
     if (!settings.aiEnabled || !baseUrl || !settings.aiModel.trim()) return false;
     if (isLocalEndpoint(baseUrl)) return true;
-    return Boolean(settings.aiSecretId.trim());
+    return Boolean(resolveAiApiKey(settings.aiSecretId, this.plugin.app.secretStorage));
   }
 
   async testConnection(): Promise<string> {
@@ -62,7 +63,7 @@ export class AIClient {
     const model = settings.aiModel.trim();
     if (!baseUrl || !model) throw new Error("AI Base URL 或模型尚未配置。");
 
-    const apiKey = settings.aiSecretId.trim();
+    const apiKey = resolveAiApiKey(settings.aiSecretId, this.plugin.app.secretStorage);
     if (!apiKey && !isLocalEndpoint(baseUrl)) {
       throw new Error("没有可用的 API Key。请先在 DashFlow 设置中填写 API Key；localhost / 127.0.0.1 本地端点可不填写 Key。");
     }

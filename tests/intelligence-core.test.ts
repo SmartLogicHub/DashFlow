@@ -24,12 +24,13 @@ test("Intelligence Core centralizes OpenAI-compatible transport", () => {
   assert.ok(main.includes("this.aiClient = new AIClient(this)"));
 });
 
-test("AI API key is intentionally stored directly in plugin settings data", () => {
-  assert.ok(aiClient.includes("const apiKey = settings.aiSecretId.trim()"));
-  assert.equal(aiClient.includes("secretStorage.getSecret"), false);
+test("AI API key is resolved through SecretStorage instead of plugin data", () => {
+  assert.ok(aiClient.includes("resolveAiApiKey"));
+  assert.ok(aiClient.includes("this.plugin.app.secretStorage"));
+  assert.equal(aiClient.includes("const apiKey = settings.aiSecretId.trim()"), false);
   assert.ok(settings.includes('.setName("API Key")'));
-  assert.ok(settings.includes("保存在 data.json 中"));
-  assert.ok(settings.includes("this.dashFlow.data.settings.aiSecretId = value.trim()"));
+  assert.ok(settings.includes("new SecretComponent(this.app, el)"));
+  assert.ok(settings.includes("data.json 只保存密钥名称"));
 });
 
 test("Morning Briefing requires separate opt-in before reading note bodies", () => {

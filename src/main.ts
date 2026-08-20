@@ -1,5 +1,6 @@
 import { Notice, Plugin } from "obsidian";
 import { DEFAULT_SETTINGS, SCHEMA_VERSION, VIEW_TYPE } from "./constants";
+import { migrateAiCredential, type AiCredentialMigrationStatus } from "./core/aiCredentialMigration";
 import { DashboardManager } from "./dashboard/DashboardManager";
 import { DashboardView } from "./dashboard/DashboardView";
 import { createDefaultDashboard } from "./dashboard/defaultDashboard";
@@ -66,6 +67,7 @@ import { WidgetRegistry } from "./widgets/WidgetRegistry";
 
 export default class DashFlowPlugin extends Plugin {
   data!: DashFlowData;
+  aiCredentialStatus: AiCredentialMigrationStatus = "unconfigured";
   widgetRegistry!: WidgetRegistry;
   dashboardManager!: DashboardManager;
   dashboardRender!: DashboardRenderService;
@@ -342,6 +344,9 @@ export default class DashFlowPlugin extends Plugin {
     } else {
       this.data.dashboards = this.data.dashboards.map((dashboard) => upgradeLegacyHomeLayout(dashboard, this.widgetRegistry));
     }
+    const credential = migrateAiCredential(this.data.settings.aiSecretId, this.app.secretStorage);
+    this.data.settings.aiSecretId = credential.aiSecretId;
+    this.aiCredentialStatus = credential.status;
     await this.savePluginData();
   }
 
