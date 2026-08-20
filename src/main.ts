@@ -1,12 +1,12 @@
 import { Notice, Plugin } from "obsidian";
-import { DEFAULT_SETTINGS, SCHEMA_VERSION, VIEW_TYPE } from "./constants";
+import { DEFAULT_SETTINGS, VIEW_TYPE } from "./constants";
 import { migrateAiCredential, type AiCredentialMigrationStatus } from "./core/aiCredentialMigration";
+import { migratePluginData } from "./core/pluginDataMigration";
 import { DashboardManager } from "./dashboard/DashboardManager";
 import { DashboardView } from "./dashboard/DashboardView";
 import { createDefaultDashboard } from "./dashboard/defaultDashboard";
 import { upgradeLegacyHomeLayout } from "./dashboard/defaultLayoutMigration";
-import { normalizeFocusState } from "./focus/focusTimer";
-import type { ActivityStore, DashFlowData } from "./models";
+import type { DashFlowData } from "./models";
 import type { ProductSection } from "./product/navigation";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
@@ -68,6 +68,7 @@ import { WidgetRegistry } from "./widgets/WidgetRegistry";
 export default class DashFlowPlugin extends Plugin {
   data!: DashFlowData;
   aiCredentialStatus: AiCredentialMigrationStatus = "unconfigured";
+  dataRecoveryRequired = false;
   widgetRegistry!: WidgetRegistry;
   dashboardManager!: DashboardManager;
   dashboardRender!: DashboardRenderService;
@@ -323,31 +324,53 @@ export default class DashFlowPlugin extends Plugin {
   }
 
   private async loadPluginData(): Promise<void> {
-    const loaded = await this.loadData() as (Partial<DashFlowData> & { activity?: Partial<ActivityStore> }) | null;
-    this.data = {
-      schemaVersion: SCHEMA_VERSION,
-      settings: { ...DEFAULT_SETTINGS, ...(loaded?.settings ?? {}) },
-      dashboards: Array.isArray(loaded?.dashboards) ? loaded.dashboards : [],
-      activeDashboardId: loaded?.activeDashboardId ?? "home",
-      customTemplates: Array.isArray(loaded?.customTemplates) ? loaded.customTemplates : [],
-      activity: {
-        startedAt: loaded?.activity?.startedAt ?? localDate(),
-        days: loaded?.activity?.days ?? {},
-      },
-      aiCache: loaded?.aiCache ?? {},
-      focus: normalizeFocusState(loaded?.focus),
-    };
+    const loaded = await this.loadData() as unknown;
+    const migration = migratePluginData(loaded, {
+      defaults: DEFAULT_SETTINGS,
+      fallbackDashboard: createDefaultDashboard(this.widgetRegistry),
+      today: localDate(),
+    });
+    this.data = migration.data;
+    this.dataRecoveryRequired = migration.recoveryRequired;
 
-    if (this.data.dashboards.length === 0) {
-      this.data.dashboards = [createDefaultDashboard(this.widgetRegistry)];
-      this.data.activeDashboardId = "home";
-    } else {
+    if (!migration.recoveryRequired) {
       this.data.dashboards = this.data.dashboards.map((dashboard) => upgradeLegacyHomeLayout(dashboard, this.widgetRegistry));
     }
     const credential = migrateAiCredential(this.data.settings.aiSecretId, this.app.secretStorage);
     this.data.settings.aiSecretId = credential.aiSecretId;
     this.aiCredentialStatus = credential.status;
+    if (!migration.recoveryRequired && (migration.shouldPersist || credential.shouldPersist)) {
+      await this.savePluginData();
+    }
+    if (migration.recoveryRequired) {
+      new Notice("DashFlow 检测到无法安全读取的工作台数据，已进入恢复模式；原数据尚未覆盖。请前往设置 → 高级处理。");
+    }
+  }
+
+  getRecoveryBackupJson(): string | null {
+    const backup = this.data.recoveryBackup;
+    return backup ? JSON.stringify(backup.data, null, 2) : null;
+  }
+
+  async restoreRecoveryBackup(): Promise<boolean> {
+    const backup = this.data.recoveryBackup;
+    if (!backup) return false;
+    await this.saveData(backup.data);
+    new Notice("DashFlow 已写回恢复快照；请重新加载插件以完成恢复。");
+    return true;
+  }
+
+  async resetPluginDataForRecovery(): Promise<void> {
+    const migration = migratePluginData(null, {
+      defaults: DEFAULT_SETTINGS,
+      fallbackDashboard: createDefaultDashboard(this.widgetRegistry),
+      today: localDate(),
+    });
+    this.data = migration.data;
+    this.dataRecoveryRequired = false;
     await this.savePluginData();
+    this.refreshDashboardViews();
+    new Notice("DashFlow 配置已重置；Markdown 内容未受影响。");
   }
 
   async savePluginData(): Promise<void> {

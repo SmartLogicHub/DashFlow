@@ -18,7 +18,7 @@ test("Quick Capture defaults remain backward compatible", () => {
   assert.equal(DEFAULT_SETTINGS.contextMorningDashboardId, "home");
   assert.equal(DEFAULT_SETTINGS.contextWorkDashboardId, "");
   assert.equal(DEFAULT_SETTINGS.contextReviewDashboardId, "");
-  assert.equal(SCHEMA_VERSION, 7);
+  assert.equal(SCHEMA_VERSION, 8);
 });
 
 test("Quick Capture can route to Inbox, Daily Note, or ask each time", () => {

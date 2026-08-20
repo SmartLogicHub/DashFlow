@@ -3,6 +3,7 @@ import { DEFAULT_SETTINGS } from "../constants";
 import type DashFlowPlugin from "../main";
 import type { HomeTheme } from "../models";
 import { HeroImagePickerModal } from "../ui/HeroImagePickerModal";
+import { TimedConfirmation } from "../ui/timedConfirmation";
 
 const WEREAD_KEY_URL = "https://weread.qq.com/r/weread-skills";
 
@@ -17,6 +18,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
 
   private saveTimer: number | null = null;
   private reindexTimer: number | null = null;
+  private readonly recoveryConfirmation = new TimedConfirmation(5_000);
 
   private scheduleSave(): void {
     if (this.saveTimer !== null) window.clearTimeout(this.saveTimer);
@@ -387,6 +389,39 @@ export class DashFlowSettingsTab extends PluginSettingTab {
   }
 
   private renderAdvanced(parent: HTMLElement): void {
+    if (this.dashFlow.data.recoveryBackup) {
+      const recovery = this.panel(
+        parent,
+        this.dashFlow.dataRecoveryRequired ? "数据恢复" : "升级恢复快照",
+        this.dashFlow.dataRecoveryRequired
+          ? "DashFlow 保留了原始快照，但不会覆盖损坏的数据；先导出或恢复，再决定是否重置。"
+          : "最近一次升级前的配置快照会保留一份，凭据字段已做安全脱敏。",
+      );
+      const actions = recovery.createDiv("dashflow-settings-recovery-actions");
+      const exportButton = actions.createEl("button", { text: "导出恢复快照" });
+      exportButton.type = "button";
+      exportButton.addEventListener("click", () => this.exportRecoveryBackup());
+      const restoreButton = actions.createEl("button", { text: "写回恢复快照" });
+      restoreButton.type = "button";
+      restoreButton.addEventListener("click", async () => {
+        await this.dashFlow.restoreRecoveryBackup();
+      });
+      const resetButton = actions.createEl("button", { text: "重置 DashFlow 配置" });
+      resetButton.type = "button";
+      resetButton.addClass("mod-warning");
+      resetButton.addEventListener("click", async () => {
+        if (!this.recoveryConfirmation.request("plugin-data-reset")) {
+          resetButton.textContent = "再次点击确认重置";
+          window.setTimeout(() => {
+            if (resetButton.isConnected) resetButton.textContent = "重置 DashFlow 配置";
+          }, 5_000);
+          return;
+        }
+        await this.dashFlow.resetPluginDataForRecovery();
+        this.display();
+      });
+    }
+
     const advanced = parent.createEl("details", { cls: "dashflow-settings-advanced", attr: { open: "open" } });
     advanced.createEl("summary", { text: "Markdown 数据格式" });
     const grid = advanced.createDiv("dashflow-settings-guide-grid");
@@ -404,6 +439,20 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       text: "---\ntype: habit\nhabit_id: workout\nname: 每天运动\nstatus: active\nfrequency: daily\ntarget_days: 30\nhabit_log:\n  - 2026-08-15\n---",
     });
     habitCard.createEl("p", { text: "习惯定义与打卡日期都保存在 Markdown；Activity 只是派生统计。" });
+  }
+
+  private exportRecoveryBackup(): void {
+    const json = this.dashFlow.getRecoveryBackupJson();
+    if (!json) {
+      new Notice("当前没有可导出的恢复快照。");
+      return;
+    }
+    const url = URL.createObjectURL(new Blob([json], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "dashflow-recovery-backup.json";
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 0);
   }
 
   private panel(parent: HTMLElement, title: string, description: string): HTMLElement {

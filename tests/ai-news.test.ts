@@ -35,7 +35,7 @@ test("AI News cache avoids repeated fetches and repeated ranking", () => {
   assert.ok(service.includes("cache.candidatesHash === candidatesHash"));
   assert.ok(service.includes("cache.fetchedAt = now"));
   assert.ok(service.includes("reusedRanking"));
-  assert.equal(SCHEMA_VERSION, 7);
+  assert.equal(SCHEMA_VERSION, 8);
 });
 
 test("AI News treats feed text as untrusted and blocks automatic private-network requests", () => {

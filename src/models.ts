@@ -307,7 +307,7 @@ export interface DashFlowSettings {
 }
 
 export interface DashFlowData {
-  schemaVersion: 7;
+  schemaVersion: 8;
   settings: DashFlowSettings;
   dashboards: DashboardDefinition[];
   activeDashboardId: string;
@@ -315,6 +315,15 @@ export interface DashFlowData {
   activity: ActivityStore;
   aiCache: AICache;
   focus: FocusTimerState;
+  onboardingCompleted: boolean;
+  recoveryBackup?: PluginDataRecoveryBackup;
+}
+
+export interface PluginDataRecoveryBackup {
+  createdAt: number;
+  sourceSchemaVersion: number | null;
+  data: Record<string, unknown>;
+  truncated?: boolean;
 }
 
 export interface VaultSnapshot {

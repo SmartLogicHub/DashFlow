@@ -36,7 +36,7 @@ test("AI API key is resolved through SecretStorage instead of plugin data", () =
 test("Morning Briefing requires separate opt-in before reading note bodies", () => {
   assert.equal(DEFAULT_SETTINGS.aiMorningBriefingEnabled, false);
   assert.equal(DEFAULT_SETTINGS.dailyNoteDateFormat, "YYYY-MM-DD");
-  assert.equal(SCHEMA_VERSION, 7);
+  assert.equal(SCHEMA_VERSION, 8);
   assert.ok(morning.includes("aiMorningBriefingEnabled"));
   assert.ok(morning.includes("this.plugin.dailyNotes.read"));
   assert.ok(dailyNotes.includes("this.app.vault.read(file)"));
@@ -50,7 +50,7 @@ test("Morning Briefing caches by day, source path and source hash", () => {
   assert.ok(morning.includes("cached.date === date"));
   assert.ok(morning.includes("cached.sourcePath === sourcePath"));
   assert.ok(morning.includes("cached.sourceHash === sourceHash"));
-  assert.ok(main.includes("aiCache: loaded?.aiCache ?? {}"));
+  assert.ok(main.includes("const migration = migratePluginData"));
   assert.ok(morning.includes("this.plugin.data.aiCache.morningBriefing = entry"));
 });
 

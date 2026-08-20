@@ -26,6 +26,8 @@ import "./personal-home.test";
 import "./weread.test";
 import "./intelligence-core.test";
 import "./ai-credential-migration.test";
+import "./plugin-data-migration.test";
+import "./destructive-actions.test";
 import "./workflow-context.test";
 import "./ai-news.test";
 import "./data-filter.test";
