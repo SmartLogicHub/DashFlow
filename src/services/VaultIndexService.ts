@@ -62,6 +62,10 @@ export class VaultIndexService {
   };
   private initialized = false;
   private timer: number | null = null;
+  private resolveReady!: () => void;
+  private readonly readyPromise = new Promise<void>((resolve) => {
+    this.resolveReady = resolve;
+  });
 
   constructor(
     private readonly app: App,
@@ -82,6 +86,11 @@ export class VaultIndexService {
     await this.indexFiles(this.app.vault.getMarkdownFiles());
     this.initialized = true;
     this.rebuildSnapshot();
+    this.resolveReady();
+  }
+
+  whenReady(): Promise<void> {
+    return this.readyPromise;
   }
 
   private registerEvents(): void {

@@ -119,9 +119,39 @@ export const SETTINGS_STYLES = `
 }
 .dashflow-settings-code-card p { margin: 9px 0 0; color: var(--text-muted); font-size: 11.5px; line-height: 1.5; }
 
+.dashflow-onboarding-modal { width: min(680px, calc(100vw - 28px)); }
+.dashflow-onboarding-modal .modal-content { padding: 24px; }
+.dashflow-onboarding-eyebrow { color: var(--text-faint); font-size: 10px; font-weight: 700; letter-spacing: 0.14em; }
+.dashflow-onboarding-modal h2 { margin: 7px 0 8px; color: var(--text-normal); font-size: 25px; letter-spacing: -0.03em; }
+.dashflow-onboarding-lead { margin: 0; max-width: 580px; color: var(--text-muted); font-size: 13px; line-height: 1.65; }
+.dashflow-onboarding-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 20px; }
+.dashflow-onboarding-count { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; border: 1px solid var(--background-modifier-border); border-radius: 9px; background: color-mix(in srgb, var(--background-secondary) 48%, var(--background-primary)); }
+.dashflow-onboarding-count strong { color: var(--text-normal); font-size: 17px; font-variant-numeric: tabular-nums; }
+.dashflow-onboarding-count span { color: var(--text-muted); font-size: 11px; }
+.dashflow-onboarding-choices, .dashflow-onboarding-paths { margin-top: 22px; }
+.dashflow-onboarding-choices h3, .dashflow-onboarding-paths h3 { margin: 0 0 9px; color: var(--text-normal); font-size: 12px; font-weight: 650; }
+.dashflow-onboarding-choice { display: flex; width: 100%; align-items: center; gap: 11px; margin: 7px 0; padding: 11px 13px; border: 1px solid var(--background-modifier-border); border-radius: 9px; color: var(--text-normal); background: var(--background-primary); text-align: left; cursor: pointer; transition: border-color 140ms ease, background 140ms ease; }
+.dashflow-onboarding-choice:hover, .dashflow-onboarding-choice[aria-pressed="true"] { border-color: var(--interactive-accent); background: color-mix(in srgb, var(--interactive-accent) 7%, var(--background-primary)); }
+.dashflow-onboarding-choice-icon { display: grid; width: 28px; height: 28px; place-items: center; border-radius: 7px; color: var(--interactive-accent); background: color-mix(in srgb, var(--interactive-accent) 13%, transparent); font-size: 16px; }
+.dashflow-onboarding-choice-copy { display: flex; min-width: 0; flex-direction: column; gap: 2px; }
+.dashflow-onboarding-choice-copy strong { font-size: 12px; }
+.dashflow-onboarding-choice-copy span { color: var(--text-muted); font-size: 11.5px; line-height: 1.4; }
+.dashflow-onboarding-path { display: grid; grid-template-columns: 96px minmax(0, 1fr); align-items: center; gap: 10px; margin: 8px 0; }
+.dashflow-onboarding-path label { color: var(--text-muted); font-size: 12px; }
+.dashflow-onboarding-path input { width: 100%; min-width: 0; }
+.dashflow-onboarding-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; }
+.dashflow-onboarding-actions button { min-height: 32px; padding: 0 14px; border-radius: 7px; cursor: pointer; }
+.dashflow-onboarding-actions .mod-ghost { border: 1px solid var(--background-modifier-border); color: var(--text-muted); background: transparent; }
+.dashflow-onboarding-actions .mod-cta { border: 1px solid var(--interactive-accent); color: var(--text-on-accent); background: var(--interactive-accent); }
+
 @media (max-width: 760px) {
   .dashflow-settings-guide-grid { grid-template-columns: 1fr; }
   .dashflow-settings-panel .setting-item { align-items: flex-start; gap: 10px; }
   .dashflow-settings-panel input[type="text"] { min-width: 150px; width: 100%; }
+}
+
+@media (max-width: 620px) {
+  .dashflow-onboarding-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashflow-onboarding-path { grid-template-columns: 1fr; gap: 4px; }
 }
 `;

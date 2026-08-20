@@ -8,6 +8,7 @@ import { createDefaultDashboard } from "./dashboard/defaultDashboard";
 import { upgradeLegacyHomeLayout } from "./dashboard/defaultLayoutMigration";
 import type { DashFlowData } from "./models";
 import type { ProductSection } from "./product/navigation";
+import { shouldShowOnboarding } from "./product/onboarding";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
 import { AIClient } from "./services/AIClient";
@@ -50,6 +51,7 @@ import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
 import { AIPlanModal } from "./ui/AIPlanModal";
 import { GlobalSearchModal } from "./ui/GlobalSearchModal";
 import { MorningBriefingSettingsModal } from "./ui/MorningBriefingSettingsModal";
+import { OnboardingModal } from "./ui/OnboardingModal";
 import { ProjectEditorModal } from "./ui/ProjectEditorModal";
 import { QuickAddModal } from "./ui/QuickAddModal";
 import { TaskEditorModal } from "./ui/TaskEditorModal";
@@ -69,6 +71,8 @@ export default class DashFlowPlugin extends Plugin {
   data!: DashFlowData;
   aiCredentialStatus: AiCredentialMigrationStatus = "unconfigured";
   dataRecoveryRequired = false;
+  private onboardingPending = false;
+  private onboardingOpen = false;
   widgetRegistry!: WidgetRegistry;
   dashboardManager!: DashboardManager;
   dashboardRender!: DashboardRenderService;
@@ -256,6 +260,7 @@ export default class DashFlowPlugin extends Plugin {
     this.activityService.start();
     this.focusService.start();
     this.vaultIndex.initializeWhenReady();
+    void this.openOnboardingWhenReady();
     this.taskInteractions.start();
     this.activityWidgets.start();
     this.habitWidgets.start();
@@ -303,6 +308,10 @@ export default class DashFlowPlugin extends Plugin {
   }
 
   async activateDashboard(): Promise<void> {
+    if (this.onboardingPending && !this.data.onboardingCompleted) {
+      void this.openOnboardingWhenReady();
+      return;
+    }
     let leaf = this.app.workspace.getLeavesOfType(VIEW_TYPE)[0];
     if (!leaf) {
       leaf = this.app.workspace.getLeaf("tab");
@@ -314,6 +323,25 @@ export default class DashFlowPlugin extends Plugin {
   async activateSection(section: ProductSection): Promise<void> {
     await this.activateDashboard();
     this.productExperience.openSection(section);
+  }
+
+  openOnboarding(manual = true): void {
+    if (this.onboardingOpen) return;
+    this.onboardingOpen = true;
+    new OnboardingModal(this, () => {
+      this.onboardingOpen = false;
+      if (!manual) this.onboardingPending = false;
+      this.refreshDashboardViews();
+      if (!manual) void this.activateDashboard();
+    }).open();
+  }
+
+  private async openOnboardingWhenReady(): Promise<void> {
+    if (!shouldShowOnboarding(this.onboardingPending, this.data.onboardingCompleted, this.dataRecoveryRequired)) return;
+    await this.vaultIndex.whenReady();
+    if (shouldShowOnboarding(this.onboardingPending, this.data.onboardingCompleted, this.dataRecoveryRequired)) {
+      this.openOnboarding(false);
+    }
   }
 
   refreshDashboardViews(): void {
@@ -332,6 +360,7 @@ export default class DashFlowPlugin extends Plugin {
     });
     this.data = migration.data;
     this.dataRecoveryRequired = migration.recoveryRequired;
+    this.onboardingPending = migration.firstRun;
 
     if (!migration.recoveryRequired) {
       this.data.dashboards = this.data.dashboards.map((dashboard) => upgradeLegacyHomeLayout(dashboard, this.widgetRegistry));

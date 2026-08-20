@@ -389,6 +389,14 @@ export class DashFlowSettingsTab extends PluginSettingTab {
   }
 
   private renderAdvanced(parent: HTMLElement): void {
+    const onboarding = this.panel(parent, "首次引导", "重新查看起始布局和工作流路径；已有自定义工作台不会被删除。");
+    new Setting(onboarding)
+      .setName("重新打开首次引导")
+      .setDesc("用于重新确认收集箱、项目和习惯文件夹；手动打开不会覆盖已有 Dashboard。")
+      .addButton((button) => button
+        .setButtonText("打开引导")
+        .onClick(() => this.dashFlow.openOnboarding(true)));
+
     if (this.dashFlow.data.recoveryBackup) {
       const recovery = this.panel(
         parent,
