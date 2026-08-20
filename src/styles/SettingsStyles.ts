@@ -1,5 +1,5 @@
 export const SETTINGS_STYLES = `
-/* v0.5.6 — Settings as a calm, product-grade surface.
+/* v0.6.0 — Settings as a calm, product-grade surface.
  * Replaces the orphaned Aurora settings layer. Neutral surfaces + a single
  * accent, hairline separators, and tabular figures — no hard-coded palette. */
 .dashflow-settings-page {

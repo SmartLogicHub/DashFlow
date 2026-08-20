@@ -2,7 +2,7 @@ import type { DashFlowSettings } from "./models";
 
 export const VIEW_TYPE = "dashflow-dashboard";
 export const SCHEMA_VERSION = 8 as const;
-export const PLUGIN_VERSION = "0.5.6";
+export const PLUGIN_VERSION = "0.6.0";
 
 export const DEFAULT_SETTINGS: DashFlowSettings = {
   inboxPath: "DashFlow/Inbox.md",

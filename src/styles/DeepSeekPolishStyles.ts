@@ -1,5 +1,5 @@
 export const DEEPSEEK_POLISH_STYLES = `
-/* v0.5.6 — selectively absorbed DeepSeek visual polish.
+/* v0.6.0 — selectively absorbed DeepSeek visual polish.
  * Keep one motion owner and one Hero owner; this layer only refines surfaces,
  * typography and theme integration. */
 

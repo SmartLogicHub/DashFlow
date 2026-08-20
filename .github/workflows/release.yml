@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+      - run: npm ci
       - run: npm test
       - run: npm run build
       - run: node --check main.js
@@ -36,7 +36,7 @@ jobs:
             exit 0
           fi
           gh release create "$VERSION" \
-            main.js manifest.json styles.css \
+            main.js manifest.json styles.css assets/heroes/*.webp \
             --target "$GITHUB_SHA" \
             --title "DashFlow v$VERSION" \
             --generate-notes

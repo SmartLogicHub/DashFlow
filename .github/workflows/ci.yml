@@ -13,7 +13,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - run: npm install
+      - run: npm ci
       - run: npm test
       - run: npm run build
       - run: node --check main.js
@@ -24,12 +24,14 @@ jobs:
             main.js
             manifest.json
             styles.css
+            assets/heroes/*.webp
       - name: Package full development source
         run: |
-          zip -r DashFlow-v0.5.6-full-source.zip \
+          zip -r DashFlow-v0.6.0-full-source.zip \
             .github \
             .gitignore \
             ARCHITECTURE.md \
+            assets \
             README.md \
             esbuild.config.mjs \
             examples \
@@ -43,4 +45,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: dashflow-source
-          path: DashFlow-v0.5.6-full-source.zip
+          path: DashFlow-v0.6.0-full-source.zip

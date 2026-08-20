@@ -1,72 +1,49 @@
-# DashFlow v0.1 Architecture
+# DashFlow 0.6 Architecture
 
-## Core rule
+## Core boundary
 
-DashFlow separates user content from UI configuration.
+DashFlow separates Vault content, derived indexes, private plugin configuration, and presentation. Markdown remains the canonical business store.
 
 ```text
-Markdown / frontmatter
-        │
-        ▼
- VaultIndexService
-        │
-        ▼
- Task / Project domain
-        │
-        ▼
- Services / queries
-        │
-        ▼
- Widget instances
-        │
-        ▼
- Dashboard + Layout
+Vault Markdown / frontmatter
+          │
+          ▼
+    VaultIndexService ──► VaultQueryService
+          │                       │
+          ▼                       ▼
+ Task / Project / Habit services ─► Product surfaces
+          │                       │
+          └──────────────► WidgetRegistry / DashboardManager
+                                      │
+                                      ▼
+                         DashboardRenderService + DesignSystemService
 ```
 
-## Source of truth
+## Product surfaces
 
-### Vault content
+- **Personal Home** is a calm, content-led overview with Today focus, Activity, recent notes, WeRead highlights and navigation rows.
+- **Work** is the extension canvas. Every registered Widget is available unless its instance is explicitly hidden; focused sections apply purpose-specific visibility policy.
+- **Inbox, Today, Projects, Calendar, Habits and Review** are workflow surfaces backed by the same index and services, not duplicated stores.
+- **Settings** owns appearance, workflow, optional integrations and recovery. The first-run modal chooses a starting template without taking ownership of existing Markdown.
 
-- Task: Markdown checkbox
-- Project: Markdown note + frontmatter
-- Project ↔ Task relation: `#project/<project_id>`
+## Data and migration
 
-### Plugin data (`data.json`)
+`DashFlowData` is schema-backed private UI state. Schema 8 includes onboarding completion and a bounded recovery snapshot. `migratePluginData` validates dashboards before persistence; malformed or future data is used only in memory and requires explicit recovery action. AI credentials are migrated separately by `migrateAiCredential`: plugin data stores only a SecretStorage identifier.
 
-- Dashboard definitions
-- Widget instances
-- Widget config
-- Widget position / size
-- Plugin settings
+`VaultIndexService` builds normalized notes, tasks, projects and habits from Markdown and refreshes incrementally through Vault and MetadataCache events. `VaultQueryService` derives search, filters and calendar ranges by index revision, keeping caches in memory.
 
-Uninstalling DashFlow does not remove Task or Project data.
+## Rendering and interaction
 
-## Model boundaries
+`DashboardRenderService` owns root-scoped render lifecycle, request coalescing and render profiling. `ProductExperienceService` owns section navigation, vocabulary and Hero content. `PresentationRuntimeService` injects bundled Hero resource paths and resolves optional Vault-image overrides through `Vault.getResourcePath`; it does not fetch third-party scenes. `DesignSystemService` composes the style layers and reduced-motion rules.
 
-### Task
+Destructive interactions are explicit: Dashboard and Widget removal require timed confirmation, Opportunity removal offers an eight-second Undo, and recovery reset requires a second click. No action silently rewrites Markdown or malformed plugin data.
 
-A normalized view of a Markdown checkbox. A Task keeps its source path, line and raw text so v0.1 can write completion state back to the source note.
+## Network and security
 
-### Project
+The default path is offline: indexing, rendering, local Hero assets and Markdown writes do not require network access. AI Planning, AI News, WeRead and click-to-load Magic Embed are opt-in boundaries with bounded requests and provider-specific validation. SecretStorage values are resolved only at request time and are never written into `data.json` or recovery exports.
 
-A normalized view of a note whose frontmatter `type` matches the configured project type. It does not own a duplicate Task array; ProjectService resolves tasks by `projectId`.
+## Build and release
 
-### WidgetDefinition
+The source is bundled with esbuild into `main.js`; `styles.css`, `manifest.json` and `assets/heroes/*.webp` form the install artifact. `package-lock.json` and `npm ci` make CI reproducible. Tests cover data boundaries, visibility, migration, destructive actions, onboarding, offline assets and release metadata.
 
-Describes a Widget type: name, icon, default size, min size and default config. Definitions live in code and are registered in WidgetRegistry.
-
-### WidgetInstance
-
-A concrete card placed on a Dashboard. Multiple instances can share the same WidgetDefinition but have different config and layout.
-
-### Dashboard
-
-A container for WidgetInstance objects and layout settings. The data model supports multiple Dashboards from v0.1 even though the v0.1 UI exposes only the Home dashboard.
-
-## Indexing
-
-Widgets never scan the Vault directly. `VaultIndexService` reads Markdown files once, builds normalized Task and Project data, then incrementally refreshes changed files using Vault / MetadataCache events.
-
-## Presentation layer
-
-The v0.1 installable build uses dependency-free DOM rendering so it can be copied directly into a test Vault without a package install/build step. Presentation is isolated from the domain, registry, services and persistence model, so a future React renderer can replace it without changing the four core data contracts.
+The repository owner must make the final license and copyright decision before publication. This document intentionally does not copy a historical repository license without authorization.

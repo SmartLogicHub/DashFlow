@@ -1,5 +1,5 @@
 export const PRODUCT_HIERARCHY_RESET_STYLES = `
-/* v0.5.6 product hierarchy reset.
+/* v0.6.0 product hierarchy reset.
  * Keep one primary navigation while preserving the full photographic identity
  * across Home and working sections. Working pages are differentiated by their
  * content and labels, not by crushing the Hero into a shallow strip.
