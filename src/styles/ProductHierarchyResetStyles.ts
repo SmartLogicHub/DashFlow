@@ -52,18 +52,8 @@ export const PRODUCT_HIERARCHY_RESET_STYLES = `
   text-shadow: 0 2px 14px rgba(0,0,0,.38) !important;
 }
 
-/* Do not request resized/quality-reduced Unsplash variants for built-in scenes.
- * User-selected local Vault images already resolve directly to their original
- * Vault resource and remain untouched. */
-.dashflow-view-container[data-dashflow-theme="alpine"] {
-  --df-home-scene: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb");
-}
-.dashflow-view-container[data-dashflow-theme="paper"] {
-  --df-home-scene: url("https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9");
-}
-.dashflow-view-container[data-dashflow-theme="midnight"] {
-  --df-home-scene: url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23");
-}
+/* Built-in scenes are bundled with the plugin and injected by the presentation
+ * runtime. User-selected local Vault images still override them directly. */
 
 /* There must be one visible navigation hierarchy. Context presets remain
  * configured in workflow settings, but the duplicated Morning/Work/Review bar

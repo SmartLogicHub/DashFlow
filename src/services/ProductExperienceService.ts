@@ -114,6 +114,7 @@ export class ProductExperienceService {
     if (!view) return;
     view.dataset.dashflowTheme = this.plugin.data.settings.homeTheme;
     view.classList.toggle("dashflow-personal-home-active", home);
+    this.plugin.presentationRuntime.refreshAmbientImages();
   }
 
   private decorateHero(hero: HTMLElement, personalHome: boolean): void {

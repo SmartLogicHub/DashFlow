@@ -18,7 +18,8 @@ test("primary working sections keep full photographic heroes instead of compress
 });
 
 test("built-in hero scenes no longer request quality-reduced transformed URLs", () => {
-  assert.ok(hierarchy.includes("photo-1506744038136-46273834b3fb\")"));
+  assert.ok(hierarchy.includes("bundled with the plugin"));
+  assert.equal(hierarchy.includes("images.unsplash.com"), false);
   assert.equal(hierarchy.includes("q=82"), false);
   assert.equal(hierarchy.includes("w=2400"), false);
 });

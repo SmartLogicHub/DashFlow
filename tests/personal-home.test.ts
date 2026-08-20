@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { DEFAULT_SETTINGS, PLUGIN_VERSION, SCHEMA_VERSION } from "../src/constants";
 
 const home = readFileSync("src/services/PersonalHomeService.ts", "utf8");
@@ -9,6 +9,7 @@ const designSystem = readFileSync("src/services/DesignSystemService.ts", "utf8")
 const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const imagePicker = readFileSync("src/ui/HeroImagePickerModal.ts", "utf8");
 const settings = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
+const heroScenes = readFileSync("src/product/heroScenes.ts", "utf8");
 
 test("v0.5.6 keeps schema-backed preferences without changing Markdown truth", () => {
   assert.equal(PLUGIN_VERSION, "0.5.6");
@@ -30,7 +31,13 @@ test("Hero ships curated low-saturation scenes while preserving local Vault over
   assert.ok(settings.includes("选择图片"));
   assert.ok(homeDesign.includes("--df-home-image"));
   assert.ok(homeDesign.includes("--df-home-scene"));
-  assert.ok(homeDesign.includes("photo-1486870591958-9b9d0d1dda99") || homeDesign.includes("unsplash.com"));
+  assert.equal(homeDesign.includes("unsplash.com"), false);
+  assert.ok(heroScenes.includes("alpine-lake.png"));
+  assert.ok(heroScenes.includes("paper-coast.png"));
+  assert.ok(heroScenes.includes("midnight-forest.png"));
+  for (const asset of ["assets/heroes/alpine-lake.png", "assets/heroes/paper-coast.png", "assets/heroes/midnight-forest.png"]) {
+    assert.equal(existsSync(asset), true, asset);
+  }
   for (const extension of ["jpg", "jpeg", "png", "webp", "avif", "gif"]) {
     assert.ok(imagePicker.includes(`"${extension}"`), extension);
   }

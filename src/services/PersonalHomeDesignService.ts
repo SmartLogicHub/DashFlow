@@ -15,7 +15,7 @@ export const PERSONAL_HOME_STYLES = `
   --df-home-accent-soft: rgba(2, 132, 199, 0.08);
   --df-home-reading: #ffffff;
   --df-home-reading-2: #f8fafc;
-  --df-home-scene: url("https://images.unsplash.com/photo-1506744038136-46273834b3fb");
+  --df-home-scene: var(--df-bundled-home-scene, linear-gradient(135deg, #b9c9d9, #eef2f5));
   --df-cmd-bg: #f8fafc;
   --df-cmd-surface: #ffffff;
   --df-cmd-soft: #f1f5f9;
@@ -39,7 +39,7 @@ export const PERSONAL_HOME_STYLES = `
   --df-home-accent-soft: rgba(120, 53, 15, 0.08);
   --df-home-reading: #ffffff;
   --df-home-reading-2: #faf8f5;
-  --df-home-scene: url("https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9");
+  --df-home-scene: var(--df-bundled-home-scene, linear-gradient(135deg, #d9d0c2, #f8f2e9));
   --df-cmd-bg: #faf8f5;
   --df-cmd-surface: #ffffff;
   --df-cmd-soft: #f4efe6;
@@ -63,7 +63,7 @@ export const PERSONAL_HOME_STYLES = `
   --df-home-accent-soft: rgba(56, 189, 248, 0.12);
   --df-home-reading: #0f1720;
   --df-home-reading-2: #15222e;
-  --df-home-scene: url("https://images.unsplash.com/photo-1518709268805-4e9042af9f23");
+  --df-home-scene: var(--df-bundled-home-scene, linear-gradient(135deg, #172b3e, #435b71));
   --df-cmd-bg: #090d12;
   --df-cmd-surface: #0f1720;
   --df-cmd-soft: #15222e;

@@ -1,5 +1,6 @@
 import { normalizePath, TFile, type EventRef } from "obsidian";
 import type DashFlowPlugin from "../main";
+import { BUNDLED_HERO_SCENES, bundledHeroAssetPath, type BundledHeroTheme } from "../product/heroScenes";
 
 /**
  * Small runtime bridge for presentation behavior that cannot be expressed in CSS.
@@ -32,6 +33,10 @@ export class PresentationRuntimeService {
     this.layoutChangeRef = null;
   }
 
+  refreshAmbientImages(): void {
+    this.syncAmbientImage();
+  }
+
   private readonly handleDocumentClick = (event: MouseEvent): void => {
     const target = event.target;
     if (!(target instanceof Element)) return;
@@ -45,8 +50,24 @@ export class PresentationRuntimeService {
     for (const view of document.querySelectorAll<HTMLElement>(".dashflow-view-container")) {
       if (customImage) view.style.setProperty("--df-ambient-image", `url(\"${customImage.replace(/\"/g, "%22")}\")`);
       else view.style.removeProperty("--df-ambient-image");
+      const theme = view.dataset.dashflowTheme ?? this.plugin.data.settings.homeTheme;
+      const bundledImage = this.resolveBundledHeroImage(theme);
+      if (bundledImage) {
+        view.style.setProperty("--df-bundled-home-scene", `url(\"${bundledImage.replace(/\"/g, "%22")}\")`);
+      } else {
+        view.style.removeProperty("--df-bundled-home-scene");
+      }
     }
   };
+
+  private resolveBundledHeroImage(theme: string | undefined): string | null {
+    if (!theme || !(theme in BUNDLED_HERO_SCENES)) return null;
+    const manifestDir = this.plugin.manifest.dir;
+    if (!manifestDir) return null;
+    return this.plugin.app.vault.adapter.getResourcePath(
+      normalizePath(bundledHeroAssetPath(manifestDir, theme as BundledHeroTheme)),
+    );
+  }
 
   private resolveLocalHeroImage(): string | null {
     const path = this.plugin.data.settings.homeHeroImagePath.trim();
