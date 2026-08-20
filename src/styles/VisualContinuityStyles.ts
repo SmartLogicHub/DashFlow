@@ -4,73 +4,8 @@ export const VISUAL_CONTINUITY_STYLES = `
  * frame, normalizes typography, and gives every working surface/modal one
  * consistent hierarchy without touching domain data or write behavior. */
 
-/* ---------------------------------------------------------------------- */
-/* HERO + NAVIGATION                                                      */
-/* ---------------------------------------------------------------------- */
-.dashflow-home-hero-actions > button:nth-child(1),
-.dashflow-home-hero-actions > button:nth-child(2) {
-  font-size: 0!important;
-}
-.dashflow-home-hero-actions > button:nth-child(1)::after,
-.dashflow-home-hero-actions > button:nth-child(2)::after {
-  font-size: 11.5px;
-  font-weight: 650;
-  line-height: 1;
-  white-space: nowrap;
-}
-.dashflow-home-hero-actions > button:nth-child(1)::after { content: "开始今天 →"; }
-.dashflow-home-hero-actions > button:nth-child(2)::after { content: "收集灵感"; }
-
-.dashflow-command-shell:not(.is-personal-home)::before { display: none!important; }
-
-.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
-  display: flex!important;
-  position: relative!important;
-  isolation: isolate;
-  height: 194px!important;
-  min-height: 194px!important;
-  margin: 0 0 12px!important;
-  padding: 24px 30px!important;
-  align-items: flex-end!important;
-  justify-content: flex-start!important;
-  overflow: hidden!important;
-  border: 1px solid var(--df-home-border, var(--df-cmd-border))!important;
-  border-radius: 14px!important;
-  color: #fff!important;
-  background-color: #0f172a!important;
-  background-image:
-    linear-gradient(90deg, rgba(15, 23, 42, .74) 0%, rgba(15, 23, 42, .40) 56%, rgba(15, 23, 42, .08) 100%),
-    var(--df-ambient-image, var(--df-home-scene))!important;
-  background-size: cover!important;
-  background-position: center 50%!important;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, .06)!important;
-}
-.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero > * { display: none!important; }
-.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(0,0,0,.16));
-}
-.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after {
-  content: "DASHFLOW";
-  position: relative;
-  z-index: 1;
-  color: rgba(255,255,255,.97);
-  font-size: 24px;
-  line-height: 1.05;
-  font-weight: 800;
-  letter-spacing: -.02em;
-  text-shadow: 0 2px 14px rgba(0,0,0,.38);
-}
-.dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="work"].is-active) > .dashflow-hero::after { content: "工作台 · WORK"; }
-.dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="projects"].is-active) > .dashflow-hero::after { content: "项目 · PROJECTS"; }
-.dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="inbox"].is-active) > .dashflow-hero::after { content: "收集箱 · INBOX"; }
-.dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="calendar"].is-active) > .dashflow-hero::after { content: "日历 · CALENDAR"; }
-.dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="habits"].is-active) > .dashflow-hero::after { content: "习惯 · HABITS"; }
-.dashflow-command-shell:not(.is-personal-home):has(.dashflow-command-button[data-section="review"].is-active) > .dashflow-hero::after { content: "复盘 · REVIEW"; }
+/* Hero structure and working-page geometry are owned by
+ * ProductHierarchyResetStyles. This layer begins at navigation. */
 
 .dashflow-command-shell > .dashflow-command-bar {
   min-height: 42px!important;
@@ -969,13 +904,6 @@ export const VISUAL_CONTINUITY_STYLES = `
 /* RESPONSIVE                                                             */
 /* ---------------------------------------------------------------------- */
 @media (max-width: 760px) {
-  .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
-    height: 160px!important;
-    min-height: 160px!important;
-    padding: 20px 22px!important;
-    border-radius: 12px!important;
-  }
-  .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after { font-size: 20px!important; }
   .dashflow-command-shell .dashflow-command-workspace { display: none!important; }
 
   .dashflow-command-shell:not(.is-personal-home) .dashflow-project-row {

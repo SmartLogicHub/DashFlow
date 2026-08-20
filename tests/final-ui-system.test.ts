@@ -10,10 +10,10 @@ const habit = readFileSync("src/ui/HabitEditorModal.ts", "utf8");
 const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const search = readFileSync("src/ui/GlobalSearchModal.ts", "utf8");
 
-test("Home and primary working sections keep full photographic Heroes", () => {
+test("Home stays immersive while working sections use compact photographic Heroes", () => {
   assert.ok(home.includes("height:194px!important") || home.includes("height: 194px!important"));
-  assert.ok(hierarchy.includes("height: 194px !important"));
-  assert.ok(hierarchy.includes("height: 172px !important"));
+  assert.ok(hierarchy.includes("height: 128px !important"));
+  assert.ok(hierarchy.includes("height: 112px !important"));
   assert.equal(design.includes("--df-page-hero-height: 88px"), false);
   assert.equal(design.includes("height: 72px!important"), false);
 });
@@ -80,6 +80,6 @@ test("mobile collapses editors and work rows while preserving the Hero artwork",
   assert.ok(visual.includes("@media (max-width: 760px)"));
   assert.ok(visual.includes("grid-template-columns: 1fr!important"));
   assert.ok(visual.includes("grid-template-columns: minmax(0, 1fr) 54px!important"));
-  assert.ok(hierarchy.includes("height: 172px !important"));
+  assert.ok(hierarchy.includes("height: 112px !important"));
   assert.equal(design.includes("height: 72px!important"), false);
 });

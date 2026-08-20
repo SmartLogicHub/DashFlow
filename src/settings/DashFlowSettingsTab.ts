@@ -2,6 +2,8 @@ import { Notice, PluginSettingTab, SecretComponent, Setting, setIcon, type App }
 import { DEFAULT_SETTINGS } from "../constants";
 import type DashFlowPlugin from "../main";
 import type { HomeTheme } from "../models";
+import { persistHomeTheme } from "../product/homeThemeSelection";
+import { HERO_THEME_CHOICES } from "../product/heroThemes";
 import { HeroImagePickerModal } from "../ui/HeroImagePickerModal";
 import { TimedConfirmation } from "../ui/timedConfirmation";
 
@@ -18,6 +20,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
 
   private saveTimer: number | null = null;
   private reindexTimer: number | null = null;
+  private themeSaving = false;
   private readonly recoveryConfirmation = new TimedConfirmation(5_000);
 
   private scheduleSave(): void {
@@ -115,20 +118,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     preview.createEl("strong", { text: this.dashFlow.data.settings.homeHeroTitle || "我的成长" });
     preview.createEl("span", { text: this.dashFlow.data.settings.homeHeroSubtitle || "把输入变成理解，把理解变成行动。" });
 
-    new Setting(appearance)
-      .setName("主题")
-      .setDesc("Alpine 使用雪山湖村，Paper 使用柔和海岸，Midnight 使用雾林；Obsidian 只跟随当前主题。前三套默认场景来自 Unsplash，可被本地图片覆盖。")
-      .addDropdown((dropdown) => dropdown
-        .addOption("alpine", "Alpine · 雪山冷蓝")
-        .addOption("paper", "Paper · 海岸晨光")
-        .addOption("midnight", "Midnight · 雾林深色")
-        .addOption("obsidian", "Obsidian · 跟随主题")
-        .setValue(this.dashFlow.data.settings.homeTheme)
-        .onChange((value) => {
-          this.dashFlow.data.settings.homeTheme = value as HomeTheme;
-          this.scheduleSave();
-          this.dashFlow.refreshDashboardViews();
-        }));
+    this.renderThemePicker(appearance);
 
     new Setting(appearance)
       .setName("自己的 Hero 图片")
@@ -197,6 +187,54 @@ export class DashFlowSettingsTab extends PluginSettingTab {
           this.scheduleSave();
           this.dashFlow.refreshDashboardViews();
         }));
+  }
+
+  private renderThemePicker(parent: HTMLElement): void {
+    const picker = parent.createDiv("dashflow-theme-picker");
+    picker.createEl("strong", { text: "主题场景" });
+    picker.createEl("span", { text: "选择后会立即保存，并同步应用到今日与工作台。三张照片已随插件离线打包。" });
+
+    const cards = picker.createDiv("dashflow-theme-cards");
+    for (const choice of HERO_THEME_CHOICES) {
+      const selected = choice.id === this.dashFlow.data.settings.homeTheme;
+      const card = cards.createEl("button", {
+        cls: `dashflow-theme-card${selected ? " is-selected" : ""}`,
+        attr: { "aria-pressed": String(selected) },
+      });
+      card.type = "button";
+      card.dataset.theme = choice.id;
+
+      const artwork = card.createDiv("dashflow-theme-card-artwork");
+      const previewUrl = this.dashFlow.presentationRuntime.themePreviewUrl(choice.id);
+      if (previewUrl) artwork.style.backgroundImage = `url("${previewUrl.replace(/"/g, "%22")}")`;
+      else artwork.addClass("is-obsidian");
+
+      const copy = card.createDiv("dashflow-theme-card-copy");
+      copy.createEl("strong", { text: choice.label });
+      copy.createEl("span", { text: choice.description });
+      const state = card.createEl("span", { cls: "dashflow-theme-card-state" });
+      state.textContent = selected ? "当前主题" : "选择主题";
+
+      card.addEventListener("click", () => void this.selectHomeTheme(choice.id));
+    }
+  }
+
+  private async selectHomeTheme(theme: HomeTheme): Promise<void> {
+    if (this.themeSaving || theme === this.dashFlow.data.settings.homeTheme) return;
+    this.themeSaving = true;
+    try {
+      await persistHomeTheme(this.dashFlow.data.settings, theme, async () => {
+        await this.dashFlow.savePluginData();
+      });
+      this.dashFlow.refreshDashboardViews();
+      this.display();
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      new Notice(`主题未能保存：${message}`);
+      this.display();
+    } finally {
+      this.themeSaving = false;
+    }
   }
 
   private renderWorkflow(parent: HTMLElement): void {

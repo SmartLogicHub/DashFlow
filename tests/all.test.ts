@@ -41,3 +41,4 @@ import "./product-hierarchy-reset.test";
 import "./opportunity-board.test";
 import "./project-kanban.test";
 import "./project-gantt.test";
+import "./hero-product-unification.test";

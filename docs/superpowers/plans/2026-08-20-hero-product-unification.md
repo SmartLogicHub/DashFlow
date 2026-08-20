@@ -41,7 +41,7 @@
 
 - [ ] **Step 2: Run the focused test and verify it fails**
 
-  Run: `node --test tests/hero-product-unification.test.ts`
+  Run: `npm.cmd test`
 
   Expected: FAIL because the three modules do not exist.
 
@@ -51,7 +51,7 @@
 
 - [ ] **Step 4: Run the focused test and verify it passes**
 
-  Run: `node --test tests/hero-product-unification.test.ts`
+  Run: `npm.cmd test`
 
   Expected: PASS.
 
@@ -70,7 +70,7 @@
 
 - [ ] **Step 2: Run the focused test and verify it fails**
 
-  Run: `node --test tests/hero-product-unification.test.ts`
+  Run: `npm.cmd test`
 
   Expected: FAIL because the current UI is a dropdown with delayed save.
 
@@ -80,7 +80,7 @@
 
 - [ ] **Step 4: Run the focused test and verify it passes**
 
-  Run: `node --test tests/hero-product-unification.test.ts`
+  Run: `npm.cmd test`
 
   Expected: PASS.
 
@@ -99,7 +99,7 @@
 
 - [ ] **Step 2: Run focused tests and verify they fail**
 
-  Run: `node --test tests/hero-product-unification.test.ts tests/studio-ui.test.ts tests/visual-continuity.test.ts`
+  Run: `npm.cmd test`
 
   Expected: FAIL because the renderer and CSS currently compete for Hero copy.
 
@@ -109,7 +109,7 @@
 
 - [ ] **Step 4: Run focused tests and verify they pass**
 
-  Run: `node --test tests/hero-product-unification.test.ts tests/studio-ui.test.ts tests/visual-continuity.test.ts`
+  Run: `npm.cmd test`
 
   Expected: PASS.
 
@@ -127,7 +127,7 @@
 
 - [ ] **Step 2: Run the focused test and verify it fails**
 
-  Run: `node --test tests/hero-product-unification.test.ts`
+  Run: `npm.cmd test`
 
   Expected: FAIL against the old labels.
 
@@ -144,4 +144,3 @@
 - [ ] **Step 5: Commit the verified implementation**
 
   Run: `git add src tests styles.css main.js manifest.json; git commit -m "fix: unify hero themes and product language"`
-

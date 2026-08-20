@@ -1,9 +1,11 @@
-export type BundledHeroTheme = "alpine" | "paper" | "midnight";
+import { heroThemeChoice, type BundledHeroTheme } from "./heroThemes";
+
+export type { BundledHeroTheme } from "./heroThemes";
 
 export const BUNDLED_HERO_SCENES: Record<BundledHeroTheme, string> = {
-  alpine: "assets/heroes/alpine.webp",
-  paper: "assets/heroes/paper.webp",
-  midnight: "assets/heroes/midnight.webp",
+  alpine: heroThemeChoice("alpine")!.assetPath!,
+  paper: heroThemeChoice("paper")!.assetPath!,
+  midnight: heroThemeChoice("midnight")!.assetPath!,
 };
 
 export function bundledHeroAssetPath(manifestDir: string, theme: BundledHeroTheme): string {

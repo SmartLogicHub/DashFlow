@@ -4,15 +4,16 @@ import { readFileSync } from "node:fs";
 
 const polish = readFileSync("src/styles/UiRefinementStyles.ts", "utf8");
 const continuity = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
+const hierarchy = readFileSync("src/styles/ProductHierarchyResetStyles.ts", "utf8");
 const runtime = readFileSync("src/services/PresentationRuntimeService.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 
-test("v0.4.3 carries the Home scene into non-home surfaces without a DOM observer", () => {
-  assert.ok(continuity.includes("var(--df-ambient-image, var(--df-home-scene))"));
-  assert.ok(continuity.includes(".dashflow-command-shell:not(.is-personal-home) > .dashflow-hero"));
+test("one Hero image reaches non-home surfaces without a DOM observer", () => {
+  assert.ok(hierarchy.includes("var(--df-hero-image"));
+  assert.ok(hierarchy.includes(".dashflow-command-shell:not(.is-personal-home) > .dashflow-hero"));
   assert.ok(runtime.includes("resolveLocalHeroImage"));
-  assert.ok(runtime.includes("--df-ambient-image"));
+  assert.ok(runtime.includes("--df-hero-image"));
   assert.equal(runtime.includes("new MutationObserver"), false);
   assert.equal(runtime.includes(".observe("), false);
   assert.ok(main.includes("new PresentationRuntimeService(this)"));
@@ -21,8 +22,10 @@ test("v0.4.3 carries the Home scene into non-home surfaces without a DOM observe
 test("Hero actions keep real workflows while retaining explicit visual outcomes", () => {
   assert.ok(experience.includes('work.addEventListener("click", () => this.openSection("work"))'));
   assert.ok(experience.includes('capture.addEventListener("click", () => new QuickAddModal(this.plugin).open())'));
-  assert.ok(continuity.includes('content: "开始今天 →"'));
-  assert.ok(continuity.includes('content: "收集灵感"'));
+  assert.ok(experience.includes('this.text("button", "开始今天")'));
+  assert.ok(experience.includes('this.text("button", "收集灵感")'));
+  assert.equal(continuity.includes('content: "开始今天 →"'), false);
+  assert.equal(continuity.includes('content: "收集灵感"'), false);
   assert.ok(runtime.includes("focusTodayWidget"));
 });
 

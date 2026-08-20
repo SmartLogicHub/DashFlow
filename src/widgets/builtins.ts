@@ -42,14 +42,11 @@ export function registerBuiltins(registry: WidgetRegistry): void {
     },
     {
       type: "progress",
-      name: "今日进度",
-      description: "今天到期任务的完成比例。",
+      name: "任务概览",
+      description: "今日任务与全部任务的完成情况。",
       icon: "◔",
       defaultSize: { w: 4, h: 3 },
       minSize: { w: 3, h: 3 },
-      settings: [
-        { key: "label", type: "text", label: "进度标签", description: "显示在环形进度中央的短标签。", placeholder: "TODAY" },
-      ],
       defaultConfig: (): ProgressWidgetConfig => ({ label: "TODAY" }),
     },
     {

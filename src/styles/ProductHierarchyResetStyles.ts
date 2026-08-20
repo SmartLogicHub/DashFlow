@@ -1,21 +1,14 @@
 export const PRODUCT_HIERARCHY_RESET_STYLES = `
-/* v0.6.0 product hierarchy reset.
- * Keep one primary navigation while preserving the full photographic identity
- * across Home and working sections. Working pages are differentiated by their
- * content and labels, not by crushing the Hero into a shallow strip.
- */
-
-/* Every primary section keeps a full-size photographic Hero. Older layers set
- * working sections to 88px/72px; override that compression here and preserve
- * the image aspect visually with cover rather than stretching it. */
+/* Product hierarchy reset. Working pages share the selected photographic
+ * identity with Today, but reserve their first screen for execution. */
 .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
   display: flex !important;
   position: relative !important;
   isolation: isolate !important;
-  height: 194px !important;
-  min-height: 194px !important;
+  height: 128px !important;
+  min-height: 128px !important;
   margin: 0 0 12px !important;
-  padding: 24px 30px !important;
+  padding: 18px 24px !important;
   align-items: flex-end !important;
   justify-content: flex-start !important;
   overflow: hidden !important;
@@ -25,7 +18,7 @@ export const PRODUCT_HIERARCHY_RESET_STYLES = `
   background-color: #0f172a !important;
   background-image:
     linear-gradient(90deg, rgba(15, 23, 42, .68) 0%, rgba(15, 23, 42, .34) 55%, rgba(15, 23, 42, .06) 100%),
-    var(--df-ambient-image, var(--df-home-scene)) !important;
+    var(--df-hero-image, var(--df-home-scene)) !important;
   background-size: cover !important;
   background-position: center 50% !important;
   background-repeat: no-repeat !important;
@@ -40,16 +33,33 @@ export const PRODUCT_HIERARCHY_RESET_STYLES = `
   pointer-events: none !important;
   background: linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.14)) !important;
 }
-.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero::after {
-  display: block !important;
+.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero > .dashflow-hero-content {
   position: relative !important;
   z-index: 1 !important;
+}
+.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero .dashflow-eyebrow {
+  display: block !important;
+  margin-bottom: 5px !important;
+  color: rgba(255,255,255,.76) !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: .08em !important;
+}
+.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero h1 {
+  margin: 0 !important;
   color: rgba(255,255,255,.98) !important;
-  font-size: clamp(22px, 2.2vw, 30px) !important;
+  font-size: clamp(20px, 2vw, 26px) !important;
   line-height: 1.05 !important;
   font-weight: 800 !important;
   letter-spacing: -.025em !important;
   text-shadow: 0 2px 14px rgba(0,0,0,.38) !important;
+}
+.dashflow-command-shell:not(.is-personal-home) > .dashflow-hero p {
+  margin: 5px 0 0 !important;
+  color: rgba(255,255,255,.86) !important;
+  font-size: 11.5px !important;
+  line-height: 1.4 !important;
+  text-shadow: 0 1px 8px rgba(0,0,0,.3) !important;
 }
 
 /* Built-in scenes are bundled with the plugin and injected by the presentation
@@ -122,13 +132,12 @@ export const PRODUCT_HIERARCHY_RESET_STYLES = `
   align-self: start !important;
 }
 
-/* Preserve a real Hero on narrow windows too; reduce padding/font, not the
- * artwork into a thin strip. */
+/* Keep the image readable on narrow windows without pushing work content down. */
 @media (max-width: 900px) {
   .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
-    height: 172px !important;
-    min-height: 172px !important;
-    padding: 20px 22px !important;
+    height: 112px !important;
+    min-height: 112px !important;
+    padding: 16px 18px !important;
   }
   .dashflow-command-bar {
     gap: 3px !important;

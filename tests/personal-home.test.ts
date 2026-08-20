@@ -9,7 +9,7 @@ const designSystem = readFileSync("src/services/DesignSystemService.ts", "utf8")
 const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const imagePicker = readFileSync("src/ui/HeroImagePickerModal.ts", "utf8");
 const settings = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
-const heroScenes = readFileSync("src/product/heroScenes.ts", "utf8");
+const heroThemes = readFileSync("src/product/heroThemes.ts", "utf8");
 
 test("v0.6.1 keeps schema-backed preferences without changing Markdown truth", () => {
   assert.equal(PLUGIN_VERSION, "0.6.1");
@@ -29,12 +29,12 @@ test("v0.6.1 keeps schema-backed preferences without changing Markdown truth", (
 test("Hero ships curated low-saturation scenes while preserving local Vault override", () => {
   assert.ok(settings.includes("HeroImagePickerModal"));
   assert.ok(settings.includes("选择图片"));
-  assert.ok(homeDesign.includes("--df-home-image"));
+  assert.ok(homeDesign.includes("--df-hero-image"));
   assert.ok(homeDesign.includes("--df-home-scene"));
   assert.equal(homeDesign.includes("unsplash.com"), false);
-  assert.ok(heroScenes.includes("alpine.webp"));
-  assert.ok(heroScenes.includes("paper.webp"));
-  assert.ok(heroScenes.includes("midnight.webp"));
+  assert.ok(heroThemes.includes("alpine.webp"));
+  assert.ok(heroThemes.includes("paper.webp"));
+  assert.ok(heroThemes.includes("midnight.webp"));
   for (const asset of ["assets/heroes/alpine.webp", "assets/heroes/paper.webp", "assets/heroes/midnight.webp"]) {
     assert.equal(existsSync(asset), true, asset);
   }

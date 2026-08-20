@@ -8,10 +8,10 @@ const designSystem = readFileSync("src/services/DesignSystemService.ts", "utf8")
 const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const settings = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 
-test("primary working sections keep full photographic heroes instead of compressed strips", () => {
-  assert.ok(hierarchy.includes("height: 194px !important"));
-  assert.ok(hierarchy.includes("min-height: 194px !important"));
-  assert.ok(hierarchy.includes("height: 172px !important"));
+test("primary working sections keep compact photographic heroes", () => {
+  assert.ok(hierarchy.includes("height: 128px !important"));
+  assert.ok(hierarchy.includes("min-height: 128px !important"));
+  assert.ok(hierarchy.includes("height: 112px !important"));
   assert.equal(hierarchy.includes("height: 88px !important"), false);
   assert.equal(hierarchy.includes("height: 72px !important"), false);
   assert.ok(hierarchy.includes("background-size: cover !important"));

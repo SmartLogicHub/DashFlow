@@ -1,9 +1,11 @@
-import { normalizePath, setIcon, TFile } from "obsidian";
+import { normalizePath, setIcon } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { Task } from "../models";
 import { activityStreak } from "../activity/activityMath";
 import { PLUGIN_VERSION } from "../constants";
 import { inboxTasks, type ProductSection } from "../product/navigation";
+import { heroPresentationFor } from "../product/heroPresentation";
+import { taskOverview } from "../product/progressOverview";
 import { isWidgetVisibleInSection } from "../product/widgetVisibility";
 import { AIPlanModal } from "../ui/AIPlanModal";
 import { GlobalSearchModal } from "../ui/GlobalSearchModal";
@@ -89,9 +91,10 @@ export class ProductExperienceService {
     shell.classList.toggle("is-personal-home", personalHome);
     this.applyTheme(shell, personalHome);
 
+    const editButton = hero.querySelector<HTMLButtonElement>(".dashflow-edit-button");
     this.decorateHero(hero, personalHome);
     this.decoratePulse(pulse);
-    this.decorateTitle(shell, title, editing);
+    this.decorateTitle(title, editing, editButton);
     const commandBar = this.ensureCommandBar(shell, title);
     this.moveDashboardSwitcher(shell, commandBar);
     this.syncCommandBar(commandBar, editing ? null : this.activeSection);
@@ -119,17 +122,16 @@ export class ProductExperienceService {
 
   private decorateHero(hero: HTMLElement, personalHome: boolean): void {
     hero.replaceChildren();
-    hero.style.removeProperty("--df-home-image");
     hero.style.removeProperty("--df-home-overlay");
+    hero.dataset.section = this.activeSection;
+    const presentation = heroPresentationFor(this.activeSection);
+    const content = document.createElement("div");
+    content.className = "dashflow-hero-content";
 
     if (personalHome) {
+      content.classList.add("dashflow-home-hero-content");
       const settings = this.plugin.data.settings;
       hero.style.setProperty("--df-home-overlay", String(Math.max(0, Math.min(80, settings.homeHeroOverlay)) / 100));
-      const image = this.resolveHeroImage(settings.homeHeroImagePath);
-      if (image) hero.style.setProperty("--df-home-image", `url("${image.replace(/"/g, "%22")}")`);
-
-      const content = document.createElement("div");
-      content.className = "dashflow-home-hero-content";
       const date = this.text("span", new Intl.DateTimeFormat("zh-CN", {
         year: "numeric",
         month: "long",
@@ -141,11 +143,11 @@ export class ProductExperienceService {
       const subtitle = this.text("p", settings.homeHeroSubtitle || "把输入变成理解，把理解变成行动。");
       const actions = document.createElement("div");
       actions.className = "dashflow-home-hero-actions";
-      const work = this.text("button", "进入工作台 ↗");
+      const work = this.text("button", "开始今天");
       work.type = "button";
       work.className = "is-primary";
       work.addEventListener("click", () => this.openSection("work"));
-      const capture = this.text("button", "快速记录");
+      const capture = this.text("button", "收集灵感");
       capture.type = "button";
       capture.addEventListener("click", () => new QuickAddModal(this.plugin).open());
       actions.append(work, capture);
@@ -154,20 +156,12 @@ export class ProductExperienceService {
       return;
     }
 
-    const content = document.createElement("div");
-    const heading = this.text("h1", "Obsidian · Personal Dashboard");
-    const description = this.text("p", "WHERE TASKS, NOTES, AND PROJECTS CONVERGE.");
-    const eyebrow = this.text("span", "DASHFLOW · SECOND BRAIN");
+    const eyebrow = this.text("span", presentation.eyebrow);
     eyebrow.className = "dashflow-eyebrow";
-    content.append(heading, description, eyebrow);
+    const heading = this.text("h1", presentation.title);
+    const description = this.text("p", presentation.description);
+    content.append(eyebrow, heading, description);
     hero.appendChild(content);
-  }
-
-  private resolveHeroImage(pathText: string): string | null {
-    const trimmed = pathText.trim();
-    if (!trimmed) return null;
-    const file = this.plugin.app.vault.getAbstractFileByPath(normalizePath(trimmed));
-    return file instanceof TFile ? this.plugin.app.vault.getResourcePath(file) : null;
   }
 
   private decoratePulse(pulse: HTMLElement): void {
@@ -193,17 +187,16 @@ export class ProductExperienceService {
     });
   }
 
-  private decorateTitle(shell: HTMLElement, title: HTMLElement, editing: boolean): void {
-    const editButton = shell.querySelector<HTMLButtonElement>(".dashflow-edit-button");
+  private decorateTitle(title: HTMLElement, editing: boolean, editButton: HTMLButtonElement | null): void {
     const dashboard = this.plugin.dashboardManager.active();
 
     const copy = document.createElement("div");
     copy.className = "dashflow-command-title-copy";
-    const eyebrow = this.text("span", this.activeSection === "work" ? "WORK SYSTEM" : "SECOND BRAIN");
+    const eyebrow = this.text("span", this.activeSection === "work" ? "工作节奏" : "DashFlow");
     eyebrow.className = "dashflow-command-eyebrow";
     const heading = this.text("strong", dashboard.name === "Home" ? "默认工作台" : dashboard.name);
     heading.className = "dashflow-command-title";
-    const meta = this.text("small", `Obsidian · Personal Dashboard · v${PLUGIN_VERSION}`);
+    const meta = this.text("small", `DashFlow · v${PLUGIN_VERSION}`);
     meta.className = "dashflow-command-meta";
     copy.append(eyebrow, heading, meta);
 
@@ -346,11 +339,8 @@ export class ProductExperienceService {
 
     const snapshot = this.plugin.vaultIndex.getSnapshot();
     const todayTasks = this.plugin.taskService.today();
-    const todayCompleted = todayTasks.filter((task) => task.completed).length;
-    const todayProgress = todayTasks.length === 0 ? 0 : Math.round((todayCompleted / todayTasks.length) * 100);
-    const allCompleted = snapshot.tasks.filter((task) => task.completed).length;
-    const allProgress = snapshot.tasks.length === 0 ? 0 : Math.round((allCompleted / snapshot.tasks.length) * 100);
-    const signature = `${todayCompleted}/${todayTasks.length}|${allCompleted}/${snapshot.tasks.length}`;
+    const overview = taskOverview(todayTasks, snapshot.tasks);
+    const signature = overview.metrics.map((metric) => `${metric.completed}/${metric.total}`).join("|");
     if (body.dataset.commandProgress === signature) return;
     body.dataset.commandProgress = signature;
 
@@ -358,10 +348,9 @@ export class ProductExperienceService {
     wrap.className = "dashflow-progress-wrap";
     const pair = document.createElement("div");
     pair.className = "dashflow-progress-pair";
-    pair.append(
-      this.progressMetric("TODAY", todayProgress, `${todayCompleted} / ${todayTasks.length} 已完成`),
-      this.progressMetric("ALL TASKS", allProgress, `${allCompleted} / ${snapshot.tasks.length} 已完成`),
-    );
+    pair.append(...overview.metrics.map((metric) => (
+      this.progressMetric(metric.label, metric.percentage, `${metric.completed} / ${metric.total} 已完成`)
+    )));
     wrap.appendChild(pair);
     body.replaceChildren(wrap);
   }

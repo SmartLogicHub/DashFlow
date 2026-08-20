@@ -17,7 +17,6 @@ import type {
 import { moveLayout, resizeLayout, resolveWidgetLayout } from "../layout/grid";
 import { createElement } from "../ui/dom";
 import { localDate } from "../utils/date";
-import { PLUGIN_VERSION } from "../constants";
 import { TimedConfirmation } from "../ui/timedConfirmation";
 
 export class DashboardRenderer {
@@ -76,7 +75,7 @@ export class DashboardRenderer {
     const shell = createElement("div", "dashflow-shell");
     this.container.appendChild(shell);
 
-    shell.appendChild(this.renderHero(dashboard));
+    shell.appendChild(this.renderHero());
     shell.appendChild(this.renderPulse(snapshot));
 
     const sectionTitle = createElement("div", "dashflow-section-title");
@@ -119,13 +118,8 @@ export class DashboardRenderer {
     this.plugin.dashboardRender.rendered(this.container);
   }
 
-  private renderHero(dashboard: DashboardDefinition): HTMLElement {
+  private renderHero(): HTMLElement {
     const hero = createElement("header", "dashflow-hero");
-    const copy = createElement("div");
-    copy.appendChild(createElement("div", "dashflow-eyebrow", `OBSIDIAN · PERSONAL DASHBOARD · v${PLUGIN_VERSION}`));
-    copy.appendChild(createElement("h1", "", dashboard.name));
-    copy.appendChild(createElement("p", "", "把 Vault 里的任务、项目和当下行动放到同一个工作台。"));
-
     const button = createElement(
       "button",
       `dashflow-edit-button${this.editing ? " is-active" : ""}`,
@@ -140,7 +134,7 @@ export class DashboardRenderer {
       this.render();
     });
 
-    hero.append(copy, button);
+    hero.appendChild(button);
     return hero;
   }
 

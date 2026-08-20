@@ -69,6 +69,53 @@ export const SETTINGS_STYLES = `
 .dashflow-home-theme-preview strong { color: var(--text-normal); font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
 .dashflow-home-theme-preview span { color: var(--text-muted); font-size: 12px; }
 
+.dashflow-theme-picker {
+  padding: 14px 18px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--background-modifier-border) 55%, transparent);
+}
+.dashflow-theme-picker > strong { display: block; color: var(--text-normal); font-size: 12.5px; font-weight: 600; }
+.dashflow-theme-picker > span { display: block; margin-top: 3px; color: var(--text-muted); font-size: 11.5px; line-height: 1.5; }
+.dashflow-theme-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: 12px; }
+.dashflow-theme-card {
+  position: relative;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 9px;
+  color: var(--text-normal);
+  background: var(--background-primary);
+  box-shadow: none;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease;
+}
+.dashflow-theme-card:hover { transform: translateY(-1px); border-color: var(--interactive-accent); }
+.dashflow-theme-card:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+.dashflow-theme-card.is-selected { border-color: var(--interactive-accent); box-shadow: 0 0 0 2px color-mix(in srgb, var(--interactive-accent) 18%, transparent); }
+.dashflow-theme-card-artwork { height: 74px; background: center / cover no-repeat; }
+.dashflow-theme-card-artwork.is-obsidian {
+  background:
+    linear-gradient(140deg, color-mix(in srgb, var(--interactive-accent) 28%, transparent), transparent 58%),
+    var(--background-secondary);
+}
+.dashflow-theme-card-copy { min-height: 68px; padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 3px; }
+.dashflow-theme-card-copy strong { color: var(--text-normal); font-size: 11px; font-weight: 650; line-height: 1.3; }
+.dashflow-theme-card-copy span { color: var(--text-muted); font-size: 10px; line-height: 1.4; }
+.dashflow-theme-card-state {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  padding: 2px 6px;
+  border-radius: 99px;
+  color: var(--text-normal);
+  background: color-mix(in srgb, var(--background-primary) 88%, transparent);
+  backdrop-filter: blur(8px);
+  font-size: 9px;
+  font-weight: 650;
+}
+.dashflow-theme-card.is-selected .dashflow-theme-card-state { color: var(--text-on-accent); background: var(--interactive-accent); }
+
 .dashflow-settings-panel {
   margin-top: 14px;
   overflow: hidden;
@@ -145,6 +192,7 @@ export const SETTINGS_STYLES = `
 .dashflow-onboarding-actions .mod-cta { border: 1px solid var(--interactive-accent); color: var(--text-on-accent); background: var(--interactive-accent); }
 
 @media (max-width: 760px) {
+  .dashflow-theme-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashflow-settings-guide-grid { grid-template-columns: 1fr; }
   .dashflow-settings-panel .setting-item { align-items: flex-start; gap: 10px; }
   .dashflow-settings-panel input[type="text"] { min-width: 150px; width: 100%; }

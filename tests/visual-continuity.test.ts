@@ -3,24 +3,22 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 
 const continuity = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
+const hierarchy = readFileSync("src/styles/ProductHierarchyResetStyles.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
 
-test("Hero action labels remain in the consolidated visual cascade", () => {
-  assert.ok(continuity.includes('button:nth-child(1)::after { content: "开始今天 →"; }'));
-  assert.ok(continuity.includes('button:nth-child(2)::after { content: "收集灵感"; }'));
+test("Visual continuity no longer controls Hero labels", () => {
+  assert.equal(continuity.includes("dashflow-command-shell:not(.is-personal-home) > .dashflow-hero"), false);
+  assert.equal(continuity.includes('content: "工作台 · WORK"'), false);
   assert.ok(design.includes("VISUAL_CONTINUITY_STYLES"));
 });
 
-test("continuity styles provide the shared photographic frame before v0.4.3 compacts it", () => {
-  assert.ok(continuity.includes("dashflow-command-shell:not(.is-personal-home) > .dashflow-hero"));
-  assert.ok(continuity.includes("height: 194px!important"));
-  assert.ok(continuity.includes("min-height: 194px!important"));
-  assert.ok(continuity.includes("background-position: center 50%!important"));
-  assert.ok(continuity.includes("var(--df-ambient-image, var(--df-home-scene))"));
-  for (const section of ["work", "projects", "inbox", "calendar", "habits", "review"]) {
-    assert.ok(continuity.includes(`data-section=\"${section}\"`));
-  }
+test("product hierarchy owns the compact shared photographic frame", () => {
+  assert.ok(hierarchy.includes("height: 128px !important"));
+  assert.ok(hierarchy.includes("min-height: 128px !important"));
+  assert.ok(hierarchy.includes("background-position: center 50% !important"));
+  assert.ok(hierarchy.includes("var(--df-hero-image"));
+  assert.equal(hierarchy.includes("::after"), false);
 });
 
 test("legacy VisualContinuityService runtime is not part of the plugin lifecycle", () => {
