@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.1 — 2026-08-20
+
+- Validates schema-8 settings before use and preserves malformed data through the non-destructive recovery flow.
+- Releases the first-run onboarding lock when the modal is dismissed without treating dismissal as completion.
+- Adds a complete GitHub Release installation ZIP that preserves bundled Hero asset paths.
+
 ## 0.6.0 — 2026-08-20
 
 - Unifies Work as the full extension Widget canvas while keeping focused section filters.

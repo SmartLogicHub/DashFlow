@@ -1,10 +1,10 @@
-# DashFlow v0.6.0
+# DashFlow v0.6.1
 
 DashFlow 是建立在 Obsidian Vault 之上的 Personal OS。Task、Project、Habit 和 Daily Progress 的 Markdown / frontmatter 是唯一业务真相；DashFlow 负责索引、聚合、筛选、展示和直接操作。
 
 ## 快速开始
 
-1. 将 `main.js`、`manifest.json`、`styles.css` 和 `assets/heroes/` 一起放入 `<Vault>/.obsidian/plugins/dashflow/`。
+1. 从 GitHub Release 下载 `DashFlow-v0.6.1.zip`，解压其内容到 `<Vault>/.obsidian/plugins/dashflow/`；不要扁平化其中的 `assets/heroes/` 目录。
 2. 在 Obsidian 设置 → 社区插件中启用 DashFlow。
 3. 首次打开时选择 Minimal、Daily Focus 或 Project Management 起始布局，也可以跳过；以后可在 DashFlow 设置 → 高级 → 首次引导重新打开。
 4. 在工作台中使用 Quick Add、Inbox、Today、Projects、Calendar、Habits 和 Review。所有内容仍写回 Vault Markdown。
@@ -16,6 +16,12 @@ npm ci
 npm test
 npm run build
 ```
+
+## 0.6.1 修复
+
+- schema 8 配置会逐字段验证：设置字段类型损坏时进入非破坏性恢复模式，不会自动覆盖原配置。
+- 首次引导被关闭时会释放弹窗锁；未完成设置不会被误标记完成，可再次打开。
+- GitHub Release 提供保留 `assets/heroes/` 目录结构的安装 ZIP。
 
 ## 0.6.0 重点
 

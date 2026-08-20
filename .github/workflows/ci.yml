@@ -27,15 +27,17 @@ jobs:
             assets/heroes/*.webp
       - name: Package full development source
         run: |
-          zip -r DashFlow-v0.6.0-full-source.zip \
+          zip -r DashFlow-v0.6.1-full-source.zip \
             .github \
             .gitignore \
             ARCHITECTURE.md \
+            CHANGELOG.md \
             assets \
             README.md \
             esbuild.config.mjs \
             examples \
             manifest.json \
+            package-lock.json \
             package.json \
             src \
             styles.css \
@@ -45,4 +47,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: dashflow-source
-          path: DashFlow-v0.6.0-full-source.zip
+          path: DashFlow-v0.6.1-full-source.zip

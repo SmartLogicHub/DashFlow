@@ -16,6 +16,7 @@ import { registerBuiltins } from "../src/widgets/builtins";
 const mainSource = readFileSync("src/main.ts", "utf8");
 const settingsSource = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 const indexSource = readFileSync("src/services/VaultIndexService.ts", "utf8");
+const modalSource = readFileSync("src/ui/OnboardingModal.ts", "utf8");
 
 function registry(): WidgetRegistry {
   const value = new WidgetRegistry();
@@ -69,4 +70,10 @@ test("runtime opens onboarding only after the initial Vault snapshot and keeps a
   assert.ok(mainSource.includes("new OnboardingModal"));
   assert.ok(mainSource.includes("this.vaultIndex.whenReady()"));
   assert.ok(settingsSource.includes("重新打开首次引导"));
+});
+
+test("dismissing onboarding releases its open lock without completing setup", () => {
+  assert.match(modalSource, /private readonly onDismissed: \(\) => void/);
+  assert.match(modalSource, /if \(!this\.finished\) this\.onDismissed\(\);/);
+  assert.match(mainSource, /new OnboardingModal\(this, \(\) => \{[\s\S]*?\}, \(\) => \{\s*this\.onboardingOpen = false;\s*\}\)\.open\(\);/);
 });

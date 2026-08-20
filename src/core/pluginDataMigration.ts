@@ -33,6 +33,26 @@ function finiteNumber(value: unknown): value is number {
   return typeof value === "number" && Number.isFinite(value);
 }
 
+function normalizeSettings(
+  value: unknown,
+  defaults: DashFlowSettings,
+): { settings: DashFlowSettings; changed: boolean } | null {
+  if (!isRecord(value)) return null;
+
+  const settings: Record<string, unknown> = { ...defaults };
+  let changed = false;
+  for (const key of Object.keys(defaults) as Array<keyof DashFlowSettings>) {
+    const candidate = value[key];
+    if (candidate === undefined) {
+      changed = true;
+      continue;
+    }
+    if (typeof candidate !== typeof defaults[key]) return null;
+    settings[key] = candidate;
+  }
+  return { settings: settings as unknown as DashFlowSettings, changed };
+}
+
 function validDashboard(value: unknown): value is DashboardDefinition {
   if (!isRecord(value) || typeof value.id !== "string" || !value.id.trim() || typeof value.name !== "string") return false;
   if (!isRecord(value.settings)) return false;
@@ -123,10 +143,11 @@ export function migratePluginData(raw: unknown, options: PluginDataMigrationOpti
   if (!Array.isArray(raw.dashboards) || !raw.dashboards.every(validDashboard)) return recoveryResult(raw, options);
 
   if (raw.schemaVersion === 8) {
-    if (typeof raw.onboardingCompleted !== "boolean" || !isRecord(raw.settings)) return recoveryResult(raw, options);
+    const normalizedSettings = normalizeSettings(raw.settings, options.defaults);
+    if (typeof raw.onboardingCompleted !== "boolean" || !normalizedSettings) return recoveryResult(raw, options);
     return {
-      data: raw as unknown as DashFlowData,
-      shouldPersist: false,
+      data: { ...raw, settings: normalizedSettings.settings } as unknown as DashFlowData,
+      shouldPersist: normalizedSettings.changed,
       firstRun: false,
       recoveryRequired: false,
       backup: isRecord(raw.recoveryBackup) ? raw.recoveryBackup as unknown as PluginDataRecoveryBackup : undefined,
@@ -141,9 +162,11 @@ export function migratePluginData(raw: unknown, options: PluginDataMigrationOpti
     if (item.id === "home" && item.name === "Home") item.name = "默认工作台";
   }
 
-  const settings = isRecord(raw.settings)
-    ? { ...options.defaults, ...raw.settings } as DashFlowSettings
-    : { ...options.defaults };
+  const normalizedSettings = raw.settings === undefined
+    ? { settings: { ...options.defaults }, changed: false }
+    : normalizeSettings(raw.settings, options.defaults);
+  if (!normalizedSettings) return recoveryResult(raw, options);
+  const settings = normalizedSettings.settings;
   const activitySource = isRecord(raw.activity) ? raw.activity : {};
   const activity: ActivityStore = {
     startedAt: typeof activitySource.startedAt === "string" ? activitySource.startedAt : options.today,

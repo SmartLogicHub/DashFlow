@@ -333,6 +333,8 @@ export default class DashFlowPlugin extends Plugin {
       if (!manual) this.onboardingPending = false;
       this.refreshDashboardViews();
       if (!manual) void this.activateDashboard();
+    }, () => {
+      this.onboardingOpen = false;
     }).open();
   }
 

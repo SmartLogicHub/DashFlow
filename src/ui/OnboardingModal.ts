@@ -8,9 +8,12 @@ import {
 } from "../product/onboarding";
 
 export class OnboardingModal extends Modal {
+  private finished = false;
+
   constructor(
     private readonly plugin: DashFlowPlugin,
     private readonly onFinished: () => void,
+    private readonly onDismissed: () => void,
   ) {
     super(plugin.app);
   }
@@ -73,6 +76,7 @@ export class OnboardingModal extends Modal {
 
   onClose(): void {
     this.contentEl.empty();
+    if (!this.finished) this.onDismissed();
   }
 
   private pathSetting(parent: HTMLElement, label: string, value: string, placeholder: string): HTMLInputElement {
@@ -101,8 +105,9 @@ export class OnboardingModal extends Modal {
       });
     }
     await this.plugin.savePluginData();
-    new Notice(skipped ? "DashFlow 已准备好，之后可在设置中重新打开首次引导。" : "DashFlow 工作台已准备好。" );
+    this.finished = true;
     this.close();
+    new Notice(skipped ? "DashFlow 已准备好，之后可在设置中重新打开首次引导。" : "DashFlow 工作台已准备好。" );
     this.onFinished();
   }
 }

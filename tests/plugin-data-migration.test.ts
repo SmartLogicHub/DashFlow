@@ -49,6 +49,15 @@ function schema7(extra: Record<string, unknown> = {}): Record<string, unknown> {
   };
 }
 
+function schema8(extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    ...schema7(),
+    schemaVersion: 8,
+    onboardingCompleted: true,
+    ...extra,
+  };
+}
+
 test("null plugin data is a true first run and is not persisted before onboarding", () => {
   const result = migratePluginData(null, options());
   assert.equal(result.firstRun, true);
@@ -93,6 +102,16 @@ test("schema-8 data loads idempotently", () => {
   assert.equal(result.recoveryRequired, false);
   assert.equal(result.shouldPersist, false);
   assert.deepEqual(result.data, upgraded);
+});
+
+test("schema-8 data with a malformed setting enters non-destructive recovery", () => {
+  const result = migratePluginData(schema8({
+    settings: { ...DEFAULT_SETTINGS, homeHeroImagePath: 42 },
+  }), options());
+  assert.equal(result.recoveryRequired, true);
+  assert.equal(result.shouldPersist, false);
+  assert.equal(result.data.settings.homeHeroImagePath, DEFAULT_SETTINGS.homeHeroImagePath);
+  assert.equal((result.backup?.data.settings as Record<string, unknown>).homeHeroImagePath, 42);
 });
 
 test("legacy default Dashboard name is normalized without changing custom names", () => {

@@ -25,6 +25,11 @@ jobs:
         run: |
           VERSION=$(node -p "require('./manifest.json').version")
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Package installable plugin
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: zip -r "DashFlow-v$VERSION.zip" main.js manifest.json styles.css assets/heroes
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -36,7 +41,7 @@ jobs:
             exit 0
           fi
           gh release create "$VERSION" \
-            main.js manifest.json styles.css assets/heroes/*.webp \
+            "DashFlow-v$VERSION.zip" main.js manifest.json styles.css assets/heroes/*.webp \
             --target "$GITHUB_SHA" \
             --title "DashFlow v$VERSION" \
             --generate-notes
