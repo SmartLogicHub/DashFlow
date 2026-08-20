@@ -365,6 +365,9 @@ export interface MagicEmbedWidgetConfig extends Record<string, unknown> {
 export interface OpportunityBoardWidgetConfig extends Record<string, unknown> {
   file: string;
 }
+export interface ProjectKanbanWidgetConfig extends Record<string, unknown> {
+  showArchived: boolean;
+}
 export interface CalendarWidgetConfig extends Record<string, unknown> {
   weekStart: CalendarWeekStart;
   showTasks: boolean;

@@ -1,5 +1,5 @@
 import { Notice, TFile, normalizePath, type App } from "obsidian";
-import type { Project, ProjectEditInput, Task } from "../models";
+import type { Project, ProjectEditInput, ProjectStatus, Task } from "../models";
 import type { VaultIndexService } from "./VaultIndexService";
 import type { VaultQueryService } from "./VaultQueryService";
 
@@ -153,6 +153,18 @@ export class ProjectService {
     await this.index.indexFile(file);
     new Notice(`DashFlow: 已更新项目「${name}」`);
     return true;
+  }
+
+  async changeStatus(project: Project, status: ProjectStatus): Promise<boolean> {
+    return this.update(project, {
+      name: project.name,
+      description: project.description,
+      status,
+      start: project.start,
+      deadline: project.deadline,
+      progressMode: project.progressMode,
+      manualProgress: project.manualProgress,
+    });
   }
 
   private async ensureFolder(path: string): Promise<void> {

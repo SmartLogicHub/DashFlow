@@ -35,6 +35,7 @@ import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService"
 import { PresentationRuntimeService } from "./services/PresentationRuntimeService";
 import { ProductDesignService } from "./services/ProductDesignService";
 import { ProductExperienceService } from "./services/ProductExperienceService";
+import { ProjectKanbanWidgetInteractionService } from "./services/ProjectKanbanWidgetInteractionService";
 import { ProjectService } from "./services/ProjectService";
 import { TaskInteractionService } from "./services/TaskInteractionService";
 import { TaskService } from "./services/TaskService";
@@ -57,6 +58,7 @@ import { registerDataWidgets } from "./widgets/data";
 import { registerEmbedWidgets } from "./widgets/embed";
 import { registerFocusWidgets } from "./widgets/focus";
 import { registerIntelligenceWidgets } from "./widgets/intelligence";
+import { registerKanbanWidgets } from "./widgets/kanban";
 import { registerOpportunityWidgets } from "./widgets/opportunity";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
 
@@ -94,6 +96,7 @@ export default class DashFlowPlugin extends Plugin {
   magicEmbedWidgets!: MagicEmbedWidgetInteractionService;
   mobileDashboard!: MobileDashboardInteractionService;
   opportunityWidgets!: OpportunityWidgetInteractionService;
+  projectKanbanWidgets!: ProjectKanbanWidgetInteractionService;
   weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
@@ -108,6 +111,7 @@ export default class DashFlowPlugin extends Plugin {
     registerFocusWidgets(this.widgetRegistry);
     registerEmbedWidgets(this.widgetRegistry);
     registerIntelligenceWidgets(this.widgetRegistry);
+    registerKanbanWidgets(this.widgetRegistry);
     registerOpportunityWidgets(this.widgetRegistry);
     await this.loadPluginData();
 
@@ -180,6 +184,7 @@ export default class DashFlowPlugin extends Plugin {
     this.magicEmbedWidgets = new MagicEmbedWidgetInteractionService(this);
     this.mobileDashboard = new MobileDashboardInteractionService(this);
     this.opportunityWidgets = new OpportunityWidgetInteractionService(this);
+    this.projectKanbanWidgets = new ProjectKanbanWidgetInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.contextSwitcher = new ContextSwitcherService(this);
@@ -254,6 +259,7 @@ export default class DashFlowPlugin extends Plugin {
     this.magicEmbedWidgets.start();
     this.mobileDashboard.start();
     this.opportunityWidgets.start();
+    this.projectKanbanWidgets.start();
     this.productExperience.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
@@ -268,6 +274,7 @@ export default class DashFlowPlugin extends Plugin {
     this.magicEmbedWidgets?.stop();
     this.mobileDashboard?.stop();
     this.opportunityWidgets?.stop();
+    this.projectKanbanWidgets?.stop();
     this.focusWidgets?.stop();
     this.dataFilterWidgets?.stop();
     this.aiNewsWidgets?.stop();

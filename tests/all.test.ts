@@ -32,3 +32,4 @@ import "./query-performance.test";
 import "./runtime-render.test";
 import "./product-hierarchy-reset.test";
 import "./opportunity-board.test";
+import "./project-kanban.test";
