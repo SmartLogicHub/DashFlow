@@ -1,6 +1,7 @@
 node_modules/
 main.js
 .worktrees/
+.superpowers/
 .DS_Store
 *.zip
 *.map
