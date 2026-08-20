@@ -362,6 +362,9 @@ export interface MagicEmbedWidgetConfig extends Record<string, unknown> {
   url: string;
   allowForms: boolean;
 }
+export interface OpportunityBoardWidgetConfig extends Record<string, unknown> {
+  file: string;
+}
 export interface CalendarWidgetConfig extends Record<string, unknown> {
   weekStart: CalendarWeekStart;
   showTasks: boolean;

@@ -30,6 +30,7 @@ import { MagicEmbedWidgetInteractionService } from "./services/MagicEmbedWidgetI
 import { MobileDashboardInteractionService } from "./services/MobileDashboardInteractionService";
 import { MorningBriefingService } from "./services/MorningBriefingService";
 import { NewsCurationService } from "./services/NewsCurationService";
+import { OpportunityWidgetInteractionService } from "./services/OpportunityWidgetInteractionService";
 import { PersonalHomeDesignService } from "./services/PersonalHomeDesignService";
 import { PresentationRuntimeService } from "./services/PresentationRuntimeService";
 import { ProductDesignService } from "./services/ProductDesignService";
@@ -56,6 +57,7 @@ import { registerDataWidgets } from "./widgets/data";
 import { registerEmbedWidgets } from "./widgets/embed";
 import { registerFocusWidgets } from "./widgets/focus";
 import { registerIntelligenceWidgets } from "./widgets/intelligence";
+import { registerOpportunityWidgets } from "./widgets/opportunity";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
 
 export default class DashFlowPlugin extends Plugin {
@@ -91,6 +93,7 @@ export default class DashFlowPlugin extends Plugin {
   focusWidgets!: FocusWidgetInteractionService;
   magicEmbedWidgets!: MagicEmbedWidgetInteractionService;
   mobileDashboard!: MobileDashboardInteractionService;
+  opportunityWidgets!: OpportunityWidgetInteractionService;
   weRead!: WeReadService;
   productDesign!: ProductDesignService;
   personalHomeDesign!: PersonalHomeDesignService;
@@ -105,6 +108,7 @@ export default class DashFlowPlugin extends Plugin {
     registerFocusWidgets(this.widgetRegistry);
     registerEmbedWidgets(this.widgetRegistry);
     registerIntelligenceWidgets(this.widgetRegistry);
+    registerOpportunityWidgets(this.widgetRegistry);
     await this.loadPluginData();
 
     this.dashboardManager = new DashboardManager(this, this.widgetRegistry);
@@ -175,6 +179,7 @@ export default class DashFlowPlugin extends Plugin {
     this.focusWidgets = new FocusWidgetInteractionService(this);
     this.magicEmbedWidgets = new MagicEmbedWidgetInteractionService(this);
     this.mobileDashboard = new MobileDashboardInteractionService(this);
+    this.opportunityWidgets = new OpportunityWidgetInteractionService(this);
     this.dashboardSwitcher = new DashboardSwitcherInteractionService(this);
     this.dashboardTransfer = new DashboardTransferInteractionService(this);
     this.contextSwitcher = new ContextSwitcherService(this);
@@ -248,6 +253,7 @@ export default class DashFlowPlugin extends Plugin {
     this.focusWidgets.start();
     this.magicEmbedWidgets.start();
     this.mobileDashboard.start();
+    this.opportunityWidgets.start();
     this.productExperience.start();
     this.dashboardSwitcher.start();
     this.dashboardTransfer.start();
@@ -261,6 +267,7 @@ export default class DashFlowPlugin extends Plugin {
     this.productExperience?.stop();
     this.magicEmbedWidgets?.stop();
     this.mobileDashboard?.stop();
+    this.opportunityWidgets?.stop();
     this.focusWidgets?.stop();
     this.dataFilterWidgets?.stop();
     this.aiNewsWidgets?.stop();
