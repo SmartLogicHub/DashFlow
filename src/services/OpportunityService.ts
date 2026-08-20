@@ -20,11 +20,11 @@ export interface OpportunityStage {
 }
 
 export const OPPORTUNITY_STAGES: OpportunityStage[] = [
-  { id: "inbox", label: "收集箱", color: "#8a8578" },
-  { id: "eval", label: "评估中", color: "#378ADD" },
-  { id: "doing", label: "进行中", color: "#185FA5" },
-  { id: "done", label: "已完成", color: "#639922" },
-  { id: "dropped", label: "已放弃", color: "#E24B4A" },
+  { id: "inbox", label: "收集箱", color: "var(--text-faint)" },
+  { id: "eval", label: "评估中", color: "var(--text-accent)" },
+  { id: "doing", label: "进行中", color: "var(--interactive-accent)" },
+  { id: "done", label: "已完成", color: "var(--text-success)" },
+  { id: "dropped", label: "已放弃", color: "var(--text-error)" },
 ];
 
 const DEFAULT_FILE = "DashFlow/Inbox Board.md";

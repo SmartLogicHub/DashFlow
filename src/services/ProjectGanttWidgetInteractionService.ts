@@ -9,7 +9,7 @@ const DAY_WIDTH = 14;
 const ROW_HEIGHT = 32;
 const HEADER_HEIGHT = 28;
 const LABEL_WIDTH = 140;
-const PALETTE = ["#378ADD", "#639922", "#d97706", "#8b5cf6", "#0ea5e9", "#e11d48"];
+const PALETTE = ["var(--df-info)", "var(--df-success)", "var(--df-warning)", "var(--df-purple)", "var(--df-cyan)", "var(--df-accent)"];
 
 const GANTT_STYLES = `
 .dashflow-project-gantt{overflow:auto;height:100%;border:1px solid var(--background-modifier-border);border-radius:10px;background:var(--background-primary)}
@@ -34,7 +34,7 @@ function daysToDate(days: number): string {
 function colorFor(id: string): string {
   let hash = 0;
   for (let i = 0; i < id.length; i += 1) hash = (hash * 31 + id.charCodeAt(i)) >>> 0;
-  return PALETTE[hash % PALETTE.length] ?? "#378ADD";
+  return PALETTE[hash % PALETTE.length] ?? "var(--df-info)";
 }
 
 export class ProjectGanttWidgetInteractionService {
@@ -154,7 +154,7 @@ export class ProjectGanttWidgetInteractionService {
       bar.setAttribute("height", String(ROW_HEIGHT - 12));
       bar.setAttribute("rx", "5");
       bar.setAttribute("class", "gantt-bar");
-      bar.setAttribute("fill", colorFor(project.id));
+      bar.style.fill = colorFor(project.id);
       bar.addEventListener("click", () => new ProjectDetailModal(this.plugin, project.id).open());
       svg.appendChild(bar);
     });

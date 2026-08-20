@@ -7,14 +7,14 @@ const STYLE_ID = "dashflow-project-kanban-styles";
 
 const KANBAN_STYLES = `
 .dashflow-project-kanban{display:flex;gap:10px;align-items:stretch;height:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:4px}
-.dashflow-project-kanban-column{flex:1 1 0;min-width:160px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--background-modifier-border);border-radius:11px;background:color-mix(in srgb,var(--background-secondary) 60%,transparent);padding:9px;overflow:hidden}
+.dashflow-project-kanban-column{flex:1 1 0;min-width:160px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--background-modifier-border);border-radius:11px;background:var(--df-surface-soft);padding:9px;overflow:hidden}
 .dashflow-project-kanban-head{display:flex;align-items:center;gap:6px;padding:0 2px}
 .dashflow-project-kanban-dot{width:8px;height:8px;border-radius:999px;flex:none}
 .dashflow-project-kanban-head strong{font-size:11px;font-weight:650;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dashflow-project-kanban-count{font-size:10px;color:var(--text-faint);font-variant-numeric:tabular-nums}
 .dashflow-project-kanban-list{display:flex;flex-direction:column;gap:6px;flex:1;min-height:24px;overflow-y:auto;padding:1px}
 .dashflow-project-kanban-list.is-drag-over{outline:2px dashed var(--interactive-accent);outline-offset:-2px;border-radius:8px}
-.dashflow-project-kanban-card{border:1px solid var(--background-modifier-border);border-radius:8px;background:var(--background-primary);padding:8px 9px;cursor:grab;font-size:11px;transition:border-color .14s ease,box-shadow .14s ease}
+.dashflow-project-kanban-card{border:1px solid var(--background-modifier-border);border-radius:8px;background:var(--df-surface-card);padding:8px 9px;cursor:grab;font-size:11px;transition:border-color .14s ease,box-shadow .14s ease}
 .dashflow-project-kanban-card:hover{border-color:color-mix(in srgb,var(--interactive-accent) 35%,var(--background-modifier-border));box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .dashflow-project-kanban-card.is-dragging{opacity:.5}
 .dashflow-project-kanban-name{font-weight:650;line-height:1.35;overflow-wrap:anywhere}
@@ -33,11 +33,11 @@ interface ColumnDef {
 }
 
 const COLUMNS: ColumnDef[] = [
-  { status: "planned", label: "计划中", color: "#8a8578" },
-  { status: "active", label: "进行中", color: "#378ADD" },
-  { status: "paused", label: "暂停", color: "#d97706" },
-  { status: "completed", label: "已完成", color: "#639922" },
-  { status: "archived", label: "已归档", color: "#9a9a9a" },
+  { status: "planned", label: "计划中", color: "var(--text-faint)" },
+  { status: "active", label: "进行中", color: "var(--interactive-accent)" },
+  { status: "paused", label: "暂停", color: "var(--text-warning)" },
+  { status: "completed", label: "已完成", color: "var(--text-success)" },
+  { status: "archived", label: "已归档", color: "var(--text-muted)" },
 ];
 
 export class ProjectKanbanWidgetInteractionService {

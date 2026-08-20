@@ -7,19 +7,19 @@ const STYLE_ID = "dashflow-opportunity-board-styles";
 
 const OPPORTUNITY_STYLES = `
 .dashflow-opportunity-board{display:flex;gap:10px;align-items:stretch;height:100%;overflow-x:auto;overflow-y:hidden;padding-bottom:4px}
-.dashflow-opportunity-column{flex:1 1 0;min-width:150px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--background-modifier-border);border-radius:11px;background:color-mix(in srgb,var(--background-secondary) 60%,transparent);padding:9px;overflow:hidden}
+.dashflow-opportunity-column{flex:1 1 0;min-width:150px;display:flex;flex-direction:column;gap:8px;border:1px solid var(--background-modifier-border);border-radius:11px;background:var(--df-surface-soft);padding:9px;overflow:hidden}
 .dashflow-opportunity-column-head{display:flex;align-items:center;gap:6px;padding:0 2px}
 .dashflow-opportunity-dot{width:8px;height:8px;border-radius:999px;flex:none}
 .dashflow-opportunity-column-head strong{font-size:11px;font-weight:650;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dashflow-opportunity-count{font-size:10px;color:var(--text-faint);font-variant-numeric:tabular-nums}
 .dashflow-opportunity-list{display:flex;flex-direction:column;gap:6px;flex:1;min-height:24px;overflow-y:auto;padding:1px}
 .dashflow-opportunity-list.is-drag-over{outline:2px dashed var(--interactive-accent);outline-offset:-2px;border-radius:8px}
-.dashflow-opportunity-card{position:relative;border:1px solid var(--background-modifier-border);border-radius:8px;background:var(--background-primary);padding:7px 9px;cursor:grab;font-size:11px;line-height:1.4;transition:border-color .14s ease,box-shadow .14s ease}
+.dashflow-opportunity-card{position:relative;border:1px solid var(--background-modifier-border);border-radius:8px;background:var(--df-surface-card);padding:7px 9px;cursor:grab;font-size:11px;line-height:1.4;transition:border-color .14s ease,box-shadow .14s ease}
 .dashflow-opportunity-card:hover{border-color:color-mix(in srgb,var(--interactive-accent) 35%,var(--background-modifier-border));box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .dashflow-opportunity-card.is-dragging{opacity:.5}
-.dashflow-opportunity-card.is-starred{border-color:color-mix(in srgb,#e6b800 45%,var(--background-modifier-border))}
+.dashflow-opportunity-card.is-starred{border-color:color-mix(in srgb,var(--text-warning) 45%,var(--background-modifier-border))}
 .dashflow-opportunity-card-title{overflow-wrap:anywhere}
-.dashflow-opportunity-card-star{position:absolute;top:5px;right:7px;color:#d4a900;font-size:10px}
+.dashflow-opportunity-card-star{position:absolute;top:5px;right:7px;color:var(--text-warning);font-size:10px}
 .dashflow-opportunity-card-link{position:absolute;bottom:5px;right:7px;appearance:none;border:0;background:transparent;color:var(--text-faint);cursor:pointer;font-size:10px;padding:0}
 .dashflow-opportunity-card-link:hover{color:var(--interactive-accent)}
 .dashflow-opportunity-add{appearance:none;border:1px dashed var(--background-modifier-border);border-radius:8px;background:transparent;color:var(--text-normal);font-size:11px;padding:6px 8px;width:100%}
