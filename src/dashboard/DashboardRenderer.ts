@@ -18,12 +18,14 @@ import { moveLayout, resizeLayout, resolveWidgetLayout } from "../layout/grid";
 import { createElement } from "../ui/dom";
 import { localDate } from "../utils/date";
 import { PLUGIN_VERSION } from "../constants";
+import { TimedConfirmation } from "../ui/timedConfirmation";
 
 export class DashboardRenderer {
   private editing = false;
   private configuringWidgetId: string | null = null;
   private modalDraft: { widgetId: string; title: string; config: Record<string, unknown> } | null = null;
   private readonly captureDrafts = new Map<string, string>();
+  private readonly destructiveConfirmation = new TimedConfirmation();
   private pointerCleanup: (() => void) | null = null;
   private frameId: number | null = null;
   private destroyed = false;
@@ -202,6 +204,13 @@ export class DashboardRenderer {
       remove.type = "button";
       remove.title = "移除";
       remove.addEventListener("click", async () => {
+        if (!this.destructiveConfirmation.request(`widget-remove:${dashboard.id}:${widget.id}`)) {
+          remove.textContent = "再次确认";
+          window.setTimeout(() => {
+            if (remove.isConnected) remove.textContent = "×";
+          }, 5_000);
+          return;
+        }
         await this.plugin.dashboardManager.removeWidget(dashboard.id, widget.id);
         if (this.configuringWidgetId === widget.id) {
           this.configuringWidgetId = null;
@@ -474,6 +483,13 @@ export class DashboardRenderer {
     const reset = createElement("button", "", "重置布局");
     reset.type = "button";
     reset.addEventListener("click", async () => {
+      if (!this.destructiveConfirmation.request(`layout-reset:${dashboard.id}`)) {
+        reset.textContent = "再次确认重置";
+        window.setTimeout(() => {
+          if (reset.isConnected) reset.textContent = "重置布局";
+        }, 5_000);
+        return;
+      }
       await this.plugin.dashboardManager.resetLayout(dashboard.id);
       this.render();
     });

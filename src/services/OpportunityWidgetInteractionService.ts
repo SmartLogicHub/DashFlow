@@ -1,3 +1,4 @@
+import { Notice } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { OpportunityBoardWidgetConfig, WidgetInstance } from "../models";
 import { OPPORTUNITY_STAGES, OpportunityService, type OpportunityItem, type OpportunityStage } from "./OpportunityService";
@@ -202,8 +203,25 @@ export class OpportunityWidgetInteractionService {
           rerender();
         },
         async () => {
-          await this.service.remove(file, item.id);
+          const removal = await this.service.remove(file, item.id);
           rerender();
+          if (!removal.removed) return;
+          const notice = new Notice("", 8_000);
+          const message = document.createElement("span");
+          message.textContent = `已删除「${item.title}」`;
+          const undo = document.createElement("button");
+          undo.type = "button";
+          undo.textContent = "撤销";
+          undo.className = "mod-cta";
+          let restored = false;
+          undo.addEventListener("click", async () => {
+            if (restored) return;
+            restored = true;
+            await this.service.restore(file, removal);
+            notice.hide();
+            rerender();
+          });
+          notice.messageEl.replaceChildren(message, undo);
         },
       ).open();
     });

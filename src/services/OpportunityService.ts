@@ -1,4 +1,5 @@
 import { Notice, TFile, normalizePath, parseYaml, type App } from "obsidian";
+import { removeOpportunityItem, restoreOpportunityItem, type OpportunityRemoval } from "../product/opportunityOrdering";
 
 export interface OpportunityItem {
   id: string;
@@ -126,9 +127,20 @@ export class OpportunityService {
     return this.update(filePath, id, { starred: !item.starred });
   }
 
-  async remove(filePath: string, id: string): Promise<OpportunityItem[]> {
+  async remove(filePath: string, id: string): Promise<OpportunityRemoval> {
     const items = await this.list(filePath);
-    return this.save(filePath, items.filter((item) => item.id !== id));
+    const removal = removeOpportunityItem(items, id);
+    if (!removal.removed) return removal;
+    const saved = await this.save(filePath, removal.items);
+    return { ...removal, items: saved };
+  }
+
+  async restore(filePath: string, removal: OpportunityRemoval): Promise<OpportunityItem[]> {
+    if (!removal.removed) return this.list(filePath);
+    const items = await this.list(filePath);
+    const restored = restoreOpportunityItem(items, removal);
+    if (restored.length === items.length) return items;
+    return this.save(filePath, restored);
   }
 
   private async save(filePath: string, items: OpportunityItem[]): Promise<OpportunityItem[]> {

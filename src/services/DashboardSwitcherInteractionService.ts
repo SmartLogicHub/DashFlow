@@ -1,4 +1,5 @@
 import { Notice } from "obsidian";
+import { TimedConfirmation } from "../ui/timedConfirmation";
 import type DashFlowPlugin from "../main";
 import type { CustomDashboardTemplate, DashboardDefinition } from "../models";
 import {
@@ -67,6 +68,7 @@ const SWITCHER_STYLES = `
 
 export class DashboardSwitcherInteractionService {
   private unsubscribeRender: (() => void) | null = null;
+  private readonly destructiveConfirmation = new TimedConfirmation();
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
@@ -306,12 +308,10 @@ export class DashboardSwitcherInteractionService {
     remove.classList.add("is-danger");
     remove.disabled = dashboards.length <= 1;
     remove.addEventListener("click", async () => {
-      if (remove.dataset.confirm !== "true") {
-        remove.dataset.confirm = "true";
+      if (!this.destructiveConfirmation.request(`dashboard-remove:${active.id}`)) {
         remove.textContent = "再次点击确认删除";
         window.setTimeout(() => {
           if (remove.isConnected) {
-            remove.dataset.confirm = "false";
             remove.textContent = "删除当前";
           }
         }, 3500);
@@ -438,12 +438,10 @@ export class DashboardSwitcherInteractionService {
     const remove = this.button("删除模板", `删除模板 ${template.name}`);
     remove.classList.add("dashflow-custom-template-delete");
     remove.addEventListener("click", async () => {
-      if (remove.dataset.confirm !== "true") {
-        remove.dataset.confirm = "true";
+      if (!this.destructiveConfirmation.request(`template-remove:${template.id}`)) {
         remove.textContent = "再次确认";
         window.setTimeout(() => {
           if (remove.isConnected) {
-            remove.dataset.confirm = "false";
             remove.textContent = "删除模板";
           }
         }, 3000);
