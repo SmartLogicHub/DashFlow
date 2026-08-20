@@ -37,6 +37,7 @@ export const DESIGN_SYSTEM_STYLES = `
 
   --df-control-sm: 28px;
   --df-control-md: 32px;
+  --df-shadow-hairline: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 .dashflow-home-hero-actions > button:nth-child(1) { min-width: 92px; }

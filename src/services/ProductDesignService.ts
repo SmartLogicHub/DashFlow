@@ -37,7 +37,7 @@ export const PRODUCT_STYLES = `
 
 /* Unified Command Bar: Stable, constant navigation without jitter. */
 .dashflow-command-bar {
-  min-height: 42px; margin: 0 0 12px; padding: 5px 6px; display: flex; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: none; border: 1px solid var(--df-cmd-border); border-radius: 10px; background: color-mix(in srgb, var(--df-cmd-surface) 96%, transparent); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+  min-height: 42px; margin: 0 0 12px; padding: 5px 6px; display: flex; align-items: center; gap: 6px; overflow-x: auto; scrollbar-width: none; border: 1px solid var(--df-cmd-border); border-radius: 10px; background: color-mix(in srgb, var(--df-cmd-surface) 96%, transparent); box-shadow: var(--df-shadow-hairline);
 }
 .dashflow-command-bar::before { content: "DashFlow"; flex: 0 0 auto; padding: 0 9px 0 6px; color: var(--df-cmd-text); font-size: 12.5px; font-weight: 750; letter-spacing: -0.01em; }
 .dashflow-command-nav, .dashflow-command-actions { display: flex; align-items: center; gap: 3px; flex: 0 0 auto; }
@@ -65,7 +65,7 @@ export const PRODUCT_STYLES = `
 
 /* Readable work grid: subtle borders, balanced typography, elegant bento cards. */
 .dashflow-command-shell .dashflow-grid { display: grid; align-items: stretch; position: relative; }
-.dashflow-command-shell .dashflow-widget { overflow: hidden; border: 1px solid var(--df-cmd-border)!important; border-radius: 12px!important; background: var(--df-cmd-surface)!important; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02)!important; transform: none!important; transition: border-color 140ms ease, box-shadow 140ms ease!important; }
+.dashflow-command-shell .dashflow-widget { overflow: hidden; border: 1px solid var(--df-cmd-border)!important; border-radius: 12px!important; background: var(--df-cmd-surface)!important; box-shadow: var(--df-shadow-hairline)!important; transform: none!important; transition: border-color 140ms ease, box-shadow 140ms ease!important; }
 .dashflow-command-shell .dashflow-grid:not(.is-editing) .dashflow-widget:hover { border-color: var(--df-cmd-border-strong)!important; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04)!important; }
 .dashflow-command-shell .dashflow-grid.is-editing .dashflow-widget { border-style: dashed!important; border-color: color-mix(in srgb, var(--df-cmd-purple) 56%, var(--df-cmd-border))!important; }
 .dashflow-command-shell .dashflow-widget-header { height: 38px!important; padding: 0 13px!important; border-bottom: 1px solid var(--df-cmd-border)!important; background: transparent!important; }
@@ -134,7 +134,7 @@ export const PRODUCT_STYLES = `
   border-radius: 10px!important;
   padding: 14px 16px!important;
   background: var(--df-cmd-surface)!important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02)!important;
+  box-shadow: var(--df-shadow-hairline)!important;
   transition: transform 140ms ease, border-color 140ms ease, box-shadow 140ms ease!important;
 }
 .dashflow-command-shell .dashflow-grid[data-product-section="projects"] .dashflow-project-row:hover {
@@ -149,7 +149,7 @@ export const PRODUCT_STYLES = `
 .dashflow-command-shell .dashflow-countdown-value { color: var(--df-cmd-text)!important; font-variant-numeric: tabular-nums; text-shadow: none!important; }
 
 /* Sub-pages: Inbox, Projects, Calendar, Habits, Review. High contrast, clean layout. */
-.dashflow-command-page { min-height: 360px; padding: 20px; border: 1px solid var(--df-cmd-border); border-radius: 12px; background: var(--df-cmd-surface); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02); }
+.dashflow-command-page { min-height: 360px; padding: 20px; border: 1px solid var(--df-cmd-border); border-radius: 12px; background: var(--df-cmd-surface); box-shadow: var(--df-shadow-hairline); }
 .dashflow-command-page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--df-cmd-border); }
 .dashflow-command-page-head small { display: block; margin-bottom: 3px; color: var(--df-cmd-muted); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; }
 .dashflow-command-page-head h2 { margin: 0; color: var(--df-cmd-text); font-size: 20px; font-weight: 750; }

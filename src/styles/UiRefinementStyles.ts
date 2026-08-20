@@ -187,7 +187,7 @@ export const UI_REFINEMENT_POLISH_STYLES = `
   border: 1px solid var(--df-cmd-border)!important;
   border-radius: 12px!important;
   background: color-mix(in srgb, var(--df-cmd-surface) 97%, transparent)!important;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02)!important;
+  box-shadow: var(--df-shadow-hairline)!important;
 }
 
 .dashflow-command-shell:not(.is-personal-home) .dashflow-widget-header {
