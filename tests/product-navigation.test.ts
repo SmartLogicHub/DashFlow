@@ -30,9 +30,7 @@ function habit(id: string, extra: Partial<Habit> = {}): Habit {
 
 test("Personal Home is separate from the dense Work dashboard", () => {
   assert.deepEqual(sectionWidgetTypes("today"), []);
-  assert.deepEqual(sectionWidgetTypes("work"), ["quick-capture", "tasks", "progress", "projects", "upcoming", "heatmap", "countdown"]);
-  assert.equal(sectionWidgetTypes("work").includes("weekly-review"), false);
-  assert.equal(sectionWidgetTypes("work").includes("vault-stats"), false);
+  assert.deepEqual(sectionWidgetTypes("work"), []);
 });
 
 test("Inbox contains only genuinely unprocessed open tasks", () => {

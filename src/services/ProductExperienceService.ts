@@ -4,6 +4,7 @@ import type { Task } from "../models";
 import { activityStreak } from "../activity/activityMath";
 import { PLUGIN_VERSION } from "../constants";
 import { inboxTasks, type ProductSection } from "../product/navigation";
+import { isWidgetVisibleInSection } from "../product/widgetVisibility";
 import { AIPlanModal } from "../ui/AIPlanModal";
 import { GlobalSearchModal } from "../ui/GlobalSearchModal";
 import { HabitEditorModal } from "../ui/HabitEditorModal";
@@ -14,7 +15,7 @@ import { TaskEditorModal } from "../ui/TaskEditorModal";
 import { PersonalHomeService } from "./PersonalHomeService";
 
 const COMMAND_SECTIONS: Array<{ id: ProductSection; label: string; icon: string }> = [
-  { id: "today", label: "主页", icon: "home" },
+  { id: "today", label: "今日", icon: "home" },
   { id: "work", label: "工作台", icon: "layout-dashboard" },
   { id: "projects", label: "项目", icon: "folder-kanban" },
   { id: "inbox", label: "收集箱", icon: "inbox" },
@@ -22,16 +23,6 @@ const COMMAND_SECTIONS: Array<{ id: ProductSection; label: string; icon: string 
   { id: "habits", label: "习惯", icon: "repeat-2" },
   { id: "review", label: "复盘", icon: "bar-chart-3" },
 ];
-
-const WORK_WIDGET_TYPES = new Set([
-  "quick-capture",
-  "tasks",
-  "progress",
-  "projects",
-  "upcoming",
-  "heatmap",
-  "countdown",
-]);
 
 export class ProductExperienceService {
   private unsubscribeRender: (() => void) | null = null;
@@ -153,7 +144,7 @@ export class ProductExperienceService {
       work.type = "button";
       work.className = "is-primary";
       work.addEventListener("click", () => this.openSection("work"));
-      const capture = this.text("button", "记录灵感");
+      const capture = this.text("button", "快速记录");
       capture.type = "button";
       capture.addEventListener("click", () => new QuickAddModal(this.plugin).open());
       actions.append(work, capture);
@@ -209,7 +200,7 @@ export class ProductExperienceService {
     copy.className = "dashflow-command-title-copy";
     const eyebrow = this.text("span", this.activeSection === "work" ? "WORK SYSTEM" : "SECOND BRAIN");
     eyebrow.className = "dashflow-command-eyebrow";
-    const heading = this.text("strong", dashboard.name === "Home" ? "MY DASHBOARD" : dashboard.name);
+    const heading = this.text("strong", dashboard.name === "Home" ? "默认工作台" : dashboard.name);
     heading.className = "dashflow-command-title";
     const meta = this.text("small", `Obsidian · Personal Dashboard · v${PLUGIN_VERSION}`);
     meta.className = "dashflow-command-meta";
@@ -493,35 +484,35 @@ export class ProductExperienceService {
       const type = widget.type;
 
       if (section === "work") {
-        const visible = WORK_WIDGET_TYPES.has(type);
+        const visible = isWidgetVisibleInSection(section, type, widget.hidden);
         this.setCardVisible(card, visible);
         if (visible) this.applySavedLayout(card, widget.layout);
         continue;
       }
 
       if (section === "projects") {
-        const visible = type === "projects";
+        const visible = isWidgetVisibleInSection(section, type, widget.hidden);
         this.setCardVisible(card, visible);
         if (visible) this.applySectionLayout(card, 1, 1, 12, 8);
         continue;
       }
 
       if (section === "calendar") {
-        const visible = type === "calendar";
+        const visible = isWidgetVisibleInSection(section, type, widget.hidden);
         this.setCardVisible(card, visible);
         if (visible) this.applySectionLayout(card, 1, 1, 12, 10);
         continue;
       }
 
       if (section === "habits") {
-        const visible = type === "habits" || type === "heatmap";
+        const visible = isWidgetVisibleInSection(section, type, widget.hidden);
         this.setCardVisible(card, visible);
         if (type === "habits") this.applySectionLayout(card, 1, 1, 8, 7);
         if (type === "heatmap") this.applySectionLayout(card, 9, 1, 4, 7);
         continue;
       }
 
-      const visible = type === "weekly-review" || type === "heatmap" || type === "vault-stats";
+      const visible = isWidgetVisibleInSection(section, type, widget.hidden);
       this.setCardVisible(card, visible);
       if (type === "weekly-review") this.applySectionLayout(card, 1, 1, 12, 8);
       if (type === "heatmap") this.applySectionLayout(card, 1, 9, 12, 5);

@@ -19,7 +19,7 @@ test("Personal Home and Work dashboard remain separate functional surfaces", () 
   assert.ok(experience.includes('section === "today"'));
   assert.ok(experience.includes("this.personalHome.render()"));
   assert.ok(experience.includes('section === "work"'));
-  assert.ok(experience.includes("WORK_WIDGET_TYPES"));
+  assert.ok(experience.includes("isWidgetVisibleInSection(section, type, widget.hidden)"));
   assert.ok(home.includes("长期成长"));
 });
 

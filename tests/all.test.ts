@@ -20,6 +20,7 @@ import "./design-system-consolidation.test";
 import "./interaction-dashboard.test";
 import "./data-boundary.test";
 import "./product-navigation.test";
+import "./widget-visibility.test";
 import "./studio-ui.test";
 import "./personal-home.test";
 import "./weread.test";

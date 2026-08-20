@@ -16,11 +16,11 @@ export class QuickAddModal extends Modal {
     contentEl.addClass("dashflow-quick-add-modal", "dashflow-editor-modal");
 
     const eyebrow = contentEl.createDiv("dashflow-modal-eyebrow dashflow-quick-add-eyebrow");
-    eyebrow.setText("QUICK ADD");
-    contentEl.createEl("h2", { text: "先记下来，再整理。" });
+    eyebrow.setText("QUICK CAPTURE");
+    contentEl.createEl("h2", { text: "快速记录" });
     contentEl.createEl("p", {
       cls: "dashflow-modal-lead dashflow-quick-add-lead",
-      text: "输入一句话按 Enter 会按 Quick Capture 设置保存；写入 Daily Note 时 #标签 与 [[双链]] 会原样保留。",
+      text: "先记下来，再整理。输入一句话按 Enter 会按捕捉设置保存；写入 Daily Note 时 #标签 与 [[双链]] 会原样保留。",
     });
 
     const composer = contentEl.createDiv("dashflow-quick-add-composer");

@@ -227,7 +227,7 @@ export default class DashFlowPlugin extends Plugin {
     });
 
     const sections: Array<[ProductSection, string]> = [
-      ["today", "打开 · 主页"], ["work", "打开 · 工作台"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
+      ["today", "打开 · 今日"], ["work", "打开 · 工作台"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
       ["calendar", "打开 · 日历"], ["habits", "打开 · 习惯"], ["review", "打开 · 复盘"],
     ];
     for (const [section, name] of sections) {

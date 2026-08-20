@@ -30,7 +30,7 @@ export function createDefaultDashboard(registry: WidgetRegistry): DashboardDefin
   ];
   return {
     id: "home",
-    name: "Home",
+    name: "默认工作台",
     icon: "layout-dashboard",
     settings: { columns: 12, gap: 8, rowHeight: 38, showHeader: true },
     widgets,
