@@ -10,6 +10,7 @@ const settingsSource = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8
 const runtimeSource = readFileSync("src/services/PresentationRuntimeService.ts", "utf8");
 const experienceSource = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const hierarchyStyles = readFileSync("src/styles/ProductHierarchyResetStyles.ts", "utf8");
+const settingsStyles = readFileSync("src/styles/SettingsStyles.ts", "utf8");
 const rendererSource = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
 
 test("theme choices expose three offline scenes and one Obsidian-following option", () => {
@@ -54,6 +55,11 @@ test("appearance uses accessible image cards and one shared Hero image runtime",
   assert.equal(settingsSource.includes("来自 Unsplash"), false);
   assert.ok(runtimeSource.includes("themePreviewUrl"));
   assert.ok(runtimeSource.includes("--df-hero-image"));
+});
+
+test("theme image cards neutralize Obsidian's fixed button height", () => {
+  assert.match(settingsStyles, /\.dashflow-theme-card\s*\{[^}]*display:\s*block\s*!important/s);
+  assert.match(settingsStyles, /\.dashflow-theme-card\s*\{[^}]*height:\s*auto\s*!important/s);
 });
 
 test("working Hero has one DOM owner and a compact shared-image frame", () => {

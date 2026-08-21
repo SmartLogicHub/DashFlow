@@ -77,8 +77,11 @@ export const SETTINGS_STYLES = `
 .dashflow-theme-picker > span { display: block; margin-top: 3px; color: var(--text-muted); font-size: 11.5px; line-height: 1.5; }
 .dashflow-theme-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: 12px; }
 .dashflow-theme-card {
+  display: block !important;
   position: relative;
   min-width: 0;
+  width: 100%;
+  height: auto !important;
   padding: 0;
   overflow: hidden;
   border: 1px solid var(--background-modifier-border);
