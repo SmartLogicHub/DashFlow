@@ -80,9 +80,8 @@ test("task overview keeps today and all-task metrics semantically separate", () 
   );
 
   assert.equal(overview.title, "任务概览");
-  assert.deepEqual(overview.metrics, [
-    { label: "今日任务", completed: 1, total: 2, percentage: 50 },
-    { label: "全部任务", completed: 2, total: 4, percentage: 50 },
-  ]);
-  assert.deepEqual(taskOverview([], []).metrics.map((metric) => metric.percentage), [0, 0]);
+  assert.deepEqual(overview.today, { label: "今日任务", completed: 1, total: 2, percentage: 50 });
+  assert.deepEqual(overview.all, { label: "全部任务", completed: 2, total: 4, percentage: 50 });
+  assert.equal(taskOverview([], []).today.total, 0);
+  assert.equal(taskOverview([], []).all.percentage, 0);
 });
