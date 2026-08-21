@@ -104,6 +104,125 @@ export const PRODUCT_STYLES = `
 .dashflow-progress-ring span { margin-top: 3px; color: var(--df-cmd-muted)!important; font-size: 9.5px!important; font-weight: 650; letter-spacing: 0.06em; }
 .dashflow-progress-caption { color: var(--df-cmd-muted); font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: center; }
 
+/* Task overview: today is the decision, the all-task total is context. */
+.dashflow-task-overview {
+  box-sizing: border-box;
+  min-height: 112px;
+  height: 100%;
+  padding: 12px 16px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(136px, 0.85fr);
+  gap: 16px;
+  align-items: stretch;
+}
+.dashflow-task-overview-primary {
+  min-width: 0;
+  padding-right: 16px;
+  display: grid;
+  grid-template-columns: 76px minmax(0, 1fr);
+  grid-template-areas:
+    "label label"
+    "ring caption";
+  column-gap: 11px;
+  row-gap: 7px;
+  align-items: center;
+  border-right: 1px solid color-mix(in srgb, var(--df-cmd-border) 72%, transparent);
+}
+.dashflow-task-overview-label {
+  grid-area: label;
+  color: var(--df-cmd-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.dashflow-task-overview-ring {
+  grid-area: ring;
+  position: relative;
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--df-home-accent, var(--interactive-accent)) var(--dashflow-progress),
+    color-mix(in srgb, var(--df-cmd-border) 64%, var(--df-cmd-soft)) 0
+  );
+}
+.dashflow-task-overview-ring::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border-radius: inherit;
+  background: var(--df-cmd-surface);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--df-cmd-border) 72%, transparent);
+}
+.dashflow-task-overview-ring > div { position: relative; z-index: 1; }
+.dashflow-task-overview-ring strong {
+  color: var(--df-cmd-text);
+  font-size: 21px;
+  font-weight: 780;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.dashflow-task-overview-primary .dashflow-task-overview-caption {
+  grid-area: caption;
+  align-self: center;
+  color: var(--df-cmd-text);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.dashflow-task-overview-empty {
+  grid-column: 1 / -1;
+  min-height: 68px;
+  display: grid;
+  place-items: center start;
+  color: var(--df-cmd-muted);
+  font-size: 12px;
+}
+.dashflow-task-overview-secondary {
+  min-width: 0;
+  padding: 7px 0;
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+.dashflow-task-overview-secondary-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--df-cmd-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+.dashflow-task-overview-secondary-heading strong {
+  color: var(--df-cmd-text);
+  font-size: 21px;
+  font-weight: 780;
+  letter-spacing: -0.04em;
+  font-variant-numeric: tabular-nums;
+}
+.dashflow-task-overview-secondary .dashflow-task-overview-caption {
+  color: var(--df-cmd-muted);
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.dashflow-task-overview-bar {
+  height: 5px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--df-cmd-border) 64%, var(--df-cmd-soft));
+}
+.dashflow-task-overview-bar-fill {
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: var(--df-home-accent, var(--interactive-accent));
+}
+
 /* Projects: structured rows with clear status and progress steps. */
 .dashflow-command-shell .dashflow-project-list { padding: 4px 12px 10px!important; }
 .dashflow-command-shell .dashflow-project-row { min-height: 46px!important; padding: 7px 4px!important; display: grid!important; grid-template-columns: minmax(0, 1fr) minmax(130px, 200px) auto; align-items: center; gap: 14px; border: 0!important; border-bottom: 1px solid color-mix(in srgb, var(--df-cmd-border) 65%, transparent)!important; border-radius: 0!important; background: transparent!important; box-shadow: none!important; cursor: pointer; transition: background 120ms ease; }
@@ -254,6 +373,11 @@ export const PRODUCT_STYLES = `
   .dashflow-command-nav .dashflow-command-label { display: none; }
   .dashflow-command-nav .dashflow-command-button { width: 30px; padding: 0; justify-content: center; }
   .dashflow-command-shell .dashflow-progress-ring { width: 62px!important; height: 62px!important; }
+  .dashflow-task-overview { padding: 10px 12px; grid-template-columns: minmax(0, 1.1fr) minmax(116px, 0.9fr); gap: 10px; }
+  .dashflow-task-overview-primary { padding-right: 10px; grid-template-columns: 60px minmax(0, 1fr); column-gap: 8px; }
+  .dashflow-task-overview-ring { width: 60px; height: 60px; }
+  .dashflow-task-overview-ring strong, .dashflow-task-overview-secondary-heading strong { font-size: 18px; }
+  .dashflow-task-overview-primary .dashflow-task-overview-caption, .dashflow-task-overview-secondary .dashflow-task-overview-caption { font-size: 10px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .dashflow-command-shell *, .dashflow-command-bar * { transition: none!important; animation: none!important; scroll-behavior: auto!important; }

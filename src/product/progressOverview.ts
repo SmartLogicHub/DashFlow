@@ -13,8 +13,6 @@ export interface TaskOverview {
   title: "任务概览";
   today: TaskOverviewMetric;
   all: TaskOverviewMetric;
-  /** @deprecated Use today and all so callers do not rely on array order. */
-  metrics: [TaskOverviewMetric, TaskOverviewMetric];
 }
 
 function metric(label: TaskOverviewMetric["label"], items: readonly CompletionItem[]): TaskOverviewMetric {
@@ -30,6 +28,5 @@ export function taskOverview(todayItems: readonly CompletionItem[], allItems: re
     title: "任务概览",
     today,
     all,
-    metrics: [today, all],
   };
 }

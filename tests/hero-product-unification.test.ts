@@ -11,6 +11,7 @@ const runtimeSource = readFileSync("src/services/PresentationRuntimeService.ts",
 const experienceSource = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const hierarchyStyles = readFileSync("src/styles/ProductHierarchyResetStyles.ts", "utf8");
 const settingsStyles = readFileSync("src/styles/SettingsStyles.ts", "utf8");
+const productDesignSource = readFileSync("src/services/ProductDesignService.ts", "utf8");
 const rendererSource = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
 
 test("theme choices expose three offline scenes and one Obsidian-following option", () => {
@@ -66,6 +67,14 @@ test("task overview gives today a primary DOM structure", () => {
   assert.ok(experienceSource.includes("dashflow-task-overview-bar-fill"));
 });
 
+test("task overview layout owns isolated primary and secondary styles", () => {
+  assert.ok(productDesignSource.includes(".dashflow-task-overview"));
+  assert.ok(productDesignSource.includes(".dashflow-task-overview-primary"));
+  assert.ok(productDesignSource.includes(".dashflow-task-overview-secondary"));
+  assert.ok(productDesignSource.includes(".dashflow-task-overview-bar-fill"));
+  assert.equal(experienceSource.includes("dashflow-progress-pair"), false);
+});
+
 test("theme image cards neutralize Obsidian's fixed button height", () => {
   assert.match(settingsStyles, /\.dashflow-theme-card\s*\{[^}]*display:\s*block\s*!important/s);
   assert.match(settingsStyles, /\.dashflow-theme-card\s*\{[^}]*height:\s*auto\s*!important/s);
@@ -89,6 +98,7 @@ test("task overview keeps today and all-task metrics semantically separate", () 
   );
 
   assert.equal(overview.title, "任务概览");
+  assert.deepEqual(Object.keys(overview), ["title", "today", "all"]);
   assert.deepEqual(overview.today, { label: "今日任务", completed: 1, total: 2, percentage: 50 });
   assert.deepEqual(overview.all, { label: "全部任务", completed: 2, total: 4, percentage: 50 });
   assert.equal(taskOverview([], []).today.total, 0);
