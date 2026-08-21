@@ -57,6 +57,15 @@ test("appearance uses accessible image cards and one shared Hero image runtime",
   assert.ok(runtimeSource.includes("--df-hero-image"));
 });
 
+test("task overview gives today a primary DOM structure", () => {
+  assert.ok(experienceSource.includes("overview.today"));
+  assert.ok(experienceSource.includes("dashflow-task-overview"));
+  assert.ok(experienceSource.includes("dashflow-task-overview-primary"));
+  assert.ok(experienceSource.includes("dashflow-task-overview-secondary"));
+  assert.ok(experienceSource.includes("dashflow-task-overview-empty"));
+  assert.ok(experienceSource.includes("dashflow-task-overview-bar-fill"));
+});
+
 test("theme image cards neutralize Obsidian's fixed button height", () => {
   assert.match(settingsStyles, /\.dashflow-theme-card\s*\{[^}]*display:\s*block\s*!important/s);
   assert.match(settingsStyles, /\.dashflow-theme-card\s*\{[^}]*height:\s*auto\s*!important/s);

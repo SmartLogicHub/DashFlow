@@ -5,7 +5,7 @@ import { activityStreak } from "../activity/activityMath";
 import { PLUGIN_VERSION } from "../constants";
 import { inboxTasks, type ProductSection } from "../product/navigation";
 import { heroPresentationFor } from "../product/heroPresentation";
-import { taskOverview } from "../product/progressOverview";
+import { taskOverview, type TaskOverviewMetric } from "../product/progressOverview";
 import { isWidgetVisibleInSection } from "../product/widgetVisibility";
 import { AIPlanModal } from "../ui/AIPlanModal";
 import { GlobalSearchModal } from "../ui/GlobalSearchModal";
@@ -340,34 +340,64 @@ export class ProductExperienceService {
     const snapshot = this.plugin.vaultIndex.getSnapshot();
     const todayTasks = this.plugin.taskService.today();
     const overview = taskOverview(todayTasks, snapshot.tasks);
-    const signature = overview.metrics.map((metric) => `${metric.completed}/${metric.total}`).join("|");
+    const signature = `${overview.today.completed}/${overview.today.total}|${overview.all.completed}/${overview.all.total}`;
     if (body.dataset.commandProgress === signature) return;
     body.dataset.commandProgress = signature;
 
     const wrap = document.createElement("div");
-    wrap.className = "dashflow-progress-wrap";
-    const pair = document.createElement("div");
-    pair.className = "dashflow-progress-pair";
-    pair.append(...overview.metrics.map((metric) => (
-      this.progressMetric(metric.label, metric.percentage, `${metric.completed} / ${metric.total} 已完成`)
-    )));
-    wrap.appendChild(pair);
+    wrap.className = "dashflow-task-overview";
+    wrap.append(
+      this.taskOverviewPrimary(overview.today),
+      this.taskOverviewSecondary(overview.all),
+    );
     body.replaceChildren(wrap);
   }
 
-  private progressMetric(label: string, progress: number, caption: string): HTMLElement {
-    const metric = document.createElement("div");
-    metric.className = "dashflow-progress-metric";
+  private taskOverviewPrimary(metric: TaskOverviewMetric): HTMLElement {
+    const primary = document.createElement("div");
+    primary.className = "dashflow-task-overview-primary";
+    const label = this.text("span", "今日任务");
+    label.className = "dashflow-task-overview-label";
+    primary.appendChild(label);
+
+    if (metric.total === 0) {
+      const empty = this.text("div", "今天暂无待办");
+      empty.className = "dashflow-task-overview-empty";
+      primary.appendChild(empty);
+      return primary;
+    }
+
     const ring = document.createElement("div");
-    ring.className = "dashflow-progress-ring";
-    ring.style.setProperty("--dashflow-progress", `${progress * 3.6}deg`);
+    ring.className = "dashflow-task-overview-ring";
+    ring.style.setProperty("--dashflow-progress", `${metric.percentage * 3.6}deg`);
     const center = document.createElement("div");
-    center.append(this.text("strong", `${progress}%`), this.text("span", label));
+    center.appendChild(this.text("strong", `${metric.percentage}%`));
     ring.appendChild(center);
-    const meta = this.text("div", caption);
-    meta.className = "dashflow-progress-caption";
-    metric.append(ring, meta);
-    return metric;
+    const caption = this.text("div", `${metric.completed} / ${metric.total} 已完成`);
+    caption.className = "dashflow-task-overview-caption";
+    primary.append(ring, caption);
+    return primary;
+  }
+
+  private taskOverviewSecondary(metric: TaskOverviewMetric): HTMLElement {
+    const secondary = document.createElement("div");
+    secondary.className = "dashflow-task-overview-secondary";
+    const heading = document.createElement("div");
+    heading.className = "dashflow-task-overview-secondary-heading";
+    heading.append(
+      this.text("span", "全部任务"),
+      this.text("strong", `${metric.percentage}%`),
+    );
+    const caption = this.text("div", `${metric.completed} / ${metric.total} 已完成`);
+    caption.className = "dashflow-task-overview-caption";
+    const bar = document.createElement("div");
+    bar.className = "dashflow-task-overview-bar";
+    const fill = document.createElement("div");
+    fill.className = "dashflow-task-overview-bar-fill";
+    fill.style.width = `${metric.percentage}%`;
+    bar.appendChild(fill);
+    secondary.append(heading, caption, bar);
+    return secondary;
   }
 
   private decorateProjectWidget(grid: HTMLElement): void {
