@@ -50,21 +50,6 @@ export const WORKFLOW_STYLES = `
   justify-content: center;
   border: 1px solid var(--background-modifier-border);
 }
-.dashflow-quick-add-target {
-  margin: -4px 2px 12px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  color: var(--text-muted);
-  font-size: var(--df-type-label, 11px);
-}
-.dashflow-quick-add-target button {
-  min-height: 26px;
-  padding: 3px 8px;
-  font-size: var(--df-type-label, 11px);
-  border-radius: 7px;
-}
 .dashflow-capture-destination-options {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

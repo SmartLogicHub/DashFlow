@@ -12,6 +12,7 @@ const calendar = readFileSync("src/services/CalendarWidgetInteractionService.ts"
 const habitWidget = readFileSync("src/services/HabitWidgetInteractionService.ts", "utf8");
 const activityWidget = readFileSync("src/services/ActivityWidgetInteractionService.ts", "utf8");
 const settingsStyles = readFileSync("src/styles/SettingsStyles.ts", "utf8");
+const workflowStyles = readFileSync("src/styles/WorkflowStyles.ts", "utf8");
 
 function filesBelow(directory: string): string[] {
   return readdirSync(directory).flatMap((name) => {
@@ -220,9 +221,12 @@ test("Quick Add keeps its target and actions aligned at desktop and narrow width
   assert.match(target, /display:\s*flex/);
   assert.match(target, /justify-content:\s*space-between/);
   assert.match(target, /align-items:\s*center/);
+  assert.match(target, /margin:\s*6px 2px 0/);
   assert.match(action, /display:\s*grid/);
   assert.match(action, /grid-template-columns:\s*22px minmax\(0, 1fr\)/);
   assert.ok(presentation.includes(".dashflow-quick-add-submit"));
   assert.ok(presentation.includes(".dashflow-quick-add-section-label"));
   assert.ok(presentation.includes(".dashflow-quick-add-actions { grid-template-columns: 1fr; }"));
+  assert.ok(presentation.includes(".dashflow-quick-add-target { flex-wrap: wrap; }"));
+  assert.equal(workflowStyles.includes(".dashflow-quick-add-target"), false);
 });

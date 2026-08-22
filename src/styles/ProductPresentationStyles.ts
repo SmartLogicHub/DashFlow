@@ -899,6 +899,8 @@ export const PRODUCT_PRESENTATION_STYLES = `
 
   .dashflow-project-detail-head { flex-direction: column; gap: 10px; }
   .dashflow-project-detail-meta { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashflow-quick-add-target { flex-wrap: wrap; }
+  .dashflow-quick-add-target-action { margin-left: auto; }
   .dashflow-quick-add-actions { grid-template-columns: 1fr; }
 }
 
