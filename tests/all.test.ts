@@ -44,3 +44,4 @@ import "./project-gantt.test";
 import "./hero-product-unification.test";
 import "./feature-catalog.test";
 import "./section-policy.test";
+import "./feature-destinations.test";

@@ -48,7 +48,7 @@ import { VaultQueryService } from "./services/VaultQueryService";
 import { WeeklyReviewService } from "./services/WeeklyReviewService";
 import { WeeklyReviewWidgetInteractionService } from "./services/WeeklyReviewWidgetInteractionService";
 import { WeReadService } from "./services/WeReadService";
-import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
+import { DashFlowSettingsTab, type SettingsSection } from "./settings/DashFlowSettingsTab";
 import { AIPlanModal } from "./ui/AIPlanModal";
 import { GlobalSearchModal } from "./ui/GlobalSearchModal";
 import { HabitEditorModal } from "./ui/HabitEditorModal";
@@ -68,6 +68,13 @@ import { registerIntelligenceWidgets } from "./widgets/intelligence";
 import { registerKanbanWidgets } from "./widgets/kanban";
 import { registerOpportunityWidgets } from "./widgets/opportunity";
 import { WidgetRegistry } from "./widgets/WidgetRegistry";
+
+interface SettingsHost {
+  setting?: {
+    open(): void;
+    openTabById(id: string): void;
+  };
+}
 
 export default class DashFlowPlugin extends Plugin {
   data!: DashFlowData;
@@ -115,6 +122,7 @@ export default class DashFlowPlugin extends Plugin {
   designSystem!: DesignSystemService;
   presentationRuntime!: PresentationRuntimeService;
   productExperience!: ProductExperienceService;
+  settingsTab!: DashFlowSettingsTab;
 
   async onload(): Promise<void> {
     this.widgetRegistry = new WidgetRegistry();
@@ -216,7 +224,8 @@ export default class DashFlowPlugin extends Plugin {
 
     for (const command of COMMAND_CATALOG) this.registerProductCommand(command);
 
-    this.addSettingTab(new DashFlowSettingsTab(this.app, this));
+    this.settingsTab = new DashFlowSettingsTab(this.app, this);
+    this.addSettingTab(this.settingsTab);
     this.productDesign.start();
     this.personalHomeDesign.start();
     this.designSystem.start();
@@ -287,6 +296,17 @@ export default class DashFlowPlugin extends Plugin {
   async activateSection(section: ProductSection): Promise<void> {
     await this.activateDashboard();
     this.productExperience.openSection(section);
+  }
+
+  openSettings(section: SettingsSection = "appearance"): void {
+    const app = this.app as typeof this.app & SettingsHost;
+    if (!app.setting) {
+      new Notice("请打开 Obsidian 设置 → DashFlow。");
+      return;
+    }
+    app.setting.open();
+    app.setting.openTabById(this.manifest.id);
+    this.settingsTab.openSection(section);
   }
 
   private registerProductCommand(command: CommandDefinition): void {

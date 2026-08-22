@@ -9,7 +9,7 @@ import { TimedConfirmation } from "../ui/timedConfirmation";
 
 const WEREAD_KEY_URL = "https://weread.qq.com/r/weread-skills";
 
-type SettingsSection = "appearance" | "workflow" | "integration" | "advanced";
+export type SettingsSection = "appearance" | "workflow" | "integration" | "advanced";
 
 export class DashFlowSettingsTab extends PluginSettingTab {
   private activeSection: SettingsSection = "appearance";
@@ -50,6 +50,11 @@ export class DashFlowSettingsTab extends PluginSettingTab {
       this.reindexTimer = null;
       void this.dashFlow.vaultIndex.reindexAll();
     }
+  }
+
+  openSection(section: SettingsSection): void {
+    this.activeSection = section;
+    this.display();
   }
 
   display(): void {

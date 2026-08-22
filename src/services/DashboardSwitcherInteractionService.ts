@@ -78,6 +78,10 @@ export class DashboardSwitcherInteractionService {
     this.plugin.dashboardRender.forEachRoot((root) => this.decorate(root));
   }
 
+  openManager(): void {
+    this.openManageModal();
+  }
+
   stop(): void {
     this.unsubscribeRender?.();
     this.unsubscribeRender = null;
