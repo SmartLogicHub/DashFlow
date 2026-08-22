@@ -11,6 +11,8 @@ export const FEATURE_HUB_STYLES = `
   display: flex;
   flex-direction: column;
   gap: 18px;
+  max-height: min(78vh, 760px);
+  overflow: hidden;
   padding: 4px 2px 12px;
 }
 
@@ -33,6 +35,94 @@ export const FEATURE_HUB_STYLES = `
 }
 .dashflow-feature-hub-close svg { width: 16px; height: 16px; }
 .dashflow-feature-hub-lead { margin: -8px 0 0; color: var(--df-hub-muted); line-height: 1.65; }
+
+.dashflow-feature-hub-tools {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+}
+.dashflow-feature-hub-search-wrap {
+  position: relative;
+  min-width: 0;
+}
+.dashflow-feature-hub-search-icon {
+  position: absolute;
+  top: 50%;
+  left: 11px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  pointer-events: none;
+  transform: translateY(-50%);
+}
+.dashflow-feature-hub-search-icon svg { width: 15px; height: 15px; }
+.dashflow-feature-hub-search {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 36px;
+  padding: 7px 12px 7px 34px;
+  border: 1px solid var(--df-hub-border);
+  border-radius: 9px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  font-size: 13px;
+}
+.dashflow-feature-hub-filters {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border: 1px solid var(--df-hub-border);
+  border-radius: 9px;
+  background: var(--background-secondary);
+}
+.dashflow-feature-hub-filters button {
+  min-height: 28px;
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+.dashflow-feature-hub-filters button.is-active {
+  background: var(--background-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+  color: var(--text-normal);
+}
+.dashflow-feature-hub-search:focus-visible,
+.dashflow-feature-hub-filters button:focus-visible,
+.dashflow-feature-hub-empty button:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
+}
+.dashflow-feature-hub-results {
+  min-height: 0;
+  padding-right: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+.dashflow-feature-hub-empty {
+  min-height: 220px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 32px;
+  color: var(--text-muted);
+  text-align: center;
+}
+.dashflow-feature-hub-empty strong { color: var(--text-normal); font-size: 14px; }
+.dashflow-feature-hub-empty p { margin: 7px 0 14px; font-size: 12px; }
+.dashflow-feature-hub-empty button { min-height: 34px; padding: 6px 13px; border-radius: 8px; }
 
 .dashflow-feature-hub-group { display: flex; flex-direction: column; gap: 9px; }
 .dashflow-feature-hub-group-title {
@@ -184,6 +274,9 @@ export const FEATURE_HUB_STYLES = `
 
 @media (max-width: 760px) {
   .modal:has(.dashflow-feature-hub) { width: calc(100vw - 20px); }
+  .dashflow-feature-hub-tools { grid-template-columns: 1fr; }
+  .dashflow-feature-hub-filters { overflow-x: auto; }
+  .dashflow-feature-hub-filters button { flex: 1 0 auto; }
   .dashflow-feature-hub-grid { grid-template-columns: 1fr; }
   .dashflow-feature-hub-item { grid-template-columns: 34px minmax(0, 1fr) auto 18px; }
   .dashflow-command-actions .dashflow-feature-action { display: flex!important; }

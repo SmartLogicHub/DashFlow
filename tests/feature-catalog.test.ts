@@ -3,6 +3,7 @@ import test from "node:test";
 import { readFileSync } from "node:fs";
 import {
   FEATURE_CATALOG,
+  filterFeatures,
   featureStatus,
   type FeatureStatusContext,
 } from "../src/product/featureCatalog";
@@ -81,6 +82,30 @@ test("feature state keeps placement and availability independent", () => {
     ...emptyContext,
     addedWidgetTypes: new Set(["focus"]),
   }).placement, "added");
+});
+
+test("feature discovery searches normalized names and descriptions", () => {
+  const statuses = new Map(FEATURE_CATALOG.map((feature) => [feature.id, featureStatus(feature, emptyContext)]));
+  const projectMatches = filterFeatures(FEATURE_CATALOG, statuses, { query: "  项目 ", mode: "all" });
+  assert.ok(projectMatches.some((feature) => feature.id === "widget-projects"));
+  assert.ok(projectMatches.some((feature) => feature.id === "new-project"));
+  assert.ok(projectMatches.every((feature) => `${feature.name} ${feature.description}`.includes("项目")));
+
+  assert.deepEqual(
+    filterFeatures(FEATURE_CATALOG, statuses, { query: "FoCuS", mode: "all" }).map((feature) => feature.id),
+    ["widget-focus"],
+  );
+});
+
+test("feature discovery filters not-added and needs-attention states", () => {
+  const statuses = new Map(FEATURE_CATALOG.map((feature) => [feature.id, featureStatus(feature, emptyContext)]));
+  const notAdded = filterFeatures(FEATURE_CATALOG, statuses, { query: "", mode: "not-added" });
+  const needsAttention = filterFeatures(FEATURE_CATALOG, statuses, { query: "", mode: "needs-attention" });
+
+  assert.ok(notAdded.length > 0);
+  assert.ok(notAdded.every((feature) => statuses.get(feature.id)?.placement === "not-added"));
+  assert.ok(needsAttention.length > 0);
+  assert.ok(needsAttention.every((feature) => statuses.get(feature.id)?.availability !== "ready"));
 });
 
 test("every command is classified and feature commands map to the feature catalog", () => {

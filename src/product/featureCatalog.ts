@@ -44,6 +44,13 @@ export interface FeatureStatus {
   configured?: boolean;
 }
 
+export type FeatureFilterMode = "all" | "not-added" | "needs-attention";
+
+export interface FeatureFilter {
+  query: string;
+  mode: FeatureFilterMode;
+}
+
 export const FEATURE_GROUP_LABELS: Record<FeatureGroup, string> = {
   capture: "捕捉与整理",
   execution: "执行与规划",
@@ -116,4 +123,19 @@ export function featureStatus(feature: FeatureDefinition, context: FeatureStatus
     };
   }
   return { placement, availability: "ready" };
+}
+
+export function filterFeatures(
+  features: readonly FeatureDefinition[],
+  statuses: ReadonlyMap<string, FeatureStatus>,
+  filter: FeatureFilter,
+): FeatureDefinition[] {
+  const query = filter.query.trim().toLocaleLowerCase();
+  return features.filter((feature) => {
+    const status = statuses.get(feature.id);
+    if (filter.mode === "not-added" && status?.placement !== "not-added") return false;
+    if (filter.mode === "needs-attention" && status?.availability === "ready") return false;
+    if (!query) return true;
+    return `${feature.name} ${feature.description}`.toLocaleLowerCase().includes(query);
+  });
 }

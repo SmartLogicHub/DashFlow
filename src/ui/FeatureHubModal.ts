@@ -3,9 +3,12 @@ import type DashFlowPlugin from "../main";
 import {
   FEATURE_CATALOG,
   FEATURE_GROUP_LABELS,
+  filterFeatures,
   featureStatus,
   type FeatureAction,
   type FeatureDefinition,
+  type FeatureFilter,
+  type FeatureFilterMode,
   type FeatureGroup,
   type FeatureStatus,
 } from "../product/featureCatalog";
@@ -22,6 +25,12 @@ import { WorkflowSettingsModal } from "./WorkflowSettingsModal";
 
 const FEATURE_GROUPS: readonly FeatureGroup[] = ["capture", "execution", "projects", "review", "intelligence"];
 
+const FEATURE_FILTERS: ReadonlyArray<{ mode: FeatureFilterMode; label: string }> = [
+  { mode: "all", label: "全部" },
+  { mode: "not-added", label: "未添加" },
+  { mode: "needs-attention", label: "待配置" },
+];
+
 const PLACEMENT_LABELS = {
   added: "已添加",
   "not-added": "未添加",
@@ -35,6 +44,10 @@ const AVAILABILITY_LABELS = {
 } as const;
 
 export class FeatureHubModal extends Modal {
+  private filter: FeatureFilter = { query: "", mode: "all" };
+  private resultsEl: HTMLDivElement | null = null;
+  private searchInput: HTMLInputElement | null = null;
+
   constructor(private readonly plugin: DashFlowPlugin) {
     super(plugin.app);
   }
@@ -60,19 +73,85 @@ export class FeatureHubModal extends Modal {
       text: "查看当前工作台已经使用的组件，补上缺少的视图，或直接进入创建、搜索与集成设置。",
     });
 
+    const tools = contentEl.createDiv("dashflow-feature-hub-tools");
+    const searchWrap = tools.createDiv("dashflow-feature-hub-search-wrap");
+    const searchIcon = searchWrap.createSpan("dashflow-feature-hub-search-icon");
+    setIcon(searchIcon, "search");
+    const search = document.createElement("input");
+    search.type = "search";
+    search.className = "dashflow-feature-hub-search";
+    search.placeholder = "搜索名称或说明";
+    search.setAttribute("aria-label", "搜索功能");
+    search.addEventListener("input", () => {
+      this.filter = { ...this.filter, query: search.value };
+      this.renderResults();
+    });
+    searchWrap.appendChild(search);
+    this.searchInput = search;
+
+    const filters = tools.createDiv("dashflow-feature-hub-filters");
+    filters.setAttribute("aria-label", "按状态筛选功能");
+    for (const option of FEATURE_FILTERS) {
+      const button = filters.createEl("button", { text: option.label });
+      button.type = "button";
+      button.dataset.featureFilter = option.mode;
+      button.addEventListener("click", () => {
+        this.filter = { ...this.filter, mode: option.mode };
+        this.syncFilterControls();
+        this.renderResults();
+      });
+    }
+
+    this.resultsEl = contentEl.createDiv("dashflow-feature-hub-results");
+    this.syncFilterControls();
+    this.renderResults();
+  }
+
+  private renderResults(): void {
+    if (!this.resultsEl) return;
+    this.resultsEl.replaceChildren();
+
     const context = this.statusContext();
+    const statuses = new Map(FEATURE_CATALOG.map((feature) => [feature.id, featureStatus(feature, context)]));
+    const matches = filterFeatures(FEATURE_CATALOG, statuses, this.filter);
+    if (matches.length === 0) {
+      const empty = this.resultsEl.createDiv("dashflow-feature-hub-empty");
+      empty.createEl("strong", { text: "没有符合条件的功能" });
+      empty.createEl("p", { text: "换一个关键词，或清除当前状态筛选。" });
+      const clear = empty.createEl("button", { text: "清除筛选" });
+      clear.type = "button";
+      clear.addEventListener("click", () => {
+        this.filter = { query: "", mode: "all" };
+        if (this.searchInput) this.searchInput.value = "";
+        this.syncFilterControls();
+        this.renderResults();
+        this.searchInput?.focus();
+      });
+      return;
+    }
+
     for (const group of FEATURE_GROUPS) {
-      const features = FEATURE_CATALOG.filter((feature) => feature.group === group);
+      const features = matches.filter((feature) => feature.group === group);
       if (features.length === 0) continue;
-      const section = contentEl.createEl("section", { cls: "dashflow-feature-hub-group" });
+      const section = this.resultsEl.createEl("section", { cls: "dashflow-feature-hub-group" });
       section.createEl("h3", { cls: "dashflow-feature-hub-group-title", text: FEATURE_GROUP_LABELS[group] });
       const grid = section.createDiv("dashflow-feature-hub-grid");
-      for (const feature of features) grid.appendChild(this.featureButton(feature, featureStatus(feature, context)));
+      for (const feature of features) grid.appendChild(this.featureButton(feature, statuses.get(feature.id)!));
+    }
+  }
+
+  private syncFilterControls(): void {
+    for (const button of this.contentEl.querySelectorAll<HTMLButtonElement>("[data-feature-filter]")) {
+      const active = button.dataset.featureFilter === this.filter.mode;
+      button.classList.toggle("is-active", active);
+      button.setAttribute("aria-pressed", String(active));
     }
   }
 
   onClose(): void {
     this.contentEl.empty();
+    this.resultsEl = null;
+    this.searchInput = null;
   }
 
   private statusContext() {

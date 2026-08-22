@@ -25,6 +25,16 @@ test("feature hub renders the canonical catalog and status dimensions", () => {
   assert.ok(hub.includes("placement"));
 });
 
+test("feature hub exposes searchable status filters and a clear empty result", () => {
+  assert.ok(hub.includes("filterFeatures"));
+  assert.ok(hub.includes("dashflow-feature-hub-search"));
+  assert.ok(hub.includes('setAttribute("aria-label", "搜索功能")'));
+  assert.ok(hub.includes('aria-pressed'));
+  for (const label of ["全部", "未添加", "待配置"]) assert.ok(hub.includes(label));
+  assert.ok(hub.includes("没有符合条件的功能"));
+  assert.ok(hub.includes("清除筛选"));
+});
+
 test("feature hub handles both widget-add success and failure", () => {
   assert.ok(hub.includes("await this.plugin.dashboardManager.addWidget"));
   assert.ok(hub.includes("if (!added)"));
