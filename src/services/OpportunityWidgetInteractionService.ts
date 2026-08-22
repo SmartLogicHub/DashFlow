@@ -21,7 +21,11 @@ const OPPORTUNITY_STYLES = `
 .dashflow-opportunity-card.is-starred{border-color:color-mix(in srgb,var(--text-warning) 45%,var(--background-modifier-border))}
 .dashflow-opportunity-card-title{overflow-wrap:anywhere}
 .dashflow-opportunity-card-star{position:absolute;top:5px;right:7px;color:var(--text-warning);font-size:var(--df-type-label,11px)}
-.dashflow-opportunity-card-link{position:absolute;bottom:5px;right:7px;appearance:none;border:0;background:transparent;color:var(--text-faint);cursor:pointer;font-size:var(--df-type-label,11px);padding:0}
+.dashflow-opportunity-card-actions{display:flex;align-items:center;gap:5px;margin-top:7px}
+.dashflow-opportunity-card-move{appearance:none;flex:1;min-width:0;min-height:28px;border:1px solid var(--background-modifier-border);border-radius:7px;background:var(--background-primary);color:var(--text-muted);font-size:var(--df-type-label,11px);padding:3px 24px 3px 7px;cursor:pointer}
+.dashflow-opportunity-card-move:hover{border-color:color-mix(in srgb,var(--interactive-accent) 40%,var(--background-modifier-border));color:var(--text-normal)}
+.dashflow-opportunity-card-move:focus-visible{outline:2px solid var(--interactive-accent);outline-offset:2px}
+.dashflow-opportunity-card-link{appearance:none;border:0;background:transparent;color:var(--text-faint);cursor:pointer;font-size:var(--df-type-label,11px);padding:5px;flex:none}
 .dashflow-opportunity-card-link:hover{color:var(--interactive-accent)}
 .dashflow-opportunity-add{appearance:none;border:1px dashed var(--background-modifier-border);border-radius:8px;background:transparent;color:var(--text-normal);font-size:11px;padding:6px 8px;width:100%}
 .dashflow-opportunity-add:focus{outline:none;border-color:var(--interactive-accent)}
@@ -175,6 +179,38 @@ export class OpportunityWidgetInteractionService {
       star.textContent = "★";
       card.appendChild(star);
     }
+
+    const actions = document.createElement("div");
+    actions.className = "dashflow-opportunity-card-actions";
+    const move = document.createElement("select");
+    move.className = "dashflow-opportunity-card-move";
+    move.setAttribute("aria-label", `移动机会「${item.title}」`);
+    for (const stage of OPPORTUNITY_STAGES) {
+      const option = document.createElement("option");
+      option.value = stage.id;
+      option.textContent = stage.label;
+      move.appendChild(option);
+    }
+    move.value = item.status;
+    const stopCardEvent = (event: Event): void => event.stopPropagation();
+    move.addEventListener("pointerdown", stopCardEvent);
+    move.addEventListener("click", stopCardEvent);
+    move.addEventListener("dragstart", (event) => event.preventDefault());
+    move.addEventListener("change", (event) => {
+      event.stopPropagation();
+      const next = move.value;
+      if (next === item.status) return;
+      move.disabled = true;
+      void this.service.move(file, item.id, next).then(
+        () => rerender(),
+        () => {
+          move.value = item.status;
+          move.disabled = false;
+        },
+      );
+    });
+    actions.appendChild(move);
+
     if (item.link) {
       const link = document.createElement("button");
       link.type = "button";
@@ -185,8 +221,9 @@ export class OpportunityWidgetInteractionService {
         event.stopPropagation();
         this.openLink(item.link);
       });
-      card.appendChild(link);
+      actions.appendChild(link);
     }
+    card.appendChild(actions);
 
     card.addEventListener("dragstart", (event) => {
       event.dataTransfer?.setData("text/plain", item.id);

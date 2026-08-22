@@ -19,6 +19,9 @@ const KANBAN_STYLES = `
 .dashflow-project-kanban-card.is-dragging{opacity:.5}
 .dashflow-project-kanban-name{font-weight:650;line-height:1.35;overflow-wrap:anywhere}
 .dashflow-project-kanban-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:6px;color:var(--text-faint);font-size:var(--df-type-label,11px);font-variant-numeric:tabular-nums}
+.dashflow-project-kanban-move{appearance:none;width:100%;min-height:28px;margin-top:7px;border:1px solid var(--background-modifier-border);border-radius:7px;background:var(--background-primary);color:var(--text-muted);font-size:var(--df-type-label,11px);padding:3px 24px 3px 7px;cursor:pointer}
+.dashflow-project-kanban-move:hover{border-color:color-mix(in srgb,var(--interactive-accent) 40%,var(--background-modifier-border));color:var(--text-normal)}
+.dashflow-project-kanban-move:focus-visible{outline:2px solid var(--interactive-accent);outline-offset:2px}
 .dashflow-project-kanban-bar{height:4px;border-radius:99px;background:color-mix(in srgb,var(--interactive-accent) 14%,var(--background-modifier-border));overflow:hidden;margin-top:6px}
 .dashflow-project-kanban-bar span{display:block;height:100%;border-radius:inherit;background:var(--interactive-accent)}
 .dashflow-project-kanban-empty{color:var(--text-faint);font-size:var(--df-type-label,11px);text-align:center;padding:10px 4px}
@@ -175,6 +178,38 @@ export class ProjectKanbanWidgetInteractionService {
     due.textContent = project.deadline ?? "无截止";
     meta.append(pct, due);
     card.appendChild(meta);
+
+    const move = document.createElement("select");
+    move.className = "dashflow-project-kanban-move";
+    move.setAttribute("aria-label", `移动项目「${project.name}」`);
+    for (const column of COLUMNS) {
+      const option = document.createElement("option");
+      option.value = column.status;
+      option.textContent = column.label;
+      move.appendChild(option);
+    }
+    move.value = project.status;
+    const stopCardEvent = (event: Event): void => event.stopPropagation();
+    move.addEventListener("pointerdown", stopCardEvent);
+    move.addEventListener("click", stopCardEvent);
+    move.addEventListener("dragstart", (event) => event.preventDefault());
+    move.addEventListener("change", (event) => {
+      event.stopPropagation();
+      const next = move.value as ProjectStatus;
+      if (next === project.status) return;
+      move.disabled = true;
+      void this.plugin.projectService.changeStatus(project, next).then(
+        (changed) => {
+          if (!changed) move.value = project.status;
+          move.disabled = false;
+        },
+        () => {
+          move.value = project.status;
+          move.disabled = false;
+        },
+      );
+    });
+    card.appendChild(move);
 
     card.addEventListener("dragstart", (event) => {
       event.dataTransfer?.setData("text/plain", project.id);
