@@ -47,3 +47,4 @@ import "./section-policy.test";
 import "./feature-destinations.test";
 import "./feature-hub.test";
 import "./section-recovery.test";
+import "./project-views.test";

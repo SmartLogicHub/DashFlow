@@ -138,6 +138,44 @@ export const FEATURE_HUB_STYLES = `
 .dashflow-section-assist button { min-height: 34px; padding: 6px 13px; border-radius: 8px; }
 .dashflow-section-assist button:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
 
+.dashflow-project-view-switcher {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  padding: 4px;
+  overflow-x: auto;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 10px;
+  background: var(--background-primary-alt);
+}
+.dashflow-project-view-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 32px;
+  padding: 5px 10px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+.dashflow-project-view-button svg { width: 14px; height: 14px; }
+.dashflow-project-view-button small { color: var(--text-faint); font-size: 9px; }
+.dashflow-project-view-button.is-active {
+  background: var(--background-primary);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .08);
+  color: var(--text-normal);
+}
+.dashflow-project-view-button.is-missing:not(.is-active) { opacity: .72; }
+.dashflow-project-view-button:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 1px; }
+.dashflow-project-view-switcher + .dashflow-section-assist { grid-row: 2 / span 3; }
+
 @media (max-width: 760px) {
   .modal:has(.dashflow-feature-hub) { width: calc(100vw - 20px); }
   .dashflow-feature-hub-grid { grid-template-columns: 1fr; }

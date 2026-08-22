@@ -3,6 +3,13 @@ import type { ProductSection } from "./navigation";
 export type FocusedSection = "projects" | "calendar" | "habits" | "review";
 export type ProjectViewType = "projects" | "project-kanban" | "project-gantt";
 
+export interface ProjectViewOption {
+  type: ProjectViewType;
+  label: string;
+  icon: string;
+  description: string;
+}
+
 interface WidgetPlacement {
   type: string;
   hidden?: boolean;
@@ -27,11 +34,13 @@ export interface SectionRecovery {
   actionLabel: string;
 }
 
-export const PROJECT_VIEW_TYPES: readonly ProjectViewType[] = [
-  "projects",
-  "project-kanban",
-  "project-gantt",
+export const PROJECT_VIEW_OPTIONS: readonly ProjectViewOption[] = [
+  { type: "projects", label: "列表", icon: "list", description: "快速浏览项目与进度。" },
+  { type: "project-kanban", label: "看板", icon: "columns-3", description: "按状态推进项目。" },
+  { type: "project-gantt", label: "时间轴", icon: "gantt-chart", description: "查看项目日期与重叠。" },
 ];
+
+export const PROJECT_VIEW_TYPES: readonly ProjectViewType[] = PROJECT_VIEW_OPTIONS.map((option) => option.type);
 
 const SECTION_POLICIES: Record<FocusedSection, SectionPolicy> = {
   projects: { section: "projects", widgetTypes: PROJECT_VIEW_TYPES, recommendedWidgetType: "projects" },
@@ -93,6 +102,23 @@ export function recommendedWidgetType(section: ProductSection): string | null {
 export function recoveryForSection(section: ProductSection): SectionRecovery | null {
   const focused = focusedSection(section);
   return focused ? SECTION_RECOVERY[focused] : null;
+}
+
+export function projectRecoveryForView(type: ProjectViewType): SectionRecovery {
+  const option = PROJECT_VIEW_OPTIONS.find((item) => item.type === type) ?? PROJECT_VIEW_OPTIONS[0]!;
+  const names: Record<ProjectViewType, string> = {
+    projects: "项目列表",
+    "project-kanban": "项目看板",
+    "project-gantt": "项目时间轴",
+  };
+  const name = names[option.type];
+  return {
+    section: "projects",
+    title: `${name}还没有加入当前工作台`,
+    description: `${option.description}加入后会留在当前工作台，并可随时切换。`,
+    widgetType: option.type,
+    actionLabel: `加入${name}`,
+  };
 }
 
 export function sectionCoverage(section: ProductSection, widgets: readonly WidgetPlacement[]): SectionCoverage {

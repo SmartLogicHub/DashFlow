@@ -1,10 +1,14 @@
 import { normalizePath, Notice, setIcon } from "obsidian";
 import type DashFlowPlugin from "../main";
-import type { Task } from "../models";
+import type { DashboardDefinition, Task, WidgetInstance } from "../models";
 import { activityStreak } from "../activity/activityMath";
 import { PLUGIN_VERSION } from "../constants";
 import { inboxTasks, PRODUCT_SECTIONS, type ProductSection } from "../product/navigation";
 import {
+  initialProjectView,
+  PROJECT_VIEW_OPTIONS,
+  PROJECT_VIEW_TYPES,
+  projectRecoveryForView,
   recoveryForSection,
   sectionCoverage,
   type ProjectViewType,
@@ -54,6 +58,10 @@ export class ProductExperienceService {
 
   currentSection(): ProductSection {
     return this.activeSection;
+  }
+
+  currentProjectView(): ProjectViewType | null {
+    return this.activeProjectView;
   }
 
   openProjectView(type: ProjectViewType): void {
@@ -504,6 +512,11 @@ export class ProductExperienceService {
 
     this.clearSyntheticPage(grid);
 
+    if (section === "projects") {
+      this.applyProjectSection(grid, dashboard);
+      return;
+    }
+
     const coverage = sectionCoverage(section, dashboard.widgets);
     const recovery = recoveryForSection(section);
     if (coverage.missing && recovery) {
@@ -522,13 +535,6 @@ export class ProductExperienceService {
         const visible = isWidgetVisibleInSection(section, type, widget.hidden);
         this.setCardVisible(card, visible);
         if (visible) this.applySavedLayout(card, widget.layout);
-        continue;
-      }
-
-      if (section === "projects") {
-        const visible = isWidgetVisibleInSection(section, type, widget.hidden);
-        this.setCardVisible(card, visible);
-        if (visible) this.applySectionLayout(card, 1, 1, 12, 8);
         continue;
       }
 
@@ -553,6 +559,54 @@ export class ProductExperienceService {
       if (type === "heatmap") this.applySectionLayout(card, 1, 9, 12, 5);
       if (type === "vault-stats") this.applySectionLayout(card, 1, 14, 12, 3);
     }
+  }
+
+  private applyProjectSection(grid: HTMLElement, dashboard: DashboardDefinition): void {
+    const selected = this.activeProjectView ?? initialProjectView(dashboard.widgets);
+    this.activeProjectView = selected;
+    grid.appendChild(this.renderProjectViewSwitcher(dashboard.widgets, selected));
+
+    let selectedVisible = false;
+    for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget[data-widget-id]")) {
+      const id = card.dataset.widgetId ?? "";
+      const widget = dashboard.widgets.find((item) => item.id === id);
+      if (!widget) continue;
+      const type = widget.type;
+      const isProjectView = PROJECT_VIEW_TYPES.includes(type as ProjectViewType);
+      const visible = isProjectView && type === selected && widget.hidden !== true && !selectedVisible;
+      this.setCardVisible(card, visible);
+      if (visible) {
+        selectedVisible = true;
+        this.applySectionLayout(card, 1, 2, 12, 9);
+      }
+    }
+
+    if (!selectedVisible) grid.appendChild(this.renderSectionAssist(projectRecoveryForView(selected)));
+  }
+
+  private renderProjectViewSwitcher(widgets: readonly WidgetInstance[], selected: ProjectViewType): HTMLElement {
+    const available = new Set(widgets.filter((widget) => widget.hidden !== true).map((widget) => widget.type));
+    const switcher = document.createElement("div");
+    switcher.className = "dashflow-project-view-switcher";
+    switcher.setAttribute("role", "group");
+    switcher.setAttribute("aria-label", "项目视图");
+
+    for (const option of PROJECT_VIEW_OPTIONS) {
+      const active = option.type === selected;
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = `dashflow-project-view-button${active ? " is-active" : ""}${available.has(option.type) ? "" : " is-missing"}`;
+      button.dataset.projectView = option.type;
+      button.setAttribute("aria-pressed", String(active));
+      button.title = option.description;
+      const icon = document.createElement("span");
+      setIcon(icon, option.icon);
+      button.append(icon, document.createTextNode(option.label));
+      if (!available.has(option.type)) button.appendChild(this.text("small", "未添加"));
+      button.addEventListener("click", () => this.openProjectView(option.type));
+      switcher.appendChild(button);
+    }
+    return switcher;
   }
 
   private setCardVisible(card: HTMLElement, visible: boolean): void {
@@ -584,7 +638,7 @@ export class ProductExperienceService {
   }
 
   private clearSyntheticPage(grid: HTMLElement): void {
-    for (const page of grid.querySelectorAll(":scope > .dashflow-command-page, :scope > .dashflow-personal-home, :scope > .dashflow-section-assist")) page.remove();
+    for (const page of grid.querySelectorAll(":scope > .dashflow-command-page, :scope > .dashflow-personal-home, :scope > .dashflow-section-assist, :scope > .dashflow-project-view-switcher")) page.remove();
   }
 
   private renderSectionAssist(recovery: SectionRecovery): HTMLElement {
