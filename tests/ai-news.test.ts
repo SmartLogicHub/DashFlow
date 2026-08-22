@@ -15,6 +15,7 @@ const styles = readFileSync("src/styles/AINewsStyles.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
 const renderer = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
+const configRequest = readFileSync("src/dashboard/widgetConfigRequest.ts", "utf8");
 
 test("AI News is a configurable Dashboard widget on the shared registry", () => {
   assert.ok(registry.includes('type: "ai-news"'));
@@ -71,6 +72,18 @@ test("AI News interaction stays observer-free and styles stay in Design System",
   assert.ok(styles.includes("dashflow-ai-news-item"));
   assert.ok(design.includes('import { AI_NEWS_STYLES }'));
   assert.ok(design.includes("AI_NEWS_STYLES,"));
+});
+
+test("AI News empty states expose direct source and provider configuration", () => {
+  assert.ok(configRequest.includes("requestWidgetConfig"));
+  assert.ok(configRequest.includes("bubbles: true"));
+  assert.ok(interaction.includes("requestWidgetConfig"));
+  assert.ok(interaction.includes('"配置新闻源"'));
+  assert.ok(interaction.includes('"打开 AI 设置"'));
+  assert.ok(interaction.includes('openSettings("integration")'));
+  assert.ok(styles.includes(".dashflow-ai-news-empty-copy"));
+  assert.ok(styles.includes(".dashflow-ai-news-empty-action"));
+  assert.ok(styles.includes(":focus-visible"));
 });
 
 test("AI News service and widget interaction are lifecycle-managed by the plugin", () => {

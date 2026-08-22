@@ -2,6 +2,7 @@ import { setIcon } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { AINewsWidgetConfig, CuratedNewsItem, WidgetInstance } from "../models";
 import type { NewsCurationResult } from "./NewsCurationService";
+import { requestWidgetConfig } from "../dashboard/widgetConfigRequest";
 
 export class AINewsWidgetInteractionService {
   private unsubscribeRender: (() => void) | null = null;
@@ -59,6 +60,17 @@ export class AINewsWidgetInteractionService {
     root.append(toolbar, content);
     body.appendChild(root);
 
+    if (!String(config.sources ?? "").trim()) {
+      refresh.disabled = true;
+      refresh.title = "请先配置新闻源";
+      content.replaceChildren(this.actionEmpty(
+        "添加公开 RSS / Atom 新闻源后，AI 会按你的兴趣筛选早报。",
+        "配置新闻源",
+        () => requestWidgetConfig(body, widget.id),
+      ));
+      return;
+    }
+
     const load = async (force: boolean): Promise<void> => {
       refresh.disabled = true;
       if (force) content.replaceChildren(this.empty("正在刷新信息源…"));
@@ -69,7 +81,9 @@ export class AINewsWidgetInteractionService {
       } catch (error) {
         if (!body.isConnected) return;
         const message = error instanceof Error ? error.message : String(error);
-        content.replaceChildren(this.empty(message));
+        content.replaceChildren(message.includes("AI Provider 尚未配置")
+          ? this.actionEmpty(message, "打开 AI 设置", () => this.plugin.openSettings("integration"))
+          : this.empty(message));
       } finally {
         if (body.isConnected) refresh.disabled = false;
       }
@@ -137,6 +151,21 @@ export class AINewsWidgetInteractionService {
     const node = document.createElement("div");
     node.className = "dashflow-ai-news-empty";
     node.textContent = text;
+    return node;
+  }
+
+  private actionEmpty(text: string, label: string, action: () => void): HTMLElement {
+    const node = document.createElement("div");
+    node.className = "dashflow-ai-news-empty";
+    const copy = document.createElement("span");
+    copy.className = "dashflow-ai-news-empty-copy";
+    copy.textContent = text;
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "dashflow-ai-news-empty-action";
+    button.textContent = label;
+    button.addEventListener("click", action);
+    node.append(copy, button);
     return node;
   }
 }

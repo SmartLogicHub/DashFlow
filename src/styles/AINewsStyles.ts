@@ -116,12 +116,42 @@ export const AI_NEWS_STYLES = `
 .dashflow-ai-news-warning { margin-top: auto; }
 .dashflow-ai-news-empty {
   min-height: 100px;
-  display: grid;
-  place-items: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
   text-align: center;
   padding: 12px;
   border: 1px dashed var(--background-modifier-border);
   border-radius: 10px;
+}
+.dashflow-ai-news-empty-copy {
+  max-width: 42ch;
+  text-wrap: pretty;
+}
+.dashflow-ai-news-empty-action {
+  appearance: none;
+  min-height: var(--df-control-compact, 32px);
+  padding: 6px 12px;
+  border: 1px solid color-mix(in srgb, var(--interactive-accent) 32%, var(--background-modifier-border));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--interactive-accent) 10%, var(--background-primary));
+  color: var(--text-accent);
+  font: inherit;
+  font-size: var(--df-type-secondary, 12px);
+  font-weight: 650;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+.dashflow-ai-news-empty-action:hover {
+  border-color: color-mix(in srgb, var(--interactive-accent) 52%, var(--background-modifier-border));
+  background: color-mix(in srgb, var(--interactive-accent) 15%, var(--background-primary));
+}
+.dashflow-ai-news-empty-action:active { transform: translateY(1px); }
+.dashflow-ai-news-empty-action:focus-visible {
+  outline: 2px solid var(--interactive-accent);
+  outline-offset: 2px;
 }
 @container dashflow-widget (max-width: 360px) {
   .dashflow-ai-news-reason { -webkit-line-clamp: 1; }
