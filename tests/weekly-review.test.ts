@@ -113,3 +113,9 @@ test("Daily Progress reuses schedule math but is reported separately from Habit"
   assert.ok(weeklyWidget.includes("dailyProgressRow"));
   assert.ok(weeklyWidget.includes("is-progress"));
 });
+
+test("weekly review provides a direct route from its Work summary", () => {
+  assert.ok(weeklyWidget.includes("dashflow-weekly-route"));
+  assert.ok(weeklyWidget.includes("查看完整复盘"));
+  assert.ok(weeklyWidget.includes('this.plugin.activateSection("review")'));
+});

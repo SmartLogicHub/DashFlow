@@ -87,3 +87,23 @@ test("calendar uses readable labels and cell-filling touch targets", () => {
   assert.ok(calendar.includes('return "项目"'));
   assert.ok(calendar.includes('return "习惯"'));
 });
+
+test("Work replaces long project and review bodies with routed summaries", () => {
+  const presentation = readFileSync(presentationPath, "utf8");
+  assert.ok(productExperience.includes("查看全部项目"));
+  assert.ok(productExperience.includes('openSection("projects")'));
+  assert.ok(presentation.includes('.dashflow-grid[data-product-section="work"]'));
+  assert.ok(presentation.includes(".dashflow-project-row:nth-of-type(n + 4)"));
+  assert.ok(presentation.includes(".dashflow-weekly-grid"));
+  assert.ok(presentation.includes("display: none !important"));
+});
+
+test("Review owns natural-height weekly content instead of nested scrolling", () => {
+  const presentation = readFileSync(presentationPath, "utf8");
+  assert.ok(weeklyReview.includes("查看完整复盘"));
+  assert.ok(weeklyReview.includes('activateSection("review")'));
+  assert.ok(presentation.includes('.dashflow-grid[data-product-section="review"]'));
+  assert.ok(presentation.includes("height: auto !important"));
+  assert.ok(presentation.includes("max-height: none !important"));
+  assert.ok(presentation.includes("overflow: visible !important"));
+});

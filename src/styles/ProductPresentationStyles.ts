@@ -33,6 +33,65 @@ export const PRODUCT_PRESENTATION_STYLES = `
   font-size: var(--df-type-secondary) !important;
 }
 
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="projects"] .dashflow-project-row:nth-of-type(n + 4) {
+  display: none !important;
+}
+
+.dashflow-command-shell .dashflow-project-route {
+  display: none !important;
+  width: 100%;
+  min-height: var(--df-control-compact);
+  margin-top: 4px;
+  border: 0;
+  border-radius: 7px;
+  background: var(--df-cmd-soft);
+  box-shadow: none;
+  color: var(--df-cmd-muted);
+  font-size: var(--df-type-secondary);
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-project-route {
+  display: block !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="weekly-review"] .dashflow-weekly-grid {
+  display: none !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-weekly-route {
+  display: inline-flex !important;
+  align-items: center;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="projects"] .dashflow-widget-body,
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="weekly-review"] .dashflow-widget-body {
+  overflow: hidden !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="review"] {
+  display: block !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="review"] > .dashflow-widget {
+  height: auto !important;
+  min-height: 0 !important;
+  margin-bottom: 12px;
+  overflow: visible !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="review"] > .dashflow-widget .dashflow-widget-body {
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="review"] .dashflow-weekly,
+.dashflow-command-shell .dashflow-grid[data-product-section="review"] .dashflow-weekly-grid {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
 .dashflow-command-shell.is-mobile .dashflow-command-bar {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr);

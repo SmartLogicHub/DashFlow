@@ -467,6 +467,15 @@ export class ProductExperienceService {
         steps.appendChild(node);
       }
     });
+
+    const list = card.querySelector<HTMLElement>(".dashflow-project-list");
+    if (list && !list.querySelector(".dashflow-project-route")) {
+      const route = this.text("button", "查看全部项目");
+      route.type = "button";
+      route.className = "dashflow-project-route";
+      route.addEventListener("click", () => this.openSection("projects"));
+      list.appendChild(route);
+    }
   }
 
   private decorateTaskPriorityBadges(grid: HTMLElement): void {

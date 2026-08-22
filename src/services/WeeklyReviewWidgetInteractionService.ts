@@ -16,7 +16,7 @@ const WEEKLY_STYLES = `
 .dashflow-weekly{height:100%;display:flex;flex-direction:column;gap:10px;min-width:0}
 .dashflow-weekly-toolbar{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
 .dashflow-weekly-period{display:flex;flex-direction:column;gap:2px;min-width:0}.dashflow-weekly-period strong{font-size:14px}.dashflow-weekly-period span{font-size:11px;color:var(--text-muted);letter-spacing:.04em}
-.dashflow-weekly-copy{min-height:32px;font-size:11px;padding:4px 10px;border-radius:7px;white-space:nowrap}
+.dashflow-weekly-actions{display:flex;align-items:center;gap:6px}.dashflow-weekly-copy,.dashflow-weekly-route{min-height:32px;font-size:11px;padding:4px 10px;border-radius:7px;white-space:nowrap}.dashflow-weekly-route{display:none}
 .dashflow-weekly-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
 .dashflow-weekly-kpi{border:1px solid var(--background-modifier-border);border-radius:9px;padding:9px 10px;background:color-mix(in srgb,var(--background-primary) 94%,var(--background-secondary));min-width:0;font-variant-numeric:tabular-nums}.dashflow-weekly-kpi strong{display:block;font-size:19px;line-height:1.05;letter-spacing:-.03em}.dashflow-weekly-kpi span{display:block;margin-top:4px;font-size:11px;color:var(--text-muted);letter-spacing:.03em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dashflow-weekly-kpi em{display:block;margin-top:2px;font-style:normal;font-size:11px;color:var(--text-muted)}
 .dashflow-weekly-grid{display:grid;grid-template-columns:1.05fr 1fr 1fr;gap:10px;min-height:0;flex:1}
@@ -136,7 +136,15 @@ export class WeeklyReviewWidgetInteractionService {
         .then(() => new Notice("DashFlow: Weekly Review 已复制"))
         .catch(() => new Notice("DashFlow: 无法访问剪贴板"));
     });
-    toolbar.append(period, copy);
+    const route = document.createElement("button");
+    route.type = "button";
+    route.className = "dashflow-weekly-route";
+    route.textContent = "查看完整复盘";
+    route.addEventListener("click", () => void this.plugin.activateSection("review"));
+    const actions = document.createElement("div");
+    actions.className = "dashflow-weekly-actions";
+    actions.append(copy, route);
+    toolbar.append(period, actions);
     return toolbar;
   }
 
