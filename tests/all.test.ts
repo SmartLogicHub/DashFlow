@@ -48,3 +48,4 @@ import "./feature-destinations.test";
 import "./feature-hub.test";
 import "./section-recovery.test";
 import "./project-views.test";
+import "./product-presentation.test";
