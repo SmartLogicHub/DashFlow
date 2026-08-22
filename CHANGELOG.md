@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- 为项目看板和机会看板增加原生阶段选择器，让触屏和键盘用户无需拖拽也能移动卡片。
+- 增加只读的真实 Obsidian 冒烟测试命令，覆盖宽窄布局截图、无障碍检查、诊断输出和界面状态恢复。
+- 将 GitHub Release 从每次 `main` 推送改为经验证的版本标签，并在仓库所有者选择 `LICENSE` 前阻止公开发布。
+- 同步 0.7 产品表现层、功能中心、聚焦页面和质量门的架构及发布文档。
+
 ## 0.7.0 — 2026-08-22
 
 - Rebuilds product-wide presentation ownership around one canonical responsive layer while preserving schema-8 data and Markdown truth.
