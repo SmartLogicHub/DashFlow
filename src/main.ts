@@ -8,6 +8,7 @@ import { createDefaultDashboard } from "./dashboard/defaultDashboard";
 import { upgradeLegacyHomeLayout } from "./dashboard/defaultLayoutMigration";
 import type { DashFlowData } from "./models";
 import type { ProductSection } from "./product/navigation";
+import { COMMAND_CATALOG, type CommandDefinition } from "./product/commandCatalog";
 import { shouldShowOnboarding } from "./product/onboarding";
 import { ActivityService } from "./services/ActivityService";
 import { ActivityWidgetInteractionService } from "./services/ActivityWidgetInteractionService";
@@ -50,6 +51,7 @@ import { WeReadService } from "./services/WeReadService";
 import { DashFlowSettingsTab } from "./settings/DashFlowSettingsTab";
 import { AIPlanModal } from "./ui/AIPlanModal";
 import { GlobalSearchModal } from "./ui/GlobalSearchModal";
+import { HabitEditorModal } from "./ui/HabitEditorModal";
 import { MorningBriefingSettingsModal } from "./ui/MorningBriefingSettingsModal";
 import { OnboardingModal } from "./ui/OnboardingModal";
 import { ProjectEditorModal } from "./ui/ProjectEditorModal";
@@ -212,45 +214,7 @@ export default class DashFlowPlugin extends Plugin {
       void this.activateDashboard();
     });
 
-    this.addCommand({ id: "open-dashboard", name: "打开 DashFlow", callback: () => void this.activateDashboard() });
-    this.addCommand({ id: "quick-add", name: "快速添加", callback: () => new QuickAddModal(this).open() });
-    this.addCommand({ id: "configure-workflow-context", name: "配置 Quick Capture 与情景模式", callback: () => new WorkflowSettingsModal(this).open() });
-    this.addCommand({ id: "search-dashflow", name: "搜索任务、项目与习惯", callback: () => new GlobalSearchModal(this).open() });
-    this.addCommand({ id: "new-task", name: "新建任务", callback: () => new TaskEditorModal(this).open() });
-    this.addCommand({ id: "new-project", name: "新建项目", callback: () => new ProjectEditorModal(this).open() });
-    this.addCommand({ id: "ai-plan-today", name: "AI 规划今天", callback: () => new AIPlanModal(this).open() });
-    this.addCommand({
-      id: "configure-ai-morning-briefing",
-      name: "配置 AI 晨间简报",
-      callback: () => new MorningBriefingSettingsModal(this).open(),
-    });
-    this.addCommand({
-      id: "refresh-ai-morning-briefing",
-      name: "刷新 AI 晨间简报",
-      callback: async () => {
-        await this.morningBriefing.clearCache();
-        await this.activateSection("today");
-      },
-    });
-
-    const sections: Array<[ProductSection, string]> = [
-      ["today", "打开 · 今日"], ["work", "打开 · 工作台"], ["inbox", "打开 · 收集箱"], ["projects", "打开 · 项目"],
-      ["calendar", "打开 · 日历"], ["habits", "打开 · 习惯"], ["review", "打开 · 复盘"],
-    ];
-    for (const [section, name] of sections) {
-      this.addCommand({ id: `open-${section}`, name, callback: () => void this.activateSection(section) });
-    }
-
-    this.addCommand({ id: "export-active-dashboard", name: "导出当前 Dashboard JSON", callback: () => this.dashboardTransfer.openExportModal() });
-    this.addCommand({ id: "import-dashboard-json", name: "导入 Dashboard JSON", callback: () => this.dashboardTransfer.openImportModal() });
-    this.addCommand({
-      id: "reindex-vault",
-      name: "重新索引 Vault",
-      callback: async () => {
-        await this.vaultIndex.reindexAll();
-        new Notice("DashFlow 索引已刷新");
-      },
-    });
+    for (const command of COMMAND_CATALOG) this.registerProductCommand(command);
 
     this.addSettingTab(new DashFlowSettingsTab(this.app, this));
     this.productDesign.start();
@@ -323,6 +287,61 @@ export default class DashFlowPlugin extends Plugin {
   async activateSection(section: ProductSection): Promise<void> {
     await this.activateDashboard();
     this.productExperience.openSection(section);
+  }
+
+  private registerProductCommand(command: CommandDefinition): void {
+    this.addCommand({
+      id: command.id,
+      name: command.name,
+      callback: async () => {
+        switch (command.action) {
+          case "open-dashboard":
+            await this.activateDashboard();
+            break;
+          case "open-section":
+            if (command.section) await this.activateSection(command.section);
+            break;
+          case "quick-add":
+            new QuickAddModal(this).open();
+            break;
+          case "workflow-settings":
+            new WorkflowSettingsModal(this).open();
+            break;
+          case "search":
+            new GlobalSearchModal(this).open();
+            break;
+          case "new-task":
+            new TaskEditorModal(this).open();
+            break;
+          case "new-project":
+            new ProjectEditorModal(this).open();
+            break;
+          case "new-habit":
+            new HabitEditorModal(this).open();
+            break;
+          case "ai-plan":
+            new AIPlanModal(this).open();
+            break;
+          case "configure-morning-briefing":
+            new MorningBriefingSettingsModal(this).open();
+            break;
+          case "refresh-morning-briefing":
+            await this.morningBriefing.clearCache();
+            await this.activateSection("today");
+            break;
+          case "export-dashboard":
+            this.dashboardTransfer.openExportModal();
+            break;
+          case "import-dashboard":
+            this.dashboardTransfer.openImportModal();
+            break;
+          case "reindex-vault":
+            await this.vaultIndex.reindexAll();
+            new Notice("DashFlow 索引已刷新");
+            break;
+        }
+      },
+    });
   }
 
   openOnboarding(manual = true): void {

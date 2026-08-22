@@ -11,6 +11,7 @@ const settings = readFileSync("src/ui/WorkflowSettingsModal.ts", "utf8");
 const picker = readFileSync("src/ui/CaptureDestinationModal.ts", "utf8");
 const quickAdd = readFileSync("src/ui/QuickAddModal.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
+const commands = readFileSync("src/product/commandCatalog.ts", "utf8");
 
 test("Quick Capture defaults remain backward compatible", () => {
   assert.equal(DEFAULT_SETTINGS.quickCaptureTarget, "inbox");
@@ -60,7 +61,8 @@ test("Context Switcher reuses DashboardManager instead of storing a second layou
 });
 
 test("workflow settings are exposed through plugin commands and lifecycle", () => {
-  assert.ok(main.includes("configure-workflow-context"));
+  assert.ok(commands.includes("configure-workflow-context"));
+  assert.ok(main.includes("COMMAND_CATALOG"));
   assert.ok(main.includes("this.contextSwitcher = new ContextSwitcherService(this)"));
   assert.ok(main.includes("this.contextSwitcher.start()"));
   assert.ok(main.includes("this.contextSwitcher?.stop()"));
