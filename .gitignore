@@ -7,3 +7,4 @@ main.js
 *.map
 data.json
 .dashflow-layout-tests.mjs
+output/playwright/
