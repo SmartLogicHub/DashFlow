@@ -28,7 +28,7 @@ export const WORKFLOW_STYLES = `
   align-items: center;
   gap: 5px;
   cursor: pointer;
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 650;
 }
 .dashflow-context-tabs > button:hover,
@@ -57,12 +57,12 @@ export const WORKFLOW_STYLES = `
   justify-content: space-between;
   gap: 10px;
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
 }
 .dashflow-quick-add-target button {
   min-height: 26px;
   padding: 3px 8px;
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   border-radius: 7px;
 }
 .dashflow-capture-destination-options {
@@ -94,7 +94,7 @@ export const WORKFLOW_STYLES = `
 .dashflow-capture-destination-option strong,
 .dashflow-capture-destination-option small { display: block; }
 .dashflow-capture-destination-option strong { font-size: 12px; }
-.dashflow-capture-destination-option small { margin-top: 4px; color: var(--text-muted); font-size: 10px; line-height: 1.45; }
+.dashflow-capture-destination-option small { margin-top: 4px; color: var(--text-muted); font-size: var(--df-type-label, 11px); line-height: 1.45; }
 .dashflow-workflow-settings-modal h3 { margin-top: 20px; font-size: 12px; }
 @media (max-width: 760px) {
   .dashflow-context-switcher { margin-top: -8px; overflow-x: auto; }

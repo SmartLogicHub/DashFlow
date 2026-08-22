@@ -11,17 +11,17 @@ const KANBAN_STYLES = `
 .dashflow-project-kanban-head{display:flex;align-items:center;gap:6px;padding:0 2px}
 .dashflow-project-kanban-dot{width:8px;height:8px;border-radius:999px;flex:none}
 .dashflow-project-kanban-head strong{font-size:11px;font-weight:650;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dashflow-project-kanban-count{font-size:10px;color:var(--text-faint);font-variant-numeric:tabular-nums}
+.dashflow-project-kanban-count{font-size:var(--df-type-label,11px);color:var(--text-faint);font-variant-numeric:tabular-nums}
 .dashflow-project-kanban-list{display:flex;flex-direction:column;gap:6px;flex:1;min-height:24px;overflow-y:auto;padding:1px}
 .dashflow-project-kanban-list.is-drag-over{outline:2px dashed var(--interactive-accent);outline-offset:-2px;border-radius:8px}
 .dashflow-project-kanban-card{border:1px solid var(--background-modifier-border);border-radius:8px;background:var(--df-surface-card);padding:8px 9px;cursor:grab;font-size:11px;transition:border-color .14s ease,box-shadow .14s ease}
 .dashflow-project-kanban-card:hover{border-color:color-mix(in srgb,var(--interactive-accent) 35%,var(--background-modifier-border));box-shadow:0 2px 8px rgba(0,0,0,.05)}
 .dashflow-project-kanban-card.is-dragging{opacity:.5}
 .dashflow-project-kanban-name{font-weight:650;line-height:1.35;overflow-wrap:anywhere}
-.dashflow-project-kanban-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:6px;color:var(--text-faint);font-size:9.5px;font-variant-numeric:tabular-nums}
+.dashflow-project-kanban-meta{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:6px;color:var(--text-faint);font-size:var(--df-type-label,11px);font-variant-numeric:tabular-nums}
 .dashflow-project-kanban-bar{height:4px;border-radius:99px;background:color-mix(in srgb,var(--interactive-accent) 14%,var(--background-modifier-border));overflow:hidden;margin-top:6px}
 .dashflow-project-kanban-bar span{display:block;height:100%;border-radius:inherit;background:var(--interactive-accent)}
-.dashflow-project-kanban-empty{color:var(--text-faint);font-size:10px;text-align:center;padding:10px 4px}
+.dashflow-project-kanban-empty{color:var(--text-faint);font-size:var(--df-type-label,11px);text-align:center;padding:10px 4px}
 .dashflow-project-kanban-add{appearance:none;border:1px dashed var(--background-modifier-border);border-radius:8px;background:transparent;color:var(--text-normal);font-size:11px;padding:6px 8px;width:100%;cursor:pointer}
 .dashflow-project-kanban-add:hover{border-color:var(--interactive-accent);color:var(--interactive-accent)}
 `;

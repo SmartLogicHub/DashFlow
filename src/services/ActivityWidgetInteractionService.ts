@@ -10,7 +10,7 @@ const ACTIVITY_STYLES = `
 .dashflow-heatmap-summary-main{display:flex;gap:18px;min-width:0}
 .dashflow-heatmap-stat{display:flex;flex-direction:column;gap:1px}
 .dashflow-heatmap-stat strong{font-size:17px;line-height:1.1;letter-spacing:-.03em}
-.dashflow-heatmap-stat span,.dashflow-heatmap-range{font-size:9px;color:var(--text-faint);letter-spacing:.05em;text-transform:uppercase}
+.dashflow-heatmap-stat span,.dashflow-heatmap-range{font-size:var(--df-type-label,11px);color:var(--text-faint);letter-spacing:.05em;text-transform:uppercase}
 .dashflow-heatmap-range{text-align:right;white-space:nowrap}
 .dashflow-heatmap-scroll{overflow-x:auto;overflow-y:hidden;padding:2px 0 5px;scrollbar-width:thin}
 .dashflow-heatmap-grid{display:grid;grid-template-rows:repeat(7,11px);grid-auto-flow:column;grid-auto-columns:11px;gap:3px;width:max-content;min-width:100%}
@@ -20,7 +20,7 @@ const ACTIVITY_STYLES = `
 .dashflow-heatmap-cell[data-level="2"]{background:color-mix(in srgb,var(--interactive-accent) 43%,var(--background-primary))}
 .dashflow-heatmap-cell[data-level="3"]{background:color-mix(in srgb,var(--interactive-accent) 67%,var(--background-primary))}
 .dashflow-heatmap-cell[data-level="4"]{background:var(--interactive-accent)}
-.dashflow-heatmap-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text-faint);font-size:9px}
+.dashflow-heatmap-footer{display:flex;align-items:center;justify-content:space-between;gap:12px;color:var(--text-faint);font-size:var(--df-type-label,11px)}
 .dashflow-heatmap-legend{display:flex;align-items:center;gap:4px;white-space:nowrap}
 .dashflow-heatmap-legend .dashflow-heatmap-cell{display:inline-block;flex:none}
 @media(max-width:900px){.dashflow-heatmap-grid{grid-template-rows:repeat(7,10px);grid-auto-columns:10px}.dashflow-heatmap-cell{width:10px;height:10px}}

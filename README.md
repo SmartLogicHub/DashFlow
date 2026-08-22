@@ -1,10 +1,10 @@
-# DashFlow v0.6.1
+# DashFlow v0.7.0
 
 DashFlow 是建立在 Obsidian Vault 之上的 Personal OS。Task、Project、Habit 和 Daily Progress 的 Markdown / frontmatter 是唯一业务真相；DashFlow 负责索引、聚合、筛选、展示和直接操作。
 
 ## 快速开始
 
-1. 从 GitHub Release 下载 `DashFlow-v0.6.1.zip`，解压其内容到 `<Vault>/.obsidian/plugins/dashflow/`；不要扁平化其中的 `assets/heroes/` 目录。
+1. 从 GitHub Release 下载 `DashFlow-v0.7.0.zip`，解压其内容到 `<Vault>/.obsidian/plugins/dashflow/`；不要扁平化其中的 `assets/heroes/` 目录。
 2. 在 Obsidian 设置 → 社区插件中启用 DashFlow。
 3. 首次打开时选择 Minimal、Daily Focus 或 Project Management 起始布局，也可以跳过；以后可在 DashFlow 设置 → 高级 → 首次引导重新打开。
 4. 在工作台中使用 Quick Add、Inbox、Today、Projects、Calendar、Habits 和 Review。所有内容仍写回 Vault Markdown。
@@ -23,6 +23,15 @@ npm ci
 npm test
 npm run build
 ```
+
+## 0.7.0 重点
+
+- 窄面板导航改为双行结构，「添加 / 功能 / 搜索」始终可见，当前页面会自动滚动到导航可视区域。
+- 功能中心支持名称与说明搜索，并可按「未添加 / 待配置」筛选；工具区固定，结果区独立滚动。
+- 工作台项目与复盘改为可跳转摘要，项目、日历、习惯和完整复盘在专页自然展开，减少固定卡片内的嵌套滚动。
+- 统一标题、正文、辅助文字、数字和触控尺寸；日历与恢复界面按 DashFlow 面板宽度响应，而不是只看应用窗口宽度。
+- 四个历史全局视觉覆盖层收敛为一个产品表现层，保留功能专属样式并显著降低 CSS 覆盖债务。
+- 升级不改变 schema 8、Markdown 真相源或现有设置字段；首次加载会沿用当前数据和个人 Hero 图片。
 
 ## 0.6.1 修复
 

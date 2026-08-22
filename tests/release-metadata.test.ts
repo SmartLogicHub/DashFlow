@@ -10,10 +10,11 @@ const lock = JSON.parse(readFileSync("package-lock.json", "utf8")) as { lockfile
 const ci = readFileSync(".github/workflows/ci.yml", "utf8");
 const release = readFileSync(".github/workflows/release.yml", "utf8");
 const readme = readFileSync("README.md", "utf8");
+const changelog = readFileSync("CHANGELOG.md", "utf8");
 const architecture = readFileSync("ARCHITECTURE.md", "utf8");
 
-test("0.6.1 release metadata and reproducible build inputs agree", () => {
-  assert.equal(PLUGIN_VERSION, "0.6.1");
+test("0.7.0 release metadata and reproducible build inputs agree", () => {
+  assert.equal(PLUGIN_VERSION, "0.7.0");
   assert.equal(packageJson.version, PLUGIN_VERSION);
   assert.equal(manifest.version, PLUGIN_VERSION);
   assert.equal(versions[PLUGIN_VERSION], "1.11.4");
@@ -37,6 +38,18 @@ test("release workflow ships an install ZIP with nested assets and complete sour
   assert.match(release, /zip -r "DashFlow-v\$VERSION\.zip"/);
   assert.match(release, /gh release create "\$VERSION"[\s\S]*?"DashFlow-v\$VERSION\.zip"/);
   for (const input of ["package-lock.json", "CHANGELOG.md"]) assert.ok(ci.includes(input), input);
-  assert.ok(readme.includes("DashFlow-v0.6.1.zip"));
+  assert.ok(readme.includes("DashFlow-v0.7.0.zip"));
+  assert.ok(changelog.includes("## 0.7.0"));
   assert.ok(readFileSync(".gitignore", "utf8").includes("main.js"));
+});
+
+test("CI derives source archive naming from manifest metadata", () => {
+  assert.ok(ci.includes("require('./manifest.json').version"));
+  assert.match(ci, /DashFlow-v\$VERSION-full-source\.zip/);
+  assert.equal(ci.includes("DashFlow-v0.6.1-full-source.zip"), false);
+});
+
+test("duplicate releases fail loudly instead of silently succeeding", () => {
+  assert.match(release, /if gh release view "\$VERSION"[\s\S]*?exit 1/);
+  assert.equal(release.includes("already exists; skipping"), false);
 });

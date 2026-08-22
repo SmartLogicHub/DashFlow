@@ -262,6 +262,7 @@ export class ProductExperienceService {
     actions.className = "dashflow-command-actions";
 
     const add = this.commandButton("plus", "添加");
+    add.dataset.commandAction = "add";
     add.addEventListener("click", () => new QuickAddModal(this.plugin).open());
     const project = this.commandButton("folder-plus", "新建项目");
     project.classList.add("is-secondary-action");
@@ -270,10 +271,12 @@ export class ProductExperienceService {
     habit.classList.add("is-secondary-action");
     habit.addEventListener("click", () => new HabitEditorModal(this.plugin).open());
     const search = this.commandButton("search", "搜索");
+    search.dataset.commandAction = "search";
     search.classList.add("is-icon-action");
     search.addEventListener("click", () => new GlobalSearchModal(this.plugin).open());
 
     const features = this.commandButton("blocks", "功能");
+    features.dataset.commandAction = "features";
     features.classList.add("is-icon-action", "dashflow-feature-action");
     features.addEventListener("click", () => new FeatureHubModal(this.plugin).open());
 
@@ -307,7 +310,10 @@ export class ProductExperienceService {
     for (const button of bar.querySelectorAll<HTMLButtonElement>(".dashflow-command-button[data-section]")) {
       const active = section !== null && button.dataset.section === section;
       button.classList.toggle("is-active", active);
-      if (active) button.setAttribute("aria-current", "page");
+      if (active) {
+        button.setAttribute("aria-current", "page");
+        this.centerActiveCommand(button);
+      }
       else button.removeAttribute("aria-current");
 
       let badge = button.querySelector<HTMLElement>(".dashflow-command-badge");
@@ -324,10 +330,18 @@ export class ProductExperienceService {
     }
   }
 
+  private centerActiveCommand(button: HTMLButtonElement): void {
+    requestAnimationFrame(() => {
+      if (!button.closest(".dashflow-command-shell.is-mobile")) return;
+      button.scrollIntoView({ inline: "center", block: "nearest" });
+    });
+  }
+
   private commandButton(iconName: string, label: string): HTMLButtonElement {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "dashflow-command-button";
+    button.setAttribute("aria-label", label);
     const icon = document.createElement("span");
     icon.className = "dashflow-command-icon";
     setIcon(icon, iconName);
@@ -454,6 +468,15 @@ export class ProductExperienceService {
         steps.appendChild(node);
       }
     });
+
+    const list = card.querySelector<HTMLElement>(".dashflow-project-list");
+    if (list && !list.querySelector(".dashflow-project-route")) {
+      const route = this.text("button", "查看全部项目");
+      route.type = "button";
+      route.className = "dashflow-project-route";
+      route.addEventListener("click", () => this.openSection("projects"));
+      list.appendChild(route);
+    }
   }
 
   private decorateTaskPriorityBadges(grid: HTMLElement): void {

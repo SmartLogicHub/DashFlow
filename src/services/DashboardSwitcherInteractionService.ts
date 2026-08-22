@@ -26,12 +26,12 @@ const SWITCHER_STYLES = `
 .dashflow-dashboard-switcher select{max-width:240px;min-width:130px;height:32px;font-size:11px;border-radius:8px}
 .dashflow-dashboard-switcher button{appearance:none;border:1px solid var(--background-modifier-border);background:var(--background-secondary);color:var(--text-muted);height:32px;min-width:32px;border-radius:8px;padding:0 9px;cursor:pointer;font-size:12px}
 .dashflow-dashboard-switcher button:hover{background:var(--background-modifier-hover);color:var(--text-normal)}
-.dashflow-dashboard-count{color:var(--text-faint);font-size:10px;margin-left:2px}
+.dashflow-dashboard-count{color:var(--text-faint);font-size:var(--df-type-label,11px);margin-left:2px}
 .dashflow-dashboard-manager-container .modal{width:min(680px,calc(100vw - 28px));max-width:680px}
 .dashflow-dashboard-manager-container .modal-content{padding-bottom:18px}
 .dashflow-dashboard-template-section{margin-top:14px}
-.dashflow-dashboard-template-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 8px;color:var(--text-muted);font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-.dashflow-dashboard-template-section-title small{font-size:9px;font-weight:500;letter-spacing:0;text-transform:none;color:var(--text-faint)}
+.dashflow-dashboard-template-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 2px 8px;color:var(--text-muted);font-size:var(--df-type-label,11px);font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.dashflow-dashboard-template-section-title small{font-size:var(--df-type-label,11px);font-weight:500;letter-spacing:0;text-transform:none;color:var(--text-faint)}
 .dashflow-dashboard-template-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0}
 .dashflow-dashboard-template-card{appearance:none;border:1px solid var(--background-modifier-border);background:var(--background-secondary);color:var(--text-normal);border-radius:12px;padding:11px 12px;text-align:left;cursor:pointer;min-height:88px;display:grid;grid-template-columns:30px minmax(0,1fr);gap:9px;align-items:start}
 .dashflow-dashboard-template-card:hover{background:var(--background-modifier-hover)}
@@ -39,10 +39,10 @@ const SWITCHER_STYLES = `
 .dashflow-dashboard-template-card.is-custom .dashflow-dashboard-template-icon{color:var(--interactive-accent)}
 .dashflow-dashboard-template-icon{font-size:20px;line-height:1.1;text-align:center;padding-top:2px}
 .dashflow-dashboard-template-copy strong{display:block;font-size:12px;margin-bottom:4px}
-.dashflow-dashboard-template-copy small{display:block;color:var(--text-muted);font-size:10px;line-height:1.45}
-.dashflow-dashboard-template-meta{display:block;color:var(--text-faint);font-size:9px;margin-top:5px}
+.dashflow-dashboard-template-copy small{display:block;color:var(--text-muted);font-size:var(--df-type-label,11px);line-height:1.45}
+.dashflow-dashboard-template-meta{display:block;color:var(--text-faint);font-size:var(--df-type-label,11px);margin-top:5px}
 .dashflow-dashboard-create-name{margin-top:16px}
-.dashflow-dashboard-create-name label,.dashflow-dashboard-template-save-field label{display:block;font-size:10px;color:var(--text-muted);margin-bottom:5px}
+.dashflow-dashboard-create-name label,.dashflow-dashboard-template-save-field label{display:block;font-size:var(--df-type-label,11px);color:var(--text-muted);margin-bottom:5px}
 .dashflow-dashboard-create-name input,.dashflow-dashboard-template-save-field input,.dashflow-dashboard-template-save-field textarea{width:100%}
 .dashflow-dashboard-template-save-field{margin:12px 0}
 .dashflow-dashboard-template-save-field textarea{min-height:76px;resize:vertical}
@@ -51,17 +51,17 @@ const SWITCHER_STYLES = `
 .dashflow-dashboard-manager-row.is-active{border-color:color-mix(in srgb,var(--interactive-accent) 50%,var(--background-modifier-border));background:color-mix(in srgb,var(--interactive-accent) 7%,transparent)}
 .dashflow-dashboard-manager-row-main{appearance:none;border:0;background:transparent;color:var(--text-normal);text-align:left;padding:3px 5px;cursor:pointer;min-width:0}
 .dashflow-dashboard-manager-row-main strong{display:block;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.dashflow-dashboard-manager-row-main small{display:block;color:var(--text-faint);font-size:9px;margin-top:3px}
-.dashflow-dashboard-manager-row-badge{font-size:9px;color:var(--interactive-accent);padding:3px 6px;border-radius:99px;background:color-mix(in srgb,var(--interactive-accent) 10%,transparent)}
+.dashflow-dashboard-manager-row-main small{display:block;color:var(--text-faint);font-size:var(--df-type-label,11px);margin-top:3px}
+.dashflow-dashboard-manager-row-badge{font-size:var(--df-type-label,11px);color:var(--interactive-accent);padding:3px 6px;border-radius:99px;background:color-mix(in srgb,var(--interactive-accent) 10%,transparent)}
 .dashflow-dashboard-name-editor{display:flex;gap:8px;align-items:center;margin:14px 0 8px}
 .dashflow-dashboard-name-editor input{flex:1;min-width:0}
 .dashflow-dashboard-manager-actions{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}
 .dashflow-dashboard-manager-actions .is-danger,.dashflow-custom-template-delete{color:var(--text-error)}
-.dashflow-dashboard-modal-note{color:var(--text-faint);font-size:10px;line-height:1.5;margin-top:6px}
+.dashflow-dashboard-modal-note{color:var(--text-faint);font-size:var(--df-type-label,11px);line-height:1.5;margin-top:6px}
 .dashflow-custom-template-list{display:flex;flex-direction:column;gap:6px;margin-top:8px}
 .dashflow-custom-template-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;padding:8px 9px;border:1px solid var(--background-modifier-border);border-radius:10px}
 .dashflow-custom-template-row strong{display:block;font-size:11px}
-.dashflow-custom-template-row small{display:block;margin-top:3px;color:var(--text-faint);font-size:9px;line-height:1.4}
+.dashflow-custom-template-row small{display:block;margin-top:3px;color:var(--text-faint);font-size:var(--df-type-label,11px);line-height:1.4}
 .dashflow-custom-template-row button{height:30px;white-space:nowrap}
 @media(max-width:900px){.dashflow-dashboard-switcher{margin-top:-8px;margin-bottom:18px}.dashflow-dashboard-switcher select{flex:1;max-width:none}.dashflow-dashboard-count{display:none}.dashflow-dashboard-manager-row{grid-template-columns:minmax(0,1fr) auto}.dashflow-dashboard-template-grid{grid-template-columns:1fr}}
 `;

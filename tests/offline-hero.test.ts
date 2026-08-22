@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 const sources = [
   readFileSync("src/services/PersonalHomeDesignService.ts", "utf8"),
-  readFileSync("src/styles/ProductHierarchyResetStyles.ts", "utf8"),
+  readFileSync("src/styles/ProductPresentationStyles.ts", "utf8"),
   readFileSync("src/services/PresentationRuntimeService.ts", "utf8"),
 ].join("\n");
 

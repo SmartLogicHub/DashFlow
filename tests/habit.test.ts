@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { readFileSync } from "node:fs";
 import type { Habit } from "../src/models";
 import {
   habitCurrentStreak,
@@ -8,6 +9,8 @@ import {
   habitStats,
   habitTargetProgress,
 } from "../src/habits/habitMath";
+
+const habitWidget = readFileSync("src/services/HabitWidgetInteractionService.ts", "utf8");
 
 function habit(overrides: Partial<Habit> = {}): Habit {
   return {
@@ -66,4 +69,10 @@ test("habit history marks scheduled and completed states", () => {
     ["2026-08-15", false, false],
     ["2026-08-16", false, false],
   ]);
+});
+
+test("empty Habit view offers a direct first-habit action", () => {
+  assert.ok(habitWidget.includes("dashflow-habit-empty"));
+  assert.ok(habitWidget.includes("创建第一个习惯"));
+  assert.ok(habitWidget.includes("new HabitEditorModal(this.plugin).open()"));
 });

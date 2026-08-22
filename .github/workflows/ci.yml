@@ -25,9 +25,17 @@ jobs:
             manifest.json
             styles.css
             assets/heroes/*.webp
-      - name: Package full development source
+      - name: Read plugin version
+        id: version
+        shell: bash
         run: |
-          zip -r DashFlow-v0.6.1-full-source.zip \
+          VERSION=$(node -p "require('./manifest.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+      - name: Package full development source
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          zip -r "DashFlow-v$VERSION-full-source.zip" \
             .github \
             .gitignore \
             ARCHITECTURE.md \
@@ -47,4 +55,4 @@ jobs:
       - uses: actions/upload-artifact@v4
         with:
           name: dashflow-source
-          path: DashFlow-v0.6.1-full-source.zip
+          path: DashFlow-v${{ steps.version.outputs.version }}-full-source.zip

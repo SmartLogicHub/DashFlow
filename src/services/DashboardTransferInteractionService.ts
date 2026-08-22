@@ -21,15 +21,15 @@ const MANAGER_CLASS = "dashflow-dashboard-manager-container";
 const TRANSFER_STYLES = `
 .dashflow-dashboard-transfer-container .modal{width:min(720px,calc(100vw - 28px));max-width:720px}
 .dashflow-dashboard-transfer-container .modal-content{padding-bottom:18px}
-.dashflow-dashboard-transfer-container textarea{width:100%;min-height:300px;resize:vertical;font-family:var(--font-monospace);font-size:10px;line-height:1.5;tab-size:2}
+.dashflow-dashboard-transfer-container textarea{width:100%;min-height:300px;resize:vertical;font-family:var(--font-monospace);font-size:var(--df-type-label,11px);line-height:1.5;tab-size:2}
 .dashflow-dashboard-transfer-field{margin:12px 0}
-.dashflow-dashboard-transfer-field label{display:block;font-size:10px;color:var(--text-muted);margin-bottom:5px}
+.dashflow-dashboard-transfer-field label{display:block;font-size:var(--df-type-label,11px);color:var(--text-muted);margin-bottom:5px}
 .dashflow-dashboard-transfer-field input[type="text"]{width:100%}
 .dashflow-dashboard-transfer-file{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0}
-.dashflow-dashboard-transfer-file input[type="file"]{max-width:100%;font-size:10px;color:var(--text-muted)}
-.dashflow-dashboard-transfer-status{min-height:18px;margin:8px 0 0;font-size:10px;line-height:1.45;color:var(--text-muted)}
+.dashflow-dashboard-transfer-file input[type="file"]{max-width:100%;font-size:var(--df-type-label,11px);color:var(--text-muted)}
+.dashflow-dashboard-transfer-status{min-height:18px;margin:8px 0 0;font-size:var(--df-type-label,11px);line-height:1.45;color:var(--text-muted)}
 .dashflow-dashboard-transfer-status.is-error{color:var(--text-error)}
-.dashflow-dashboard-transfer-note{font-size:10px;line-height:1.5;color:var(--text-faint);margin:8px 0 12px}
+.dashflow-dashboard-transfer-note{font-size:var(--df-type-label,11px);line-height:1.5;color:var(--text-faint);margin:8px 0 12px}
 .dashflow-dashboard-transfer-actions{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:12px}
 .dashflow-dashboard-transfer-injected{white-space:nowrap}
 @media(max-width:900px){.dashflow-dashboard-transfer-container textarea{min-height:240px}.dashflow-dashboard-transfer-actions{justify-content:stretch}.dashflow-dashboard-transfer-actions button{flex:1}}

@@ -196,11 +196,11 @@ export const INTERACTION_MOTION_STYLES = `
   }
 
   .dashflow-countdown > span {
-    font-size: 10px!important;
+    font-size: var(--df-type-label, 11px)!important;
   }
 
   .dashflow-countdown > small {
-    font-size: 9px!important;
+    font-size: var(--df-type-label, 11px)!important;
   }
 }
 

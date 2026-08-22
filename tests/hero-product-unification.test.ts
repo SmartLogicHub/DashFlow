@@ -9,7 +9,7 @@ import { taskOverview } from "../src/product/progressOverview";
 const settingsSource = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 const runtimeSource = readFileSync("src/services/PresentationRuntimeService.ts", "utf8");
 const experienceSource = readFileSync("src/services/ProductExperienceService.ts", "utf8");
-const hierarchyStyles = readFileSync("src/styles/ProductHierarchyResetStyles.ts", "utf8");
+const presentationStyles = readFileSync("src/styles/ProductPresentationStyles.ts", "utf8");
 const settingsStyles = readFileSync("src/styles/SettingsStyles.ts", "utf8");
 const productDesignSource = readFileSync("src/services/ProductDesignService.ts", "utf8");
 const rendererSource = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
@@ -86,9 +86,9 @@ test("working Hero has one DOM owner and a compact shared-image frame", () => {
   assert.ok(experienceSource.includes("content.append(eyebrow, heading, description)"));
   assert.equal(experienceSource.includes("Obsidian · Personal Dashboard"), false);
   assert.equal(rendererSource.includes("Obsidian · Personal Dashboard"), false);
-  assert.equal(hierarchyStyles.includes("::after"), false);
-  assert.ok(hierarchyStyles.includes("height: 128px !important"));
-  assert.ok(hierarchyStyles.includes("var(--df-hero-image"));
+  assert.equal(presentationStyles.includes(".dashflow-hero::after"), false);
+  assert.ok(presentationStyles.includes("height: 128px"));
+  assert.ok(presentationStyles.includes("var(--df-hero-image"));
 });
 
 test("task overview keeps today and all-task metrics semantically separate", () => {

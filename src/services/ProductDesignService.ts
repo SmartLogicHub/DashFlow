@@ -54,7 +54,7 @@ export const PRODUCT_STYLES = `
 .dashflow-command-button.is-icon-action .dashflow-command-label { display: none; }
 .dashflow-command-icon { width: 14px; height: 14px; display: grid; place-items: center; }
 .dashflow-command-icon svg { width: 13.5px; height: 13.5px; }
-.dashflow-command-badge { min-width: 16px; height: 16px; display: grid; place-items: center; margin-left: -1px; padding: 0 4px; border-radius: 99px; color: white; background: var(--df-cmd-rose); font-size: 9.5px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.dashflow-command-badge { min-width: 16px; height: 16px; display: grid; place-items: center; margin-left: -1px; padding: 0 4px; border-radius: 99px; color: white; background: var(--df-cmd-rose); font-size: var(--df-type-label, 11px); font-weight: 700; font-variant-numeric: tabular-nums; }
 
 .dashflow-command-workspace .dashflow-dashboard-switcher { min-height: 0!important; height: 30px; margin: 0!important; display: flex!important; gap: 2px!important; }
 .dashflow-command-workspace .dashflow-dashboard-switcher select,
@@ -74,7 +74,7 @@ export const PRODUCT_STYLES = `
 .dashflow-command-shell .dashflow-widget-icon { width: 22px!important; height: 22px!important; border-radius: 6px!important; background: var(--df-cmd-soft)!important; color: var(--df-cmd-text)!important; box-shadow: none!important; }
 .dashflow-command-shell .dashflow-widget-icon svg { width: 13px!important; height: 13px!important; }
 .dashflow-command-shell .dashflow-widget-body { color: var(--df-cmd-text); font-size: 11.5px; }
-.dashflow-command-shell .dashflow-kicker { color: var(--df-cmd-muted)!important; font-size: 10px!important; font-weight: 600!important; letter-spacing: 0.05em!important; }
+.dashflow-command-shell .dashflow-kicker { color: var(--df-cmd-muted)!important; font-size: var(--df-type-label, 11px)!important; font-weight: 600!important; letter-spacing: 0.05em!important; }
 .dashflow-command-shell .dashflow-empty { min-height: 68px!important; color: var(--df-cmd-muted)!important; font-size: 11.5px!important; }
 
 /* Task rows: clean line items with subtle hover. */
@@ -82,8 +82,8 @@ export const PRODUCT_STYLES = `
 .dashflow-command-shell .dashflow-task:last-child { border-bottom: 0!important; }
 .dashflow-command-shell .dashflow-task:hover { background: var(--df-cmd-soft)!important; }
 .dashflow-command-shell .dashflow-task > span:not(.dashflow-task-priority) { color: var(--df-cmd-text)!important; font-size: 12px!important; line-height: 1.4; }
-.dashflow-command-shell .dashflow-task time { color: var(--df-cmd-muted)!important; font-size: 10px!important; font-variant-numeric: tabular-nums; }
-.dashflow-task-priority { margin-left: auto; padding: 2px 7px; border-radius: 99px; font-size: 9.5px; font-weight: 600; white-space: nowrap; }
+.dashflow-command-shell .dashflow-task time { color: var(--df-cmd-muted)!important; font-size: var(--df-type-label, 11px)!important; font-variant-numeric: tabular-nums; }
+.dashflow-task-priority { margin-left: auto; padding: 2px 7px; border-radius: 99px; font-size: var(--df-type-label, 11px); font-weight: 600; white-space: nowrap; }
 .dashflow-task-priority.is-urgent { color: #b91c1c; background: color-mix(in srgb, #ef4444 12%, transparent); }
 .dashflow-task-priority.is-high { color: #b45309; background: color-mix(in srgb, #f59e0b 14%, transparent); }
 .dashflow-task-priority.is-low { color: var(--df-cmd-muted); background: var(--df-cmd-soft); }
@@ -101,7 +101,7 @@ export const PRODUCT_STYLES = `
 .dashflow-progress-ring::before { content: ""; position: absolute; inset: 5px; border-radius: 50%; background: var(--df-cmd-surface); }
 .dashflow-progress-ring > div { position: relative; z-index: 1; display: grid; justify-items: center; }
 .dashflow-progress-ring strong { font-size: 16px!important; line-height: 1!important; font-weight: 750; font-variant-numeric: tabular-nums; color: var(--df-cmd-text); }
-.dashflow-progress-ring span { margin-top: 3px; color: var(--df-cmd-muted)!important; font-size: 9.5px!important; font-weight: 650; letter-spacing: 0.06em; }
+.dashflow-progress-ring span { margin-top: 3px; color: var(--df-cmd-muted)!important; font-size: var(--df-type-label, 11px)!important; font-weight: 650; letter-spacing: 0.06em; }
 .dashflow-progress-caption { color: var(--df-cmd-muted); font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums; text-align: center; }
 
 /* Task overview: today is the decision, the all-task total is context. */
@@ -131,7 +131,7 @@ export const PRODUCT_STYLES = `
 .dashflow-task-overview-label {
   grid-area: label;
   color: var(--df-cmd-muted);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -193,7 +193,7 @@ export const PRODUCT_STYLES = `
   justify-content: space-between;
   gap: 8px;
   color: var(--df-cmd-muted);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 700;
   letter-spacing: 0.08em;
 }
@@ -229,7 +229,7 @@ export const PRODUCT_STYLES = `
 .dashflow-command-shell .dashflow-project-row:last-child { border-bottom: 0!important; }
 .dashflow-command-shell .dashflow-project-row:hover { background: color-mix(in srgb, var(--df-cmd-soft) 72%, transparent)!important; border-radius: 6px; }
 .dashflow-command-shell .dashflow-project-row strong { color: var(--df-cmd-text)!important; font-size: 12.5px!important; font-weight: 650!important; }
-.dashflow-command-shell .dashflow-project-row small, .dashflow-command-shell .dashflow-project-stat { color: var(--df-cmd-muted)!important; font-size: 10.5px!important; font-variant-numeric: tabular-nums; }
+.dashflow-command-shell .dashflow-project-row small, .dashflow-command-shell .dashflow-project-stat { color: var(--df-cmd-muted)!important; font-size: var(--df-type-label, 11px)!important; font-variant-numeric: tabular-nums; }
 .dashflow-project-steps { display: grid; grid-template-columns: repeat(5, 1fr); align-items: center; position: relative; }
 .dashflow-project-steps::before { content: ""; position: absolute; left: 4px; right: 4px; height: 2px; background: var(--df-cmd-soft); }
 .dashflow-project-step { width: 7px; height: 7px; z-index: 1; justify-self: center; border-radius: 50%; background: var(--df-cmd-soft); }
@@ -278,7 +278,7 @@ export const PRODUCT_STYLES = `
 .dashflow-command-inbox-composer > span:first-child { width: 16px; height: 16px; color: var(--df-cmd-muted); display: grid; place-items: center; }
 .dashflow-command-inbox-composer input { width: 100%; border: 0!important; background: transparent!important; box-shadow: none!important; font-size: 12.5px; color: var(--df-cmd-text); }
 .dashflow-command-inbox-composer input::placeholder { color: var(--df-cmd-muted); opacity: 0.85; }
-.dashflow-command-inbox-composer > span:last-child { color: var(--df-cmd-muted); font-size: 10px; font-weight: 700; background: var(--df-cmd-surface); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--df-cmd-border); }
+.dashflow-command-inbox-composer > span:last-child { color: var(--df-cmd-muted); font-size: var(--df-type-label, 11px); font-weight: 700; background: var(--df-cmd-surface); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--df-cmd-border); }
 .dashflow-command-inbox-list { display: flex; flex-direction: column; }
 .dashflow-command-inbox-row { min-height: 40px; display: grid; grid-template-columns: 18px minmax(0, 1fr) 18px; gap: 10px; align-items: center; border-bottom: 1px solid color-mix(in srgb, var(--df-cmd-border) 65%, transparent); padding: 2px 0; }
 .dashflow-command-inbox-row > button { min-width: 0; padding: 5px 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
@@ -311,7 +311,7 @@ export const PRODUCT_STYLES = `
 .dashflow-command-shell .dashflow-stat { border-right: 1px solid var(--df-cmd-border); background: transparent!important; }
 .dashflow-command-shell .dashflow-stat:last-child { border-right: 0; }
 .dashflow-command-shell .dashflow-stat strong { color: var(--df-cmd-text)!important; font-size: 20px!important; font-weight: 750!important; font-variant-numeric: tabular-nums; }
-.dashflow-command-shell .dashflow-stat span { color: var(--df-cmd-muted)!important; font-size: 10px!important; font-weight: 600; letter-spacing: 0.05em; }
+.dashflow-command-shell .dashflow-stat span { color: var(--df-cmd-muted)!important; font-size: var(--df-type-label, 11px)!important; font-weight: 600; letter-spacing: 0.05em; }
 
 /* Habit streak & keyboard badges. */
 .dashflow-habit-streak {
@@ -320,7 +320,7 @@ export const PRODUCT_STYLES = `
   gap: 3px;
   padding: 1px 6px;
   border-radius: 99px;
-  font-size: 9.5px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 700;
   color: #ea580c;
   background: color-mix(in srgb, #f97316 12%, transparent);
@@ -339,7 +339,7 @@ export const PRODUCT_STYLES = `
   background: var(--df-cmd-surface);
   color: var(--df-cmd-muted);
   font-family: var(--font-monospace, monospace);
-  font-size: 9.5px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 700;
   line-height: 1;
 }
@@ -347,8 +347,8 @@ export const PRODUCT_STYLES = `
 /* Floating Layout Edit Bar. */
 .dashflow-command-shell .dashflow-resize-handle { border-radius: 50%!important; }
 .dashflow-command-shell .dashflow-edit-bar { position: fixed!important; left: 50%; bottom: 22px; z-index: 120; transform: translateX(-50%); min-height: 42px; padding: 5px 8px!important; display: flex; align-items: center; gap: 6px; border: 1px solid var(--df-cmd-border)!important; border-radius: 999px!important; background: color-mix(in srgb, var(--df-cmd-surface) 96%, transparent)!important; box-shadow: 0 8px 24px rgba(28, 30, 42, 0.10)!important; backdrop-filter: blur(16px); }
-.dashflow-command-shell .dashflow-edit-bar select, .dashflow-command-shell .dashflow-edit-bar button { height: 30px!important; border-radius: 999px!important; font-size: 10.5px!important; font-weight: 600; }
-.dashflow-command-shell .dashflow-edit-bar > span { color: var(--df-cmd-muted)!important; font-size: 9.5px!important; }
+.dashflow-command-shell .dashflow-edit-bar select, .dashflow-command-shell .dashflow-edit-bar button { height: 30px!important; border-radius: 999px!important; font-size: var(--df-type-label, 11px)!important; font-weight: 600; }
+.dashflow-command-shell .dashflow-edit-bar > span { color: var(--df-cmd-muted)!important; font-size: var(--df-type-label, 11px)!important; }
 
 @media (max-width: 980px) {
   .dashflow-command-shell { width: min(100% - 18px, 1160px)!important; }
@@ -377,7 +377,7 @@ export const PRODUCT_STYLES = `
   .dashflow-task-overview-primary { padding-right: 10px; grid-template-columns: 60px minmax(0, 1fr); column-gap: 8px; }
   .dashflow-task-overview-ring { width: 60px; height: 60px; }
   .dashflow-task-overview-ring strong, .dashflow-task-overview-secondary-heading strong { font-size: 18px; }
-  .dashflow-task-overview-primary .dashflow-task-overview-caption, .dashflow-task-overview-secondary .dashflow-task-overview-caption { font-size: 10px; }
+.dashflow-task-overview-primary .dashflow-task-overview-caption, .dashflow-task-overview-secondary .dashflow-task-overview-caption { font-size: var(--df-type-label, 11px); }
 }
 @media (prefers-reduced-motion: reduce) {
   .dashflow-command-shell *, .dashflow-command-bar * { transition: none!important; animation: none!important; scroll-behavior: auto!important; }

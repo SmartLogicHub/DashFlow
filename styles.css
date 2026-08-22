@@ -74,7 +74,7 @@
 .dashflow-pulse-label,
 .dashflow-section-title > span {
   letter-spacing: .12em;
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 700;
   color: var(--text-muted);
 }
@@ -175,7 +175,7 @@
 .dashflow-pulse > span {
   white-space: nowrap;
   padding: 0 18px;
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   letter-spacing: .075em;
   color: var(--text-muted);
 }
@@ -341,7 +341,7 @@
 }
 
 .dashflow-empty code {
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   color: var(--text-muted);
   background: var(--df-surface-soft);
   border-radius: 5px;
@@ -406,7 +406,7 @@
 
 .dashflow-task time {
   color: var(--text-faint);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   padding: 2px 6px;
   border-radius: 999px;
   background: var(--df-surface-soft);
@@ -459,7 +459,7 @@
 
 .dashflow-capture-footer span {
   color: var(--text-faint);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 500;
 }
 
@@ -515,13 +515,13 @@
   display: block;
   margin-top: 2px;
   color: var(--df-accent);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 650;
   letter-spacing: .10em;
 }
 
 .dashflow-progress-meta {
-  font-size: 10.5px;
+  font-size: var(--df-type-label, 11px);
   color: var(--text-faint);
   font-variant-numeric: tabular-nums;
 }
@@ -587,7 +587,7 @@
 
 .dashflow-project-stat span {
   color: var(--text-faint);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-variant-numeric: tabular-nums;
 }
 
@@ -600,7 +600,7 @@
 
 .dashflow-countdown > span {
   color: var(--df-warning);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 650;
   letter-spacing: .14em;
 }
@@ -617,7 +617,7 @@
 
 .dashflow-countdown > small {
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 600;
   letter-spacing: .16em;
   margin-top: 5px;
@@ -659,7 +659,7 @@
 .dashflow-stat:nth-child(4) strong { color: var(--df-success); }
 
 .dashflow-stat span {
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 600;
   color: var(--text-faint);
   letter-spacing: .10em;
@@ -704,7 +704,7 @@
 
 .dashflow-edit-bar > span {
   color: var(--text-faint);
-  font-size: 9px;
+  font-size: var(--df-type-label, 11px);
   padding: 0 5px;
 }
 

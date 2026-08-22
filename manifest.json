@@ -1,9 +1,9 @@
 {
   "id": "dashflow",
   "name": "DashFlow",
-  "version": "0.6.1",
+  "version": "0.7.0",
   "minAppVersion": "1.11.4",
-  "description": "A Personal OS for Obsidian with optimized runtime rendering, responsive dashboard interactions, DeepSeek-inspired UX polish, Focus, AI News and workflow tools.",
+  "description": "A Personal OS for Obsidian with a unified responsive interface, searchable feature discovery, Focus, AI News and workflow tools.",
   "author": "DashFlow",
   "isDesktopOnly": false
 }

@@ -103,8 +103,8 @@ export const SETTINGS_STYLES = `
     var(--background-secondary);
 }
 .dashflow-theme-card-copy { min-height: 68px; padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 3px; }
-.dashflow-theme-card-copy strong { color: var(--text-normal); font-size: 11px; font-weight: 650; line-height: 1.3; }
-.dashflow-theme-card-copy span { color: var(--text-muted); font-size: 10px; line-height: 1.4; }
+.dashflow-theme-card-copy strong { min-height: 2.6em; color: var(--text-normal); font-size: 11px; font-weight: 650; line-height: 1.3; white-space: normal; overflow-wrap: anywhere; }
+.dashflow-theme-card-copy span { color: var(--text-muted); font-size: 12px; line-height: 1.45; white-space: normal; overflow: visible; text-overflow: clip; }
 .dashflow-theme-card-state {
   position: absolute;
   top: 7px;
@@ -114,7 +114,7 @@ export const SETTINGS_STYLES = `
   color: var(--text-normal);
   background: color-mix(in srgb, var(--background-primary) 88%, transparent);
   backdrop-filter: blur(8px);
-  font-size: 9px;
+  font-size: 11px;
   font-weight: 650;
 }
 .dashflow-theme-card.is-selected .dashflow-theme-card-state { color: var(--text-on-accent); background: var(--interactive-accent); }
@@ -171,7 +171,7 @@ export const SETTINGS_STYLES = `
 
 .dashflow-onboarding-modal { width: min(680px, calc(100vw - 28px)); }
 .dashflow-onboarding-modal .modal-content { padding: 24px; }
-.dashflow-onboarding-eyebrow { color: var(--text-faint); font-size: 10px; font-weight: 700; letter-spacing: 0.14em; }
+.dashflow-onboarding-eyebrow { color: var(--text-faint); font-size: 11px; font-weight: 700; letter-spacing: 0.14em; }
 .dashflow-onboarding-modal h2 { margin: 7px 0 8px; color: var(--text-normal); font-size: 25px; letter-spacing: -0.03em; }
 .dashflow-onboarding-lead { margin: 0; max-width: 580px; color: var(--text-muted); font-size: 13px; line-height: 1.65; }
 .dashflow-onboarding-counts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin-top: 20px; }
