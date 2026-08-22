@@ -562,10 +562,14 @@ export class DashboardRenderer {
 
     for (const field of definition.settings ?? []) {
       const control = this.createWidgetSettingControl(field, draftConfig);
+      const preset = field.type === "textarea" && field.preset
+        ? this.createWidgetSettingPreset(field, draftConfig, control)
+        : undefined;
       content.appendChild(this.renderSettingRow(
         field.label,
         field.description ?? "",
         control,
+        preset,
       ));
     }
 
@@ -626,6 +630,7 @@ export class DashboardRenderer {
     label: string,
     description: string,
     control: HTMLElement,
+    action?: HTMLElement,
   ): HTMLElement {
     const row = createElement("div", "setting-item");
     const info = createElement("div", "setting-item-info");
@@ -633,8 +638,28 @@ export class DashboardRenderer {
     if (description) info.appendChild(createElement("div", "setting-item-description", description));
     const controlWrap = createElement("div", "setting-item-control");
     controlWrap.appendChild(control);
+    if (action) {
+      controlWrap.classList.add("dashflow-widget-setting-stack");
+      controlWrap.appendChild(action);
+    }
     row.append(info, controlWrap);
     return row;
+  }
+
+  private createWidgetSettingPreset(
+    field: Extract<WidgetSettingField, { type: "textarea" }>,
+    draftConfig: Record<string, unknown>,
+    control: HTMLElement,
+  ): HTMLButtonElement {
+    const button = createElement("button", "dashflow-widget-setting-preset", field.preset?.label ?? "填入预设");
+    button.type = "button";
+    button.addEventListener("click", () => {
+      if (!field.preset || !(control instanceof HTMLTextAreaElement)) return;
+      control.value = field.preset.value;
+      draftConfig[field.key] = field.preset.value;
+      control.focus();
+    });
+    return button;
   }
 
   private createWidgetSettingControl(
@@ -665,6 +690,17 @@ export class DashboardRenderer {
         draftConfig[field.key] = select.value;
       });
       return select;
+    }
+
+    if (field.type === "textarea") {
+      const textarea = document.createElement("textarea");
+      textarea.value = String(current ?? "");
+      textarea.rows = field.rows ?? 5;
+      if (field.placeholder) textarea.placeholder = field.placeholder;
+      textarea.addEventListener("input", () => {
+        draftConfig[field.key] = textarea.value;
+      });
+      return textarea;
     }
 
     const input = createElement("input");

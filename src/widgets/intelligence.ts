@@ -1,5 +1,6 @@
 import type { AINewsWidgetConfig, WidgetDefinition } from "../models";
 import type { WidgetRegistry } from "./WidgetRegistry";
+import { recommendedAiNewsSourcesText } from "./aiNewsSources";
 
 export function registerIntelligenceWidgets(registry: WidgetRegistry): void {
   const definition: WidgetDefinition<AINewsWidgetConfig> = {
@@ -12,10 +13,12 @@ export function registerIntelligenceWidgets(registry: WidgetRegistry): void {
     settings: [
       {
         key: "sources",
-        type: "text",
+        type: "textarea",
         label: "RSS / Atom 源",
         description: "使用换行、逗号或分号分隔多个 HTTP(S) Feed URL；最多 12 个。",
         placeholder: "https://example.com/feed.xml",
+        rows: 6,
+        preset: { label: "使用推荐源", value: recommendedAiNewsSourcesText() },
       },
       {
         key: "interests",

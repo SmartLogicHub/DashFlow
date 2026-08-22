@@ -179,6 +179,12 @@ interface WidgetSettingBase {
 
 export type WidgetSettingField =
   | (WidgetSettingBase & { type: "text"; placeholder?: string })
+  | (WidgetSettingBase & {
+      type: "textarea";
+      placeholder?: string;
+      rows?: number;
+      preset?: { label: string; value: string };
+    })
   | (WidgetSettingBase & { type: "number"; min?: number; max?: number; step?: number })
   | (WidgetSettingBase & { type: "toggle" })
   | (WidgetSettingBase & { type: "date" })

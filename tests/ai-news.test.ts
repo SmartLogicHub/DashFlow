@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 import { SCHEMA_VERSION } from "../src/constants";
+import {
+  RECOMMENDED_AI_NEWS_SOURCES,
+  recommendedAiNewsSourcesText,
+} from "../src/widgets/aiNewsSources";
 
 const models = readFileSync("src/models.ts", "utf8");
 const registry = readFileSync("src/widgets/intelligence.ts", "utf8");
@@ -10,6 +14,7 @@ const interaction = readFileSync("src/services/AINewsWidgetInteractionService.ts
 const styles = readFileSync("src/styles/AINewsStyles.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const main = readFileSync("src/main.ts", "utf8");
+const renderer = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
 
 test("AI News is a configurable Dashboard widget on the shared registry", () => {
   assert.ok(registry.includes('type: "ai-news"'));
@@ -18,6 +23,17 @@ test("AI News is a configurable Dashboard widget on the shared registry", () => 
   assert.ok(registry.includes('key: "topK"'));
   assert.ok(registry.includes('key: "refreshHours"'));
   assert.ok(main.includes("registerIntelligenceWidgets(this.widgetRegistry)"));
+});
+
+test("AI News exposes six verified recommended feeds through a multiline setting", () => {
+  assert.equal(RECOMMENDED_AI_NEWS_SOURCES.length, 6);
+  assert.equal(new Set(RECOMMENDED_AI_NEWS_SOURCES.map((item) => item.url)).size, 6);
+  assert.ok(RECOMMENDED_AI_NEWS_SOURCES.every((item) => item.url.startsWith("https://")));
+  assert.equal(recommendedAiNewsSourcesText().split("\n").length, 6);
+  assert.ok(registry.includes('type: "textarea"'));
+  assert.ok(registry.includes('label: "使用推荐源"'));
+  assert.ok(renderer.includes('document.createElement("textarea")'));
+  assert.ok(renderer.includes("field.preset.value"));
 });
 
 test("AI News uses bounded RSS fetch, dedupe and one shared AI ranking request", () => {
