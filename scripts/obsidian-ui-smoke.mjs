@@ -110,6 +110,7 @@ let page;
 let settingsPage;
 let originalViewport = null;
 let originalSection = null;
+let originalLeafState = null;
 let originalSidebars = null;
 const consoleErrors = [];
 const pageErrors = [];
@@ -132,14 +133,16 @@ try {
     version: window.app?.plugins?.manifests?.dashflow?.version ?? null,
   }));
   assert.equal(plugin.loaded, true, "DashFlow is not enabled in the connected Vault");
-  await page.locator(".dashflow-shell").first().waitFor({ state: "visible", timeout: 10_000 });
 
   originalViewport = page.viewportSize();
   originalSection = await currentSection(page);
+  originalLeafState = await page.evaluate(() => window.app.workspace.activeLeaf?.getViewState?.() ?? null);
   originalSidebars = await page.evaluate(() => ({
     leftCollapsed: window.app.workspace.leftSplit.collapsed,
     rightCollapsed: window.app.workspace.rightSplit.collapsed,
   }));
+  if (!originalSection) await openSection(page, "work");
+  await page.locator(".dashflow-shell").first().waitFor({ state: "visible", timeout: 10_000 });
 
   await page.setViewportSize(wideViewport);
   await openSection(page, "today");
@@ -233,7 +236,13 @@ try {
           }
         }, originalSidebars);
       }
-      if (originalSection && sectionCommands[originalSection]) await openSection(page, originalSection);
+      if (originalSection && sectionCommands[originalSection]) {
+        await openSection(page, originalSection);
+      } else if (originalLeafState) {
+        await page.evaluate(async (originalLeafState) => {
+          await window.app.workspace.activeLeaf?.setViewState(originalLeafState, { focus: true });
+        }, originalLeafState);
+      }
     } catch (cleanupError) {
       report.cleanupError = cleanupError instanceof Error ? cleanupError.message : String(cleanupError);
     }

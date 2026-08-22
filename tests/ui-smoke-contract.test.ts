@@ -39,5 +39,8 @@ test("UI smoke is read-only, writes diagnostics, and restores UI state", () => {
   assert.ok(script.includes("finally"));
   assert.ok(script.includes("originalViewport"));
   assert.ok(script.includes("originalSection"));
+  assert.ok(script.includes("originalLeafState"));
+  assert.match(script, /originalLeafState[\s\S]*?openSection\(page, "work"\)[\s\S]*?locator\("\.dashflow-shell"\)/);
+  assert.ok(script.includes("setViewState(originalLeafState"));
   assert.ok(script.includes("closeOpenModals"));
 });
