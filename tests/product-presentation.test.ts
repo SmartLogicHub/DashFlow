@@ -4,6 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 const presentationPath = "src/styles/ProductPresentationStyles.ts";
 const productDesign = readFileSync("src/services/ProductDesignService.ts", "utf8");
+const productExperience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 
 test("the product has one canonical presentation entry point", () => {
   assert.ok(existsSync(presentationPath), "ProductPresentationStyles.ts should exist");
@@ -34,4 +35,29 @@ test("the product shell exposes a container query boundary", () => {
   const presentation = readFileSync(presentationPath, "utf8");
   assert.ok(presentation.includes(".dashflow-command-shell"));
   assert.ok(presentation.includes("container: dashflow-shell / inline-size"));
+});
+
+test("narrow panes split navigation and primary actions into two visible rows", () => {
+  const presentation = readFileSync(presentationPath, "utf8");
+  assert.ok(presentation.includes(".dashflow-command-shell.is-mobile .dashflow-command-bar"));
+  assert.ok(presentation.includes("grid-template-columns: minmax(0, 1fr)"));
+  assert.ok(presentation.includes(".dashflow-command-shell.is-mobile .dashflow-command-nav"));
+  assert.ok(presentation.includes("overflow-x: auto"));
+  assert.ok(presentation.includes(".dashflow-command-shell.is-mobile .dashflow-command-actions"));
+  assert.ok(presentation.includes("grid-template-columns: var(--df-control-touch) minmax(82px, 1fr) var(--df-control-touch)"));
+});
+
+test("narrow action row keeps Add Feature and Search addressable", () => {
+  for (const action of ["add", "features", "search"]) {
+    assert.ok(productExperience.includes(`dataset.commandAction = "${action}"`));
+  }
+  const presentation = readFileSync(presentationPath, "utf8");
+  assert.ok(presentation.includes('[data-command-action="features"] .dashflow-command-label'));
+  assert.ok(presentation.includes("display: inline"));
+});
+
+test("active narrow navigation is centered after section sync", () => {
+  assert.ok(productExperience.includes("centerActiveCommand(button)"));
+  assert.ok(productExperience.includes("private centerActiveCommand"));
+  assert.ok(productExperience.includes('scrollIntoView({ inline: "center", block: "nearest" })'));
 });
