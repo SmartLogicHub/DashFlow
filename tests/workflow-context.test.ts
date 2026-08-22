@@ -72,6 +72,13 @@ test("Context Switcher reuses DashboardManager instead of storing a second layou
   assert.equal(settings.includes("layouts:"), false);
 });
 
+test("layout editing exposes a labeled and confirmed card removal action", () => {
+  assert.ok(renderer.includes('className = "dashflow-widget-remove"'));
+  assert.ok(renderer.includes('remove.textContent = "移除"'));
+  assert.ok(renderer.includes('remove.textContent = "再次确认"'));
+  assert.ok(renderer.includes('remove.setAttribute("aria-label", "移除卡片")'));
+});
+
 test("workflow settings are exposed through plugin commands and lifecycle", () => {
   assert.ok(commands.includes("configure-workflow-context"));
   assert.ok(main.includes("COMMAND_CATALOG"));

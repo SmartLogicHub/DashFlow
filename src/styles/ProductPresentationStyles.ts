@@ -121,6 +121,24 @@ export const PRODUCT_PRESENTATION_STYLES = `
   background: var(--df-cmd-soft) !important;
 }
 
+.dashflow-widget-controls .dashflow-widget-remove {
+  width: auto !important;
+  min-width: 44px;
+  padding: 0 8px;
+  font-size: var(--df-type-label);
+  font-weight: 650;
+}
+
+.dashflow-widget-controls .dashflow-widget-remove.is-confirming {
+  color: var(--text-error) !important;
+  background: color-mix(in srgb, var(--text-error) 10%, transparent) !important;
+}
+
+.dashflow-shell.is-mobile .dashflow-widget-controls .dashflow-widget-remove {
+  width: auto !important;
+  min-width: 44px;
+}
+
 .dashflow-command-shell.is-layout-editing .dashflow-command-workspace {
   display: flex !important;
   align-items: center;

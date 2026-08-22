@@ -206,14 +206,20 @@ export class DashboardRenderer {
         this.render();
       });
 
-      const remove = createElement("button", "", "×");
+      const remove = createElement("button", "", "移除");
       remove.type = "button";
-      remove.title = "移除";
+      remove.className = "dashflow-widget-remove";
+      remove.title = "从工作台移除卡片";
+      remove.setAttribute("aria-label", "移除卡片");
       remove.addEventListener("click", async () => {
         if (!this.destructiveConfirmation.request(`widget-remove:${dashboard.id}:${widget.id}`)) {
           remove.textContent = "再次确认";
+          remove.classList.add("is-confirming");
           window.setTimeout(() => {
-            if (remove.isConnected) remove.textContent = "×";
+            if (remove.isConnected) {
+              remove.textContent = "移除";
+              remove.classList.remove("is-confirming");
+            }
           }, 5_000);
           return;
         }
