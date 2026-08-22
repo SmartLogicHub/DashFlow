@@ -341,6 +341,7 @@ export class ProductExperienceService {
     const button = document.createElement("button");
     button.type = "button";
     button.className = "dashflow-command-button";
+    button.setAttribute("aria-label", label);
     const icon = document.createElement("span");
     icon.className = "dashflow-command-icon";
     setIcon(icon, iconName);

@@ -262,7 +262,7 @@ export const FEATURE_HUB_STYLES = `
   font-size: 12px;
 }
 .dashflow-project-view-button svg { width: 14px; height: 14px; }
-.dashflow-project-view-button small { color: var(--text-faint); font-size: 9px; }
+.dashflow-project-view-button small { color: var(--text-faint); font-size: var(--df-type-label, 11px); }
 .dashflow-project-view-button.is-active {
   background: var(--background-primary);
   box-shadow: 0 1px 3px rgba(0, 0, 0, .08);

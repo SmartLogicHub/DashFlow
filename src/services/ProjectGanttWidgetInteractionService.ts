@@ -14,7 +14,7 @@ const PALETTE = ["var(--df-info)", "var(--df-success)", "var(--df-warning)", "va
 const GANTT_STYLES = `
 .dashflow-project-gantt{overflow:auto;height:100%;border:1px solid var(--background-modifier-border);border-radius:10px;background:var(--background-primary)}
 .dashflow-project-gantt svg{display:block}
-.dashflow-project-gantt text{font-size:10px;fill:var(--text-muted)}
+.dashflow-project-gantt text{font-size:var(--df-type-label,11px);fill:var(--text-muted)}
 .dashflow-project-gantt .gantt-bar{fill-opacity:.82;cursor:pointer}
 .dashflow-project-gantt .gantt-bar:hover{fill-opacity:1}
 .dashflow-project-gantt .gantt-today{stroke:var(--text-error);stroke-width:1.5;stroke-dasharray:3 3}

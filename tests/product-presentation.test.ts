@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { existsSync, readFileSync, readdirSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join } from "node:path";
 
 const presentationPath = "src/styles/ProductPresentationStyles.ts";
 const productDesign = readFileSync("src/services/ProductDesignService.ts", "utf8");
@@ -9,7 +10,15 @@ const productExperience = readFileSync("src/services/ProductExperienceService.ts
 const weeklyReview = readFileSync("src/services/WeeklyReviewWidgetInteractionService.ts", "utf8");
 const calendar = readFileSync("src/services/CalendarWidgetInteractionService.ts", "utf8");
 const habitWidget = readFileSync("src/services/HabitWidgetInteractionService.ts", "utf8");
+const activityWidget = readFileSync("src/services/ActivityWidgetInteractionService.ts", "utf8");
 const settingsStyles = readFileSync("src/styles/SettingsStyles.ts", "utf8");
+
+function filesBelow(directory: string): string[] {
+  return readdirSync(directory).flatMap((name) => {
+    const entry = join(directory, name);
+    return statSync(entry).isDirectory() ? filesBelow(entry) : [entry];
+  });
+}
 
 test("the product has one canonical presentation entry point", () => {
   assert.ok(existsSync(presentationPath), "ProductPresentationStyles.ts should exist");
@@ -64,6 +73,7 @@ test("narrow action row keeps Add Feature and Search addressable", () => {
   const presentation = readFileSync(presentationPath, "utf8");
   assert.ok(presentation.includes('[data-command-action="features"] .dashflow-command-label'));
   assert.ok(presentation.includes("display: inline"));
+  assert.ok(productExperience.includes('button.setAttribute("aria-label", label)'));
 });
 
 test("active narrow navigation is centered after section sync", () => {
@@ -78,6 +88,24 @@ test("canonical presentation applies readable widget typography and numeric alig
   assert.ok(presentation.includes("font-size: var(--df-type-title) !important"));
   assert.ok(presentation.includes("font-size: var(--df-type-body)"));
   assert.ok(presentation.includes("min-height: var(--df-control-compact)"));
+  for (const selector of [
+    ".dashflow-widget-kicker",
+    ".dashflow-capture-footer span",
+    ".dashflow-task-overview-label",
+    ".dashflow-countdown > span",
+    ".dashflow-stat span",
+  ]) {
+    assert.ok(presentation.includes(selector), `missing readable type override: ${selector}`);
+  }
+  assert.equal(/font-size:\s*(?:[7-9](?:\.\d+)?|10(?:\.\d+)?)px/.test(activityWidget), false);
+});
+
+test("product UI source never renders business text below the 11px label token", () => {
+  const undersized = /font-size:\s*(?:[7-9](?:\.\d+)?|10(?:\.\d+)?)px/g;
+  for (const file of [...filesBelow("src"), "styles.css"].filter((name) => /\.(?:ts|css)$/.test(name))) {
+    const matches = readFileSync(file, "utf8").match(undersized) ?? [];
+    assert.deepEqual(matches, [], `${file} contains undersized UI text: ${matches.join(", ")}`);
+  }
 });
 
 test("weekly review no longer renders business labels below 11px", () => {
@@ -104,6 +132,10 @@ test("Work replaces long project and review bodies with routed summaries", () =>
   assert.ok(presentation.includes(".dashflow-project-row:nth-of-type(n + 4)"));
   assert.ok(presentation.includes(".dashflow-weekly-grid"));
   assert.ok(presentation.includes("display: none !important"));
+  assert.ok(presentation.includes('.dashflow-widget[data-widget-type="progress"] .dashflow-task-overview'));
+  assert.ok(presentation.includes("min-height: 0"));
+  assert.ok(presentation.includes('.dashflow-widget-body:has(> .dashflow-empty)'));
+  assert.ok(presentation.includes("grid-template-rows: auto minmax(0, 1fr)"));
 });
 
 test("Review owns natural-height weekly content instead of nested scrolling", () => {

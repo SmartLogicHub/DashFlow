@@ -166,7 +166,7 @@ export const DATA_FILTER_STYLES = `
 
 .dashflow-data-filter-result-kind {
   color: var(--text-faint);
-  font-size: 9px;
+  font-size: var(--df-type-label, 11px);
   font-weight: 700;
   letter-spacing: .06em;
 }

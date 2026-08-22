@@ -177,6 +177,29 @@ export const PRODUCT_PRESENTATION_STYLES = `
   line-height: 1.5;
 }
 
+.dashflow-command-shell .dashflow-command-badge,
+.dashflow-command-shell .dashflow-widget-kicker,
+.dashflow-command-shell .dashflow-widget-kicker span,
+.dashflow-command-shell .dashflow-capture-footer span,
+.dashflow-command-shell .dashflow-task time,
+.dashflow-command-shell .dashflow-task-priority,
+.dashflow-command-shell .dashflow-progress-ring span,
+.dashflow-command-shell .dashflow-task-overview-label,
+.dashflow-command-shell .dashflow-task-overview-secondary-heading,
+.dashflow-command-shell .dashflow-task-overview-secondary-heading span,
+.dashflow-command-shell .dashflow-project-row small,
+.dashflow-command-shell .dashflow-project-stat,
+.dashflow-command-shell .dashflow-project-stat span,
+.dashflow-command-shell .dashflow-heatmap-stat span,
+.dashflow-command-shell .dashflow-heatmap-range,
+.dashflow-command-shell .dashflow-heatmap-footer,
+.dashflow-command-shell .dashflow-heatmap-legend,
+.dashflow-command-shell .dashflow-countdown > span,
+.dashflow-command-shell .dashflow-countdown > small,
+.dashflow-command-shell .dashflow-stat span {
+  font-size: var(--df-type-label) !important;
+}
+
 .dashflow-command-shell .dashflow-kicker,
 .dashflow-command-shell .dashflow-empty {
   font-size: var(--df-type-secondary) !important;
@@ -539,6 +562,34 @@ export const PRODUCT_PRESENTATION_STYLES = `
 
 .dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="projects"] .dashflow-widget-body,
 .dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="weekly-review"] .dashflow-widget-body {
+  overflow: hidden !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="progress"] .dashflow-task-overview {
+  min-height: 0;
+  padding: 9px 14px;
+  gap: 12px;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="tasks"] .dashflow-widget-body:has(> .dashflow-empty),
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="upcoming"] .dashflow-widget-body:has(> .dashflow-empty) {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="tasks"] .dashflow-widget-body:has(> .dashflow-empty) > .dashflow-empty,
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="upcoming"] .dashflow-widget-body:has(> .dashflow-empty) > .dashflow-empty {
+  height: auto !important;
+  min-height: 0 !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="projects"] .dashflow-project-list {
+  padding-bottom: 8px !important;
+}
+
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="heatmap"] .dashflow-widget-body,
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="countdown"] .dashflow-widget-body,
+.dashflow-command-shell .dashflow-grid[data-product-section="work"] .dashflow-widget[data-widget-type="vault-stats"] .dashflow-widget-body {
   overflow: hidden !important;
 }
 

@@ -204,7 +204,7 @@ export const FOCUS_EMBED_STYLES = `
   text-overflow: ellipsis;
   white-space: nowrap;
   color: var(--text-faint);
-  font-size: 10px;
+  font-size: var(--df-type-label, 11px);
 }
 .dashflow-magic-embed-toolbar button {
   min-height: 24px;
