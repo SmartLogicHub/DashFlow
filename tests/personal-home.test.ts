@@ -34,8 +34,22 @@ test("Hero ships curated low-saturation scenes while preserving local Vault over
   assert.equal(homeDesign.includes("unsplash.com"), false);
   assert.ok(heroThemes.includes("alpine.webp"));
   assert.ok(heroThemes.includes("paper.webp"));
+  assert.ok(heroThemes.includes("moss.webp"));
+  assert.ok(heroThemes.includes("dune.webp"));
+  assert.ok(heroThemes.includes("ink.webp"));
+  assert.ok(heroThemes.includes("blush.webp"));
   assert.ok(heroThemes.includes("midnight.webp"));
-  for (const asset of ["assets/heroes/alpine.webp", "assets/heroes/paper.webp", "assets/heroes/midnight.webp"]) {
+  assert.ok(heroThemes.includes("aurora.webp"));
+  for (const asset of [
+    "assets/heroes/alpine.webp",
+    "assets/heroes/paper.webp",
+    "assets/heroes/moss.webp",
+    "assets/heroes/dune.webp",
+    "assets/heroes/ink.webp",
+    "assets/heroes/blush.webp",
+    "assets/heroes/midnight.webp",
+    "assets/heroes/aurora.webp",
+  ]) {
     assert.equal(existsSync(asset), true, asset);
   }
   for (const extension of ["jpg", "jpeg", "png", "webp", "avif", "gif"]) {
@@ -80,8 +94,19 @@ test("Quick Add captures immediately while preserving structured editors", () =>
   assert.ok(quickAdd.includes("HabitEditorModal"));
 });
 
-test("theme layer ships Alpine, Paper, Midnight and Obsidian presets", () => {
-  for (const theme of ["alpine", "paper", "midnight", "obsidian"]) {
+test("theme layer ships eight curated scene palettes and an Obsidian preset", () => {
+  for (const theme of ["alpine", "paper", "moss", "dune", "ink", "blush", "midnight", "aurora", "obsidian"]) {
     assert.ok(homeDesign.includes(`data-dashflow-theme=\"${theme}\"`), theme);
   }
+  for (const theme of ["moss", "dune", "ink", "blush", "aurora"]) {
+    const block = homeDesign.match(new RegExp(`data-dashflow-theme=\\"${theme}\\"\\] \\{([\\s\\S]*?)\\n\\}`))?.[1] ?? "";
+    for (const token of ["--df-home-canvas", "--df-home-surface", "--df-home-text", "--df-home-accent", "--df-home-scene", "--df-cmd-bg"]) {
+      assert.ok(block.includes(token), `${theme}: ${token}`);
+    }
+  }
+});
+
+test("theme picker explains that a custom Hero image keeps visual priority", () => {
+  assert.ok(settings.includes("当前仍优先显示你的自定义 Hero 图片"));
+  assert.ok(settings.includes("八张照片已随插件离线打包"));
 });

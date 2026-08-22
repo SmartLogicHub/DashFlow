@@ -49,7 +49,7 @@ test("one canonical presentation module owns global product geometry", () => {
   for (const retired of ["PRODUCT_HIERARCHY_RESET_STYLES", "DEEPSEEK_POLISH_STYLES", "UI_REFINEMENT_POLISH_STYLES", "VISUAL_CONTINUITY_STYLES"]) {
     assert.equal(designSystem.includes(retired), false, retired);
   }
-  assert.ok(presentation.includes('.theme-dark .dashflow-view-container[data-dashflow-theme="alpine"]'));
+  assert.equal(presentation.includes('.theme-dark .dashflow-view-container[data-dashflow-theme="alpine"]'), false);
   assert.ok(presentation.includes("font-variant-numeric: tabular-nums"));
 });
 

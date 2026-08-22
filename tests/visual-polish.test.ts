@@ -37,7 +37,7 @@ test("canonical presentation preserves unified navigation and quiet disconnected
   assert.equal(presentation.includes("width: min(1180px"), false);
   assert.ok(presentation.includes("dashflow-home-weread:has(.dashflow-home-weread-mark)"));
   assert.ok(presentation.includes("background: var(--df-home-surface)"));
-  assert.ok(presentation.includes('.theme-dark .dashflow-view-container[data-dashflow-theme="alpine"]'));
+  assert.equal(presentation.includes('.theme-dark .dashflow-view-container[data-dashflow-theme="alpine"]'), false);
 });
 
 test("Command Dashboard default Home gives summary content enough height without nested scrolling", () => {

@@ -214,6 +214,12 @@ test("theme cards allow two-line titles and unclipped descriptions", () => {
   assert.equal(settingsStyles.includes("-webkit-line-clamp"), false);
 });
 
+test("expanded theme picker uses a responsive three-two-one column grid", () => {
+  assert.ok(settingsStyles.includes("grid-template-columns: repeat(3, minmax(0, 1fr))"));
+  assert.match(settingsStyles, /@media \(max-width: 760px\)[\s\S]*?\.dashflow-theme-cards \{ grid-template-columns: repeat\(2, minmax\(0, 1fr\)\); \}/);
+  assert.match(settingsStyles, /@media \(max-width: 460px\)[\s\S]*?\.dashflow-theme-cards \{ grid-template-columns: 1fr; \}/);
+});
+
 test("Quick Add keeps its target and actions aligned at desktop and narrow widths", () => {
   const presentation = readFileSync(presentationPath, "utf8");
   const target = presentation.match(/\.dashflow-quick-add-target\s*\{([^}]*)\}/)?.[1] ?? "";

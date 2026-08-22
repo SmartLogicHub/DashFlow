@@ -18,28 +18,6 @@ export const PRODUCT_PRESENTATION_STYLES = `
   text-rendering: optimizeLegibility;
 }
 
-.theme-dark .dashflow-view-container[data-dashflow-theme="alpine"],
-.theme-dark .dashflow-view-container[data-dashflow-theme="paper"] {
-  --df-home-canvas: var(--background-primary);
-  --df-home-surface: var(--background-primary);
-  --df-home-surface-2: var(--background-secondary);
-  --df-home-border: var(--background-modifier-border);
-  --df-home-border-strong: color-mix(in srgb, var(--background-modifier-border) 65%, var(--text-muted));
-  --df-home-text: var(--text-normal);
-  --df-home-muted: var(--text-muted);
-  --df-home-faint: var(--text-faint);
-  --df-home-reading: var(--background-primary);
-  --df-home-reading-2: var(--background-secondary);
-  --df-cmd-bg: var(--background-primary);
-  --df-cmd-surface: var(--background-primary);
-  --df-cmd-soft: var(--background-secondary);
-  --df-cmd-border: var(--background-modifier-border);
-  --df-cmd-border-strong: color-mix(in srgb, var(--background-modifier-border) 65%, var(--text-muted));
-  --df-cmd-text: var(--text-normal);
-  --df-cmd-muted: var(--text-muted);
-  --df-cmd-faint: var(--text-faint);
-}
-
 .dashflow-command-shell:not(.is-personal-home) > .dashflow-hero {
   display: flex !important;
   position: relative;

@@ -197,7 +197,12 @@ export class DashFlowSettingsTab extends PluginSettingTab {
   private renderThemePicker(parent: HTMLElement): void {
     const picker = parent.createDiv("dashflow-theme-picker");
     picker.createEl("strong", { text: "主题场景" });
-    picker.createEl("span", { text: "选择后会立即保存，并同步应用到今日与工作台。三张照片已随插件离线打包。" });
+    const hasCustomHero = this.dashFlow.data.settings.homeHeroImagePath.trim().length > 0;
+    picker.createEl("span", {
+      text: hasCustomHero
+        ? "主题配色会立即切换；当前仍优先显示你的自定义 Hero 图片。"
+        : "选择后会立即保存，并同步应用到今日与工作台。八张照片已随插件离线打包。",
+    });
 
     const cards = picker.createDiv("dashflow-theme-cards");
     for (const choice of HERO_THEME_CHOICES) {

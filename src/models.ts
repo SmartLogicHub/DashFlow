@@ -7,7 +7,16 @@ export type HabitKind = "habit" | "daily-progress";
 export type ActivityMetric = "score" | "tasks" | "notes" | "habits";
 export type CalendarEventKind = "task-due" | "task-scheduled" | "project-deadline" | "habit";
 export type CalendarWeekStart = "monday" | "sunday";
-export type HomeTheme = "alpine" | "paper" | "midnight" | "obsidian";
+export type HomeTheme =
+  | "alpine"
+  | "paper"
+  | "moss"
+  | "dune"
+  | "ink"
+  | "blush"
+  | "midnight"
+  | "aurora"
+  | "obsidian";
 export type CaptureTarget = "inbox" | "daily-note" | "ask";
 export type ContextMode = "morning" | "work" | "review";
 export type DataFilterEntity = "all" | "note" | "task" | "project" | "habit";

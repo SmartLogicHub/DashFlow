@@ -75,7 +75,7 @@ export const SETTINGS_STYLES = `
 }
 .dashflow-theme-picker > strong { display: block; color: var(--text-normal); font-size: 12.5px; font-weight: 600; }
 .dashflow-theme-picker > span { display: block; margin-top: 3px; color: var(--text-muted); font-size: 11.5px; line-height: 1.5; }
-.dashflow-theme-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; margin-top: 12px; }
+.dashflow-theme-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; margin-top: 12px; }
 .dashflow-theme-card {
   display: block !important;
   position: relative;
@@ -204,5 +204,9 @@ export const SETTINGS_STYLES = `
 @media (max-width: 620px) {
   .dashflow-onboarding-counts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .dashflow-onboarding-path { grid-template-columns: 1fr; gap: 4px; }
+}
+
+@media (max-width: 460px) {
+  .dashflow-theme-cards { grid-template-columns: 1fr; }
 }
 `;

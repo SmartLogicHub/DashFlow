@@ -25,7 +25,16 @@ test("0.7.0 release metadata and reproducible build inputs agree", () => {
 });
 
 test("release artifacts include bundled Hero assets and current privacy guidance", () => {
-  for (const asset of ["assets/heroes/alpine.webp", "assets/heroes/paper.webp", "assets/heroes/midnight.webp"]) {
+  for (const asset of [
+    "assets/heroes/alpine.webp",
+    "assets/heroes/paper.webp",
+    "assets/heroes/moss.webp",
+    "assets/heroes/dune.webp",
+    "assets/heroes/ink.webp",
+    "assets/heroes/blush.webp",
+    "assets/heroes/midnight.webp",
+    "assets/heroes/aurora.webp",
+  ]) {
     assert.equal(existsSync(asset), true, asset);
     assert.ok(ci.includes(asset) || ci.includes("assets/heroes/*.webp"));
     assert.ok(release.includes(asset) || release.includes("assets/heroes/*.webp"));

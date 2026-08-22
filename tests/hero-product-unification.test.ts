@@ -14,12 +14,26 @@ const settingsStyles = readFileSync("src/styles/SettingsStyles.ts", "utf8");
 const productDesignSource = readFileSync("src/services/ProductDesignService.ts", "utf8");
 const rendererSource = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
 
-test("theme choices expose three offline scenes and one Obsidian-following option", () => {
-  assert.deepEqual(HERO_THEME_CHOICES.map((choice) => choice.id), ["alpine", "paper", "midnight", "obsidian"]);
+test("theme choices expose eight offline scenes and one Obsidian-following option", () => {
+  assert.deepEqual(HERO_THEME_CHOICES.map((choice) => choice.id), [
+    "alpine", "paper", "moss", "dune", "ink", "blush", "midnight", "aurora", "obsidian",
+  ]);
   assert.deepEqual(
-    HERO_THEME_CHOICES.slice(0, 3).map((choice) => choice.assetPath),
-    ["assets/heroes/alpine.webp", "assets/heroes/paper.webp", "assets/heroes/midnight.webp"],
+    HERO_THEME_CHOICES.slice(0, 8).map((choice) => choice.assetPath),
+    [
+      "assets/heroes/alpine.webp",
+      "assets/heroes/paper.webp",
+      "assets/heroes/moss.webp",
+      "assets/heroes/dune.webp",
+      "assets/heroes/ink.webp",
+      "assets/heroes/blush.webp",
+      "assets/heroes/midnight.webp",
+      "assets/heroes/aurora.webp",
+    ],
   );
+  assert.deepEqual(HERO_THEME_CHOICES.map((choice) => choice.label), [
+    "雪山冷蓝", "海岸晨光", "森屿", "沙丘", "水墨", "樱雾", "雾林深夜", "极光", "跟随 Obsidian",
+  ]);
   assert.equal(heroThemeChoice("obsidian")?.assetPath, null);
 });
 

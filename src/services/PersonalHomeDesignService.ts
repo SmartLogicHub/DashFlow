@@ -50,6 +50,102 @@ export const PERSONAL_HOME_STYLES = `
   --df-cmd-faint: #a8a29e;
   --df-cmd-purple: #78350f;
 }
+.dashflow-view-container[data-dashflow-theme="moss"] {
+  --df-home-canvas: #f4f7f2;
+  --df-home-surface: #fbfcfa;
+  --df-home-surface-2: #e8eee6;
+  --df-home-border: rgba(30, 55, 38, 0.10);
+  --df-home-border-strong: rgba(30, 55, 38, 0.18);
+  --df-home-text: #1c2a20;
+  --df-home-muted: #667368;
+  --df-home-faint: #96a09a;
+  --df-home-accent: #326b48;
+  --df-home-accent-soft: rgba(50, 107, 72, 0.10);
+  --df-home-reading: #fbfcfa;
+  --df-home-reading-2: #f4f7f2;
+  --df-home-scene: var(--df-hero-image, linear-gradient(135deg, #9aa99c, #dfe7dd));
+  --df-cmd-bg: #f4f7f2;
+  --df-cmd-surface: #fbfcfa;
+  --df-cmd-soft: #e8eee6;
+  --df-cmd-border: rgba(30, 55, 38, 0.10);
+  --df-cmd-border-strong: rgba(30, 55, 38, 0.18);
+  --df-cmd-text: #1c2a20;
+  --df-cmd-muted: #667368;
+  --df-cmd-faint: #96a09a;
+  --df-cmd-purple: #326b48;
+}
+.dashflow-view-container[data-dashflow-theme="dune"] {
+  --df-home-canvas: #fbf6ef;
+  --df-home-surface: #fffdf9;
+  --df-home-surface-2: #f1e5d6;
+  --df-home-border: rgba(78, 49, 33, 0.10);
+  --df-home-border-strong: rgba(78, 49, 33, 0.18);
+  --df-home-text: #38281f;
+  --df-home-muted: #806b5e;
+  --df-home-faint: #aa988a;
+  --df-home-accent: #a5532d;
+  --df-home-accent-soft: rgba(165, 83, 45, 0.10);
+  --df-home-reading: #fffdf9;
+  --df-home-reading-2: #fbf6ef;
+  --df-home-scene: var(--df-hero-image, linear-gradient(135deg, #b8764f, #ead8c4));
+  --df-cmd-bg: #fbf6ef;
+  --df-cmd-surface: #fffdf9;
+  --df-cmd-soft: #f1e5d6;
+  --df-cmd-border: rgba(78, 49, 33, 0.10);
+  --df-cmd-border-strong: rgba(78, 49, 33, 0.18);
+  --df-cmd-text: #38281f;
+  --df-cmd-muted: #806b5e;
+  --df-cmd-faint: #aa988a;
+  --df-cmd-purple: #a5532d;
+}
+.dashflow-view-container[data-dashflow-theme="ink"] {
+  --df-home-canvas: #f5f6f6;
+  --df-home-surface: #fbfbfa;
+  --df-home-surface-2: #e8ebec;
+  --df-home-border: rgba(32, 41, 45, 0.10);
+  --df-home-border-strong: rgba(32, 41, 45, 0.18);
+  --df-home-text: #20292d;
+  --df-home-muted: #68767c;
+  --df-home-faint: #98a3a8;
+  --df-home-accent: #476775;
+  --df-home-accent-soft: rgba(71, 103, 117, 0.10);
+  --df-home-reading: #fbfbfa;
+  --df-home-reading-2: #f5f6f6;
+  --df-home-scene: var(--df-hero-image, linear-gradient(135deg, #7b8b92, #e3e7e8));
+  --df-cmd-bg: #f5f6f6;
+  --df-cmd-surface: #fbfbfa;
+  --df-cmd-soft: #e8ebec;
+  --df-cmd-border: rgba(32, 41, 45, 0.10);
+  --df-cmd-border-strong: rgba(32, 41, 45, 0.18);
+  --df-cmd-text: #20292d;
+  --df-cmd-muted: #68767c;
+  --df-cmd-faint: #98a3a8;
+  --df-cmd-purple: #476775;
+}
+.dashflow-view-container[data-dashflow-theme="blush"] {
+  --df-home-canvas: #fbf6f6;
+  --df-home-surface: #fffafa;
+  --df-home-surface-2: #f3e6e8;
+  --df-home-border: rgba(66, 39, 47, 0.10);
+  --df-home-border-strong: rgba(66, 39, 47, 0.18);
+  --df-home-text: #35272b;
+  --df-home-muted: #816c72;
+  --df-home-faint: #ad989e;
+  --df-home-accent: #9b4f63;
+  --df-home-accent-soft: rgba(155, 79, 99, 0.10);
+  --df-home-reading: #fffafa;
+  --df-home-reading-2: #fbf6f6;
+  --df-home-scene: var(--df-hero-image, linear-gradient(135deg, #c3929e, #eedfe1));
+  --df-cmd-bg: #fbf6f6;
+  --df-cmd-surface: #fffafa;
+  --df-cmd-soft: #f3e6e8;
+  --df-cmd-border: rgba(66, 39, 47, 0.10);
+  --df-cmd-border-strong: rgba(66, 39, 47, 0.18);
+  --df-cmd-text: #35272b;
+  --df-cmd-muted: #816c72;
+  --df-cmd-faint: #ad989e;
+  --df-cmd-purple: #9b4f63;
+}
 .dashflow-view-container[data-dashflow-theme="midnight"] {
   --df-home-canvas: #090d12;
   --df-home-surface: #0f1720;
@@ -73,6 +169,30 @@ export const PERSONAL_HOME_STYLES = `
   --df-cmd-muted: #94a3b8;
   --df-cmd-faint: #64748b;
   --df-cmd-purple: #38bdf8;
+}
+.dashflow-view-container[data-dashflow-theme="aurora"] {
+  --df-home-canvas: #081416;
+  --df-home-surface: #0e2022;
+  --df-home-surface-2: #153034;
+  --df-home-border: rgba(255, 255, 255, 0.08);
+  --df-home-border-strong: rgba(255, 255, 255, 0.16);
+  --df-home-text: #edf7f5;
+  --df-home-muted: #9ab8b3;
+  --df-home-faint: #668b86;
+  --df-home-accent: #49c5a8;
+  --df-home-accent-soft: rgba(73, 197, 168, 0.12);
+  --df-home-reading: #0e2022;
+  --df-home-reading-2: #153034;
+  --df-home-scene: var(--df-hero-image, linear-gradient(135deg, #0a2528, #244e54));
+  --df-cmd-bg: #081416;
+  --df-cmd-surface: #0e2022;
+  --df-cmd-soft: #153034;
+  --df-cmd-border: rgba(255, 255, 255, 0.08);
+  --df-cmd-border-strong: rgba(255, 255, 255, 0.16);
+  --df-cmd-text: #edf7f5;
+  --df-cmd-muted: #9ab8b3;
+  --df-cmd-faint: #668b86;
+  --df-cmd-purple: #49c5a8;
 }
 .dashflow-view-container[data-dashflow-theme="obsidian"] {
   --df-home-canvas: var(--background-primary);
