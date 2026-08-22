@@ -598,6 +598,7 @@ export class ProductExperienceService {
       button.className = `dashflow-project-view-button${active ? " is-active" : ""}${available.has(option.type) ? "" : " is-missing"}`;
       button.dataset.projectView = option.type;
       button.setAttribute("aria-pressed", String(active));
+      if (active) button.setAttribute("aria-current", "page");
       button.title = option.description;
       const icon = document.createElement("span");
       setIcon(icon, option.icon);

@@ -37,6 +37,7 @@ test("project page renders one selected view plus a real switcher", () => {
   assert.ok(experience.includes("renderProjectViewSwitcher"));
   assert.ok(experience.includes("dashflow-project-view-switcher"));
   assert.ok(experience.includes('setAttribute("aria-pressed"'));
+  assert.equal((experience.match(/setAttribute\("aria-current", "page"\)/g) ?? []).length, 2);
   assert.ok(experience.includes("type === selected"));
   assert.ok(experience.includes("projectRecoveryForView(selected)"));
 });
