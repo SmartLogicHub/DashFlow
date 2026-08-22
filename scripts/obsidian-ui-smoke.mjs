@@ -158,6 +158,43 @@ try {
   assert.equal(work.actions.every((action) => !action.missing && action.visible && action.accessibleName), true);
   await page.screenshot({ path: path.join(outputDirectory, "work-wide.png") });
 
+  const aiNewsCard = page.locator(".dashflow-widget[data-widget-type='ai-news']").first();
+  const aiNewsSetup = { present: await aiNewsCard.count() > 0, requiresSource: false, actionText: "" };
+  if (aiNewsSetup.present) {
+    const emptyText = (await aiNewsCard.locator(".dashflow-ai-news-empty").textContent().catch(() => "")) ?? "";
+    aiNewsSetup.requiresSource = emptyText.includes("添加公开 RSS") || emptyText.includes("请添加公开 HTTP");
+    if (aiNewsSetup.requiresSource) {
+      aiNewsSetup.actionText = (await aiNewsCard.locator(".dashflow-ai-news-empty-action").textContent().catch(() => ""))?.trim() ?? "";
+      assert.equal(aiNewsSetup.actionText, "配置新闻源", "Unconfigured AI News lacks its direct setup action");
+    }
+  }
+
+  await page.locator("[data-command-action='add']").click();
+  const quickAddModal = page.locator(".dashflow-quick-add-modal");
+  await quickAddModal.waitFor({ state: "visible", timeout: 10_000 });
+  const quickAddWide = await quickAddModal.evaluate((root) => {
+    const modal = root.closest(".modal");
+    const submit = root.querySelector(".dashflow-quick-add-submit");
+    const targetAction = root.querySelector(".dashflow-quick-add-target-action");
+    const rect = modal?.getBoundingClientRect();
+    return {
+      submitText: submit?.textContent?.trim() ?? "",
+      submitDisabled: submit instanceof HTMLButtonElement ? submit.disabled : null,
+      targetActionText: targetAction?.textContent?.trim() ?? "",
+      actionCount: root.querySelectorAll(".dashflow-quick-add-action").length,
+      insideViewport: Boolean(rect && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight),
+      overflow: Math.max(0, root.scrollWidth - root.clientWidth),
+    };
+  });
+  assert.equal(quickAddWide.submitText, "保存");
+  assert.equal(quickAddWide.submitDisabled, true);
+  assert.equal(quickAddWide.targetActionText, "更改目标");
+  assert.equal(quickAddWide.actionCount, 3);
+  assert.equal(quickAddWide.insideViewport, true);
+  assert.equal(quickAddWide.overflow <= 1, true, `Wide Quick Add overflows by ${quickAddWide.overflow}px`);
+  await page.screenshot({ path: path.join(outputDirectory, "quick-add-wide.png") });
+  await closeOpenModals(page);
+
   await page.locator(".dashflow-feature-action").click();
   await page.locator(".dashflow-feature-hub").waitFor({ state: "visible", timeout: 10_000 });
   const featureCount = await page.locator(".dashflow-feature-hub-item").count();
@@ -200,6 +237,23 @@ try {
   assert.equal(narrow.actions.every((action) => !action.missing && action.visible && action.insideShell && action.accessibleName), true);
   await page.screenshot({ path: path.join(outputDirectory, "work-narrow.png") });
 
+  await page.locator("[data-command-action='add']").click();
+  await quickAddModal.waitFor({ state: "visible" });
+  const quickAddNarrow = await quickAddModal.evaluate((root) => {
+    const modal = root.closest(".modal");
+    const rect = modal?.getBoundingClientRect();
+    return {
+      insideViewport: Boolean(rect && rect.left >= 0 && rect.right <= innerWidth && rect.top >= 0 && rect.bottom <= innerHeight),
+      overflow: Math.max(0, root.scrollWidth - root.clientWidth),
+      actionCount: root.querySelectorAll(".dashflow-quick-add-action").length,
+    };
+  });
+  assert.equal(quickAddNarrow.insideViewport, true, "Narrow Quick Add leaves the viewport");
+  assert.equal(quickAddNarrow.overflow <= 1, true, `Narrow Quick Add overflows by ${quickAddNarrow.overflow}px`);
+  assert.equal(quickAddNarrow.actionCount, 3);
+  await page.screenshot({ path: path.join(outputDirectory, "quick-add-narrow.png") });
+  await closeOpenModals(page);
+
   await page.locator(".dashflow-feature-action").click();
   await page.locator(".dashflow-feature-hub").waitFor({ state: "visible" });
   const narrowHubInsideViewport = await page.locator(".modal:has(.dashflow-feature-hub)").evaluate((modal) => {
@@ -212,7 +266,21 @@ try {
 
   assert.deepEqual(pageErrors, [], "UI smoke captured uncaught page errors");
   assert.deepEqual(consoleErrors, [], "UI smoke captured console errors");
-  Object.assign(report, { plugin, today, work, featureCount, settingsTabs, narrow, narrowHubInsideViewport, pageErrors, consoleErrors, passed: true });
+  Object.assign(report, {
+    plugin,
+    today,
+    work,
+    aiNewsSetup,
+    quickAddWide,
+    featureCount,
+    settingsTabs,
+    narrow,
+    quickAddNarrow,
+    narrowHubInsideViewport,
+    pageErrors,
+    consoleErrors,
+    passed: true,
+  });
 } catch (error) {
   Object.assign(report, {
     passed: false,

@@ -24,6 +24,9 @@ test("UI smoke connects over configurable CDP and checks core product surfaces",
     ".dashflow-command-nav",
     ".dashflow-feature-hub",
     ".dashflow-settings-page",
+    ".dashflow-ai-news-empty-action",
+    ".dashflow-quick-add-submit",
+    ".dashflow-quick-add-target-action",
   ]) assert.ok(script.includes(selector), selector);
   assert.ok(script.includes("unnamedVisibleButtons"));
   assert.ok(script.includes("viewportOverflow"));
