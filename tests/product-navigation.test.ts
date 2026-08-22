@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { inboxTasks, sectionWidgetTypes, todaySummary } from "../src/product/navigation";
+import { inboxTasks, todaySummary } from "../src/product/navigation";
+import { sectionWidgetTypes } from "../src/product/sectionPolicy";
 import type { Habit, Task, VaultSnapshot } from "../src/models";
 
 function task(id: string, sourcePath: string, extra: Partial<Task> = {}): Task {

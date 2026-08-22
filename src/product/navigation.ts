@@ -20,20 +20,6 @@ export const PRODUCT_SECTIONS: ProductSectionDefinition[] = [
   { id: "review", label: "复盘", icon: "bar-chart-3", title: "复盘", description: "回顾本周发生了什么，再决定下一周。" },
 ];
 
-const SECTION_WIDGET_TYPES: Record<ProductSection, string[]> = {
-  today: [],
-  work: [],
-  inbox: [],
-  projects: ["projects"],
-  calendar: ["calendar"],
-  habits: ["habits", "heatmap"],
-  review: ["weekly-review", "heatmap", "vault-stats"],
-};
-
-export function sectionWidgetTypes(section: ProductSection): string[] {
-  return [...SECTION_WIDGET_TYPES[section]];
-}
-
 export function sectionDefinition(section: ProductSection): ProductSectionDefinition {
   return PRODUCT_SECTIONS.find((item) => item.id === section) ?? PRODUCT_SECTIONS[0]!;
 }

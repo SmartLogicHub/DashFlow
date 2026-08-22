@@ -35,7 +35,8 @@ test("Work displays every registered Widget unless that instance is hidden", () 
 
 test("focused sections retain their purpose-specific Widget filters", () => {
   assert.equal(isWidgetVisibleInSection("projects", "projects", false), true);
-  assert.equal(isWidgetVisibleInSection("projects", "project-kanban", false), false);
+  assert.equal(isWidgetVisibleInSection("projects", "project-kanban", false), true);
+  assert.equal(isWidgetVisibleInSection("projects", "project-gantt", false), true);
   assert.equal(isWidgetVisibleInSection("calendar", "calendar", false), true);
   assert.equal(isWidgetVisibleInSection("habits", "habits", false), true);
   assert.equal(isWidgetVisibleInSection("habits", "heatmap", false), true);
