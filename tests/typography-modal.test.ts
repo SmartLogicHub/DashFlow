@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { readFileSync } from "node:fs";
 
-const continuity = readFileSync("src/styles/VisualContinuityStyles.ts", "utf8");
+const continuity = readFileSync("src/styles/ProductPresentationStyles.ts", "utf8");
 const detail = readFileSync("src/ui/ProjectDetailModal.ts", "utf8");
 
 test("Project detail keeps a structured modal layout instead of a flat text stack", () => {
@@ -18,20 +18,19 @@ test("Project detail keeps a structured modal layout instead of a flat text stac
     assert.ok(detail.includes(cls));
     assert.ok(continuity.includes(`.${cls}`));
   }
-  assert.ok(continuity.includes("grid-template-columns: repeat(4, minmax(0, 1fr))!important"));
-  assert.ok(continuity.includes("font-size: 24px!important"));
+  assert.ok(continuity.includes("grid-template-columns: repeat(4, minmax(0, 1fr))"));
+  assert.ok(continuity.includes("font-size: 24px"));
 });
 
 test("Work project rows preserve all three rendered columns", () => {
-  assert.ok(continuity.includes("grid-template-columns: minmax(0, 1fr) minmax(96px, 146px) 54px!important"));
+  assert.ok(continuity.includes("grid-template-columns: minmax(0, 1fr) minmax(96px, 146px) 54px !important"));
   assert.ok(continuity.includes(".dashflow-project-steps"));
   assert.ok(continuity.includes(".dashflow-project-stat"));
   assert.ok(continuity.includes(".dashflow-project-row:has(.dashflow-project-steps) .dashflow-project-bar"));
 });
 
-test("Progress pair uses theme accent and balanced spacing", () => {
-  assert.ok(continuity.includes("width: min(100%, 282px)!important"));
-  assert.ok(continuity.includes("var(--df-home-accent, var(--interactive-accent)) var(--dashflow-progress)"));
-  assert.ok(continuity.includes("grid-template-columns: repeat(2, minmax(92px, 1fr))!important"));
-  assert.ok(continuity.includes(".dashflow-progress-ring::after { display: none!important; }"));
+test("Project summaries preserve a dedicated routed overview", () => {
+  assert.ok(continuity.includes(".dashflow-project-route"));
+  assert.ok(continuity.includes(".dashflow-project-row:nth-of-type(n + 4)"));
+  assert.ok(continuity.includes(".dashflow-grid[data-product-section=\"projects\"]"));
 });

@@ -1,5 +1,3 @@
-import { PRODUCT_PRESENTATION_STYLES } from "../styles/ProductPresentationStyles";
-
 const STYLE_ID = "dashflow-product-visual-reset-v041";
 
 export const PRODUCT_STYLES = `
@@ -391,7 +389,7 @@ export class ProductDesignService {
     if (document.getElementById(STYLE_ID)) return;
     const style = document.createElement("style");
     style.id = STYLE_ID;
-    style.textContent = `${PRODUCT_STYLES}\n${PRODUCT_PRESENTATION_STYLES}`;
+    style.textContent = PRODUCT_STYLES;
     document.head.appendChild(style);
   }
 

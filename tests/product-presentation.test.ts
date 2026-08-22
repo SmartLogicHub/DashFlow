@@ -1,20 +1,27 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 
 const presentationPath = "src/styles/ProductPresentationStyles.ts";
 const productDesign = readFileSync("src/services/ProductDesignService.ts", "utf8");
+const designSystem = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const productExperience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const weeklyReview = readFileSync("src/services/WeeklyReviewWidgetInteractionService.ts", "utf8");
 const calendar = readFileSync("src/services/CalendarWidgetInteractionService.ts", "utf8");
 const habitWidget = readFileSync("src/services/HabitWidgetInteractionService.ts", "utf8");
+const settingsStyles = readFileSync("src/styles/SettingsStyles.ts", "utf8");
 
 test("the product has one canonical presentation entry point", () => {
   assert.ok(existsSync(presentationPath), "ProductPresentationStyles.ts should exist");
   assert.ok(
-    productDesign.includes('import { PRODUCT_PRESENTATION_STYLES } from "../styles/ProductPresentationStyles"'),
-    "ProductDesignService should import the canonical presentation layer",
+    designSystem.includes('import { PRODUCT_PRESENTATION_STYLES } from "../styles/ProductPresentationStyles"'),
+    "DesignSystemService should import the canonical presentation layer",
   );
+  assert.equal(productDesign.includes("PRODUCT_PRESENTATION_STYLES"), false);
+  const foundationIndex = designSystem.indexOf("DESIGN_SYSTEM_STYLES,");
+  const presentationIndex = designSystem.indexOf("PRODUCT_PRESENTATION_STYLES,");
+  const featureIndex = designSystem.indexOf("AI_NEWS_STYLES,");
+  assert.ok(foundationIndex < presentationIndex && presentationIndex < featureIndex);
 });
 
 test("the canonical presentation layer owns the minimum type and control tokens", () => {
@@ -125,4 +132,42 @@ test("calendar and recovery content respond to the DashFlow pane, not only the w
   assert.ok(presentation.includes("grid-template-columns: 1fr"));
   assert.ok(presentation.includes(".dashflow-calendar-agenda"));
   assert.ok(presentation.includes("border-top: 1px solid"));
+});
+
+test("the canonical presentation layer replaces all legacy global polish files", () => {
+  const legacyFiles = [
+    "DeepSeekPolishStyles.ts",
+    "ProductHierarchyResetStyles.ts",
+    "UiRefinementStyles.ts",
+    "VisualContinuityStyles.ts",
+  ];
+  for (const file of legacyFiles) {
+    assert.equal(existsSync(`src/styles/${file}`), false, `${file} should be retired`);
+    assert.equal(designSystem.includes(file.replace(".ts", "")), false, `${file} should not be imported`);
+  }
+
+  const presentation = readFileSync(presentationPath, "utf8");
+  for (const selector of [
+    ".dashflow-command-shell:not(.is-personal-home) > .dashflow-hero",
+    ".dashflow-task-editor > .setting-item",
+    ".dashflow-project-detail-meta",
+    ".dashflow-quick-add-actions",
+    ".dashflow-search-modal",
+  ]) assert.ok(presentation.includes(selector), selector);
+});
+
+test("presentation override debt stays below the explicit consolidation budget", () => {
+  const styleSources = readdirSync("src/styles")
+    .filter((file) => file.endsWith(".ts"))
+    .map((file) => readFileSync(`src/styles/${file}`, "utf8"));
+  styleSources.push(productDesign);
+  const importantCount = (styleSources.join("\n").match(/!important/g) ?? []).length;
+  assert.ok(importantCount <= 420, `expected at most 420 !important declarations, found ${importantCount}`);
+});
+
+test("theme cards allow two-line titles and unclipped descriptions", () => {
+  assert.ok(settingsStyles.includes("min-height: 2.6em"));
+  assert.ok(settingsStyles.includes("white-space: normal"));
+  assert.ok(settingsStyles.includes("overflow: visible"));
+  assert.equal(settingsStyles.includes("-webkit-line-clamp"), false);
 });

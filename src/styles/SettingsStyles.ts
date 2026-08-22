@@ -103,8 +103,8 @@ export const SETTINGS_STYLES = `
     var(--background-secondary);
 }
 .dashflow-theme-card-copy { min-height: 68px; padding: 9px 10px 10px; display: flex; flex-direction: column; gap: 3px; }
-.dashflow-theme-card-copy strong { color: var(--text-normal); font-size: 11px; font-weight: 650; line-height: 1.3; }
-.dashflow-theme-card-copy span { color: var(--text-muted); font-size: 12px; line-height: 1.45; }
+.dashflow-theme-card-copy strong { min-height: 2.6em; color: var(--text-normal); font-size: 11px; font-weight: 650; line-height: 1.3; white-space: normal; overflow-wrap: anywhere; }
+.dashflow-theme-card-copy span { color: var(--text-muted); font-size: 12px; line-height: 1.45; white-space: normal; overflow: visible; text-overflow: clip; }
 .dashflow-theme-card-state {
   position: absolute;
   top: 7px;

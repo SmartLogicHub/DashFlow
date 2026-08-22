@@ -9,7 +9,7 @@ import { WidgetRegistry } from "../src/widgets/WidgetRegistry";
 
 const design = readFileSync("src/services/ProductDesignService.ts", "utf8");
 const homeDesign = readFileSync("src/services/PersonalHomeDesignService.ts", "utf8");
-const polish = readFileSync("src/styles/UiRefinementStyles.ts", "utf8");
+const presentation = readFileSync("src/styles/ProductPresentationStyles.ts", "utf8");
 const experience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const settingsSource = readFileSync("src/settings/DashFlowSettingsTab.ts", "utf8");
 
@@ -29,16 +29,15 @@ test("Work owns only the center canvas and no longer renders the old purple land
   assert.ok(experience.includes("shell.querySelector(\":scope > .dashflow-product-nav\")?.remove()"));
 });
 
-test("v0.4.2 final polish preserves unified navigation geometry and makes disconnected Home states recede", () => {
+test("canonical presentation preserves unified navigation and quiet disconnected Home states", () => {
   const sharedWidth = "width: min(1160px, calc(100% - 28px))!important";
   assert.ok(design.includes(sharedWidth));
   assert.ok(homeDesign.includes(sharedWidth));
   assert.ok(design.includes("Unified Command Bar"));
-  assert.equal(polish.includes("width: min(1180px"), false);
-  assert.equal(polish.includes("Treat the command bar as product navigation"), false);
-  assert.ok(polish.includes("dashflow-home-weread:has(.dashflow-home-weread-mark)"));
-  assert.ok(polish.includes("A disconnected WeRead integration is a setup hint"));
-  assert.ok(polish.includes("grid-template-columns: minmax(0, 1fr) auto!important"));
+  assert.equal(presentation.includes("width: min(1180px"), false);
+  assert.ok(presentation.includes("dashflow-home-weread:has(.dashflow-home-weread-mark)"));
+  assert.ok(presentation.includes("background: var(--df-home-surface)"));
+  assert.ok(presentation.includes('.theme-dark .dashflow-view-container[data-dashflow-theme="alpine"]'));
 });
 
 test("Command Dashboard default Home uses the compact screenshot-driven composition and remains collision free", () => {

@@ -1,13 +1,10 @@
 import { AI_NEWS_STYLES } from "../styles/AINewsStyles";
 import { DATA_FILTER_STYLES } from "../styles/DataFilterStyles";
-import { DEEPSEEK_POLISH_STYLES } from "../styles/DeepSeekPolishStyles";
 import { FOCUS_EMBED_STYLES } from "../styles/FocusEmbedStyles";
 import { FEATURE_HUB_STYLES } from "../styles/FeatureHubStyles";
 import { INTERACTION_MOTION_STYLES } from "../styles/InteractionMotionStyles";
-import { PRODUCT_HIERARCHY_RESET_STYLES } from "../styles/ProductHierarchyResetStyles";
+import { PRODUCT_PRESENTATION_STYLES } from "../styles/ProductPresentationStyles";
 import { SETTINGS_STYLES } from "../styles/SettingsStyles";
-import { UI_REFINEMENT_POLISH_STYLES } from "../styles/UiRefinementStyles";
-import { VISUAL_CONTINUITY_STYLES } from "../styles/VisualContinuityStyles";
 
 const STYLE_ID = "dashflow-design-system-v044";
 
@@ -15,9 +12,9 @@ const STYLE_ID = "dashflow-design-system-v044";
  * Consolidated design-system layer.
  *
  * This service is presentation-only: no MutationObserver, no event handlers,
- * and no access to Task / Project / Habit data. Earlier visual layers are kept
- * as styles-only modules and loaded here in their original cascade order while
- * interaction motion is layered last so card feedback remains consistent.
+ * and no access to Task / Project / Habit data. Product-wide geometry and
+ * typography live in ProductPresentationStyles; this service now composes only
+ * feature-specific modules and the shared motion layer.
  */
 export const DESIGN_SYSTEM_STYLES = `
 .dashflow-view-container {
@@ -210,16 +207,13 @@ export const DESIGN_SYSTEM_STYLES = `
 `;
 
 const CONSOLIDATED_STYLES = [
-  VISUAL_CONTINUITY_STYLES,
-  UI_REFINEMENT_POLISH_STYLES,
   DESIGN_SYSTEM_STYLES,
+  PRODUCT_PRESENTATION_STYLES,
   AI_NEWS_STYLES,
   DATA_FILTER_STYLES,
   FOCUS_EMBED_STYLES,
   FEATURE_HUB_STYLES,
   INTERACTION_MOTION_STYLES,
-  PRODUCT_HIERARCHY_RESET_STYLES,
-  DEEPSEEK_POLISH_STYLES,
   SETTINGS_STYLES,
 ].join("\n\n");
 
