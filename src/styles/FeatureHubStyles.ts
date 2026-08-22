@@ -3,6 +3,7 @@ export const FEATURE_HUB_STYLES = `
   width: min(920px, calc(100vw - 32px));
   max-width: 920px;
 }
+.modal:has(.dashflow-feature-hub) > .modal-close-button { display: none; }
 
 .dashflow-feature-hub {
   --df-hub-border: var(--background-modifier-border);
@@ -108,7 +109,12 @@ export const FEATURE_HUB_STYLES = `
 .dashflow-feature-hub-arrow { display: grid; place-items: center; color: var(--text-faint); }
 .dashflow-feature-hub-arrow svg { width: 14px; height: 14px; }
 
-.dashflow-command-actions .dashflow-feature-action { display: flex!important; }
+.dashflow-command-actions .dashflow-feature-action {
+  display: flex!important;
+  width: auto!important;
+  padding-inline: 8px!important;
+}
+.dashflow-command-actions .dashflow-feature-action .dashflow-command-label { display: inline!important; }
 
 .dashflow-section-assist {
   grid-column: 1 / -1;
