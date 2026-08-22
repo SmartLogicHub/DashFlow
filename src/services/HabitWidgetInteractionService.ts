@@ -16,9 +16,9 @@ const STYLE_ID = "dashflow-habit-styles";
 
 const HABIT_STYLES = `
 .dashflow-habits{height:100%;display:flex;flex-direction:column;gap:10px;min-width:0}
-.dashflow-habits-kicker{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text-faint);font-size:9px;letter-spacing:.06em;text-transform:uppercase}
+.dashflow-habits-kicker{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--text-muted);font-size:11px;letter-spacing:.03em}
 .dashflow-habits-kicker-actions{display:flex;align-items:center;gap:8px}
-.dashflow-habits-add{width:22px;height:22px;display:grid;place-items:center;padding:0;border-radius:7px}
+.dashflow-habits-add{width:32px;height:32px;display:grid;place-items:center;padding:0;border-radius:7px}
 .dashflow-habit-list{display:flex;flex-direction:column;gap:8px;min-height:0;overflow:auto;padding-right:2px}
 .dashflow-habit-row{border:1px solid var(--background-modifier-border);border-radius:10px;padding:9px 10px;display:flex;flex-direction:column;gap:7px;background:color-mix(in srgb,var(--background-primary) 92%,var(--background-secondary));min-width:0}
 .dashflow-habit-row.is-paused{opacity:.62}
@@ -27,10 +27,10 @@ const HABIT_STYLES = `
 .dashflow-habit-title-wrap{display:flex;align-items:center;gap:6px;min-width:0;flex-wrap:wrap}
 .dashflow-habit-name{appearance:none;border:0;background:transparent;padding:0;color:var(--text-normal);font-weight:600;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;max-width:100%}
 .dashflow-habit-name:hover{color:var(--interactive-accent)}
-.dashflow-habit-kind{font-size:8px;line-height:1;padding:3px 5px;border-radius:999px;color:var(--interactive-accent);background:color-mix(in srgb,var(--interactive-accent) 10%,transparent);white-space:nowrap}
-.dashflow-habit-project{appearance:none;border:0;background:transparent;padding:0;color:var(--text-muted);font-size:9px;cursor:pointer;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dashflow-habit-kind{font-size:11px;line-height:1;padding:3px 5px;border-radius:999px;color:var(--interactive-accent);background:color-mix(in srgb,var(--interactive-accent) 10%,transparent);white-space:nowrap}
+.dashflow-habit-project{appearance:none;border:0;background:transparent;padding:0;color:var(--text-muted);font-size:11px;cursor:pointer;max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dashflow-habit-project:hover{color:var(--interactive-accent)}
-.dashflow-habit-streak{font-size:10px;color:var(--text-muted);white-space:nowrap;padding-top:1px}
+.dashflow-habit-streak{font-size:12px;color:var(--text-muted);white-space:nowrap;padding-top:1px}
 .dashflow-habit-history{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(10px,1fr);gap:4px;align-items:center}
 .dashflow-habit-day{appearance:none;border:0;padding:0;height:12px;border-radius:3px;background:var(--background-modifier-border);position:relative;min-width:0}
 button.dashflow-habit-day{cursor:pointer}
@@ -43,8 +43,8 @@ button.dashflow-habit-day:hover{outline:1px solid color-mix(in srgb,var(--intera
 .dashflow-habit-progress{display:flex;align-items:center;gap:8px;min-width:0;flex:1}
 .dashflow-habit-progress-track{height:4px;flex:1;min-width:40px;border-radius:999px;background:var(--background-modifier-border);overflow:hidden}
 .dashflow-habit-progress-track span{display:block;height:100%;border-radius:inherit;background:var(--interactive-accent)}
-.dashflow-habit-progress-label{font-size:9px;color:var(--text-faint);white-space:nowrap}
-.dashflow-habit-note,.dashflow-habit-check{font-size:10px;padding:4px 8px;border-radius:7px;white-space:nowrap}
+.dashflow-habit-progress-label{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.dashflow-habit-note,.dashflow-habit-check{min-height:32px;font-size:11px;padding:4px 8px;border-radius:7px;white-space:nowrap}
 .dashflow-habit-note.has-note{color:var(--interactive-accent);border-color:color-mix(in srgb,var(--interactive-accent) 35%,var(--background-modifier-border))}
 .dashflow-habit-check.is-done{background:color-mix(in srgb,var(--interactive-accent) 18%,var(--background-primary));color:var(--text-normal)}
 .dashflow-daily-progress-note-input{width:100%;min-height:120px;resize:vertical}
@@ -101,11 +101,11 @@ export class HabitWidgetInteractionService {
     const kicker = document.createElement("div");
     kicker.className = "dashflow-habits-kicker";
     const label = document.createElement("span");
-    label.textContent = `TODAY · ${doneToday}/${scheduled.length} DONE`;
+    label.textContent = `今天 · ${doneToday}/${scheduled.length} 已完成`;
     const actions = document.createElement("div");
     actions.className = "dashflow-habits-kicker-actions";
     const count = document.createElement("span");
-    count.textContent = progressCount > 0 ? `${habits.length} TRACKERS · ${progressCount} DAILY` : `${habits.length} HABITS`;
+    count.textContent = progressCount > 0 ? `${habits.length} 项节奏 · ${progressCount} 项日更` : `${habits.length} 个习惯`;
     const add = document.createElement("button");
     add.type = "button";
     add.className = "clickable-icon dashflow-habits-add";
@@ -119,8 +119,17 @@ export class HabitWidgetInteractionService {
 
     if (habits.length === 0) {
       const empty = document.createElement("div");
-      empty.className = "dashflow-empty";
-      empty.textContent = "还没有长期节奏。点击右上角 ＋ 创建习惯或日更长期任务。";
+      empty.className = "dashflow-habit-empty";
+      const title = document.createElement("strong");
+      title.textContent = "建立你的第一个长期节奏";
+      const description = document.createElement("p");
+      description.textContent = "从一个容易坚持的习惯开始，也可以创建带每日记录的长期任务。";
+      const action = document.createElement("button");
+      action.type = "button";
+      action.className = "dashflow-habit-empty-action";
+      action.textContent = "创建第一个习惯";
+      action.addEventListener("click", () => new HabitEditorModal(this.plugin).open());
+      empty.append(title, description, action);
       root.appendChild(empty);
       body.appendChild(root);
       return;

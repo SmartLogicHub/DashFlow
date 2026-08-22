@@ -92,6 +92,61 @@ export const PRODUCT_PRESENTATION_STYLES = `
   min-height: 0 !important;
 }
 
+.dashflow-command-shell .dashflow-habit-empty {
+  min-height: 150px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  padding: 22px;
+  text-align: center;
+}
+
+.dashflow-command-shell .dashflow-habit-empty strong {
+  font-size: var(--df-type-title);
+}
+
+.dashflow-command-shell .dashflow-habit-empty p {
+  max-width: 420px;
+  margin: 7px 0 14px;
+  color: var(--df-cmd-muted);
+  font-size: var(--df-type-secondary);
+  line-height: 1.55;
+}
+
+.dashflow-command-shell .dashflow-habit-empty-action,
+.dashflow-command-shell .dashflow-section-assist button {
+  min-height: var(--df-control-touch);
+}
+
+@container dashflow-shell (max-width: 720px) {
+  .dashflow-command-shell .dashflow-grid[data-product-section="calendar"] .dashflow-calendar {
+    grid-template-columns: 1fr;
+  }
+
+  .dashflow-command-shell .dashflow-grid[data-product-section="calendar"] .dashflow-calendar-agenda {
+    padding-top: 12px;
+    padding-left: 0;
+    border-top: 1px solid var(--df-cmd-border);
+    border-left: 0;
+  }
+
+  .dashflow-command-shell .dashflow-section-assist {
+    grid-template-columns: 1fr;
+    justify-items: stretch;
+    min-height: 0;
+    padding: 18px;
+  }
+
+  .dashflow-command-shell .dashflow-section-assist-icon {
+    width: 40px;
+    height: 40px;
+  }
+
+  .dashflow-command-shell .dashflow-section-assist button {
+    width: 100%;
+  }
+}
+
 .dashflow-command-shell.is-mobile .dashflow-command-bar {
   display: grid !important;
   grid-template-columns: minmax(0, 1fr);

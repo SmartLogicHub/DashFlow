@@ -7,6 +7,7 @@ const productDesign = readFileSync("src/services/ProductDesignService.ts", "utf8
 const productExperience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
 const weeklyReview = readFileSync("src/services/WeeklyReviewWidgetInteractionService.ts", "utf8");
 const calendar = readFileSync("src/services/CalendarWidgetInteractionService.ts", "utf8");
+const habitWidget = readFileSync("src/services/HabitWidgetInteractionService.ts", "utf8");
 
 test("the product has one canonical presentation entry point", () => {
   assert.ok(existsSync(presentationPath), "ProductPresentationStyles.ts should exist");
@@ -106,4 +107,22 @@ test("Review owns natural-height weekly content instead of nested scrolling", ()
   assert.ok(presentation.includes("height: auto !important"));
   assert.ok(presentation.includes("max-height: none !important"));
   assert.ok(presentation.includes("overflow: visible !important"));
+});
+
+test("focused empty states stay compact and actionable", () => {
+  const presentation = readFileSync(presentationPath, "utf8");
+  assert.ok(habitWidget.includes("dashflow-habit-empty-action"));
+  assert.ok(presentation.includes(".dashflow-habit-empty"));
+  assert.ok(presentation.includes("min-height: var(--df-control-touch)"));
+  assert.ok(presentation.includes(".dashflow-section-assist button"));
+  assert.ok(presentation.includes("width: 100%"));
+});
+
+test("calendar and recovery content respond to the DashFlow pane, not only the window", () => {
+  const presentation = readFileSync(presentationPath, "utf8");
+  assert.ok(presentation.includes("@container dashflow-shell (max-width: 720px)"));
+  assert.ok(presentation.includes('.dashflow-grid[data-product-section="calendar"] .dashflow-calendar'));
+  assert.ok(presentation.includes("grid-template-columns: 1fr"));
+  assert.ok(presentation.includes(".dashflow-calendar-agenda"));
+  assert.ok(presentation.includes("border-top: 1px solid"));
 });
