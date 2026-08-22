@@ -2,6 +2,7 @@ import { AI_NEWS_STYLES } from "../styles/AINewsStyles";
 import { DATA_FILTER_STYLES } from "../styles/DataFilterStyles";
 import { DEEPSEEK_POLISH_STYLES } from "../styles/DeepSeekPolishStyles";
 import { FOCUS_EMBED_STYLES } from "../styles/FocusEmbedStyles";
+import { FEATURE_HUB_STYLES } from "../styles/FeatureHubStyles";
 import { INTERACTION_MOTION_STYLES } from "../styles/InteractionMotionStyles";
 import { PRODUCT_HIERARCHY_RESET_STYLES } from "../styles/ProductHierarchyResetStyles";
 import { SETTINGS_STYLES } from "../styles/SettingsStyles";
@@ -215,6 +216,7 @@ const CONSOLIDATED_STYLES = [
   AI_NEWS_STYLES,
   DATA_FILTER_STYLES,
   FOCUS_EMBED_STYLES,
+  FEATURE_HUB_STYLES,
   INTERACTION_MOTION_STYLES,
   PRODUCT_HIERARCHY_RESET_STYLES,
   DEEPSEEK_POLISH_STYLES,

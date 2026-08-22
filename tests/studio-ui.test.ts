@@ -9,7 +9,7 @@ const homeDesign = readFileSync("src/services/PersonalHomeDesignService.ts", "ut
 const runtime = readFileSync("src/services/PresentationRuntimeService.ts", "utf8");
 
 test("DashFlow keeps Obsidian chrome and uses horizontal navigation instead of an internal app sidebar", () => {
-  assert.ok(experience.includes("COMMAND_SECTIONS"));
+  assert.ok(experience.includes("PRODUCT_SECTIONS"));
   assert.ok(experience.includes("dashflow-command-bar"));
   assert.ok(experience.includes("dashflow-command-nav"));
   assert.ok(experience.includes("dashflow-product-nav\")?.remove()"));

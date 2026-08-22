@@ -100,12 +100,15 @@ export class WeReadService {
 
   constructor(private readonly plugin: DashFlowPlugin) {}
 
-  isConfigured(): boolean {
+  hasConfiguration(): boolean {
     const settings = this.plugin.data.settings;
     const secretId = settings.weReadSecretId.trim();
-    return settings.weReadEnabled
-      && Boolean(secretId)
-      && Boolean(this.plugin.app.secretStorage.getSecret(secretId));
+    return Boolean(secretId) && Boolean(this.plugin.app.secretStorage.getSecret(secretId));
+  }
+
+  isConfigured(): boolean {
+    const settings = this.plugin.data.settings;
+    return settings.weReadEnabled && this.hasConfiguration();
   }
 
   clearCache(): void {

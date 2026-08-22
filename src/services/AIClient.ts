@@ -40,12 +40,17 @@ function jsonPayload(content: string): string {
 export class AIClient {
   constructor(private readonly plugin: DashFlowPlugin) {}
 
-  isConfigured(): boolean {
+  hasConfiguration(): boolean {
     const settings = this.plugin.data.settings;
     const baseUrl = trimBaseUrl(settings.aiBaseUrl);
-    if (!settings.aiEnabled || !baseUrl || !settings.aiModel.trim()) return false;
+    if (!baseUrl || !settings.aiModel.trim()) return false;
     if (isLocalEndpoint(baseUrl)) return true;
     return Boolean(resolveAiApiKey(settings.aiSecretId, this.plugin.app.secretStorage));
+  }
+
+  isConfigured(): boolean {
+    const settings = this.plugin.data.settings;
+    return settings.aiEnabled && this.hasConfiguration();
   }
 
   async testConnection(): Promise<string> {

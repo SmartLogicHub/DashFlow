@@ -3,11 +3,13 @@ import type DashFlowPlugin from "../main";
 import type { Task } from "../models";
 import { activityStreak } from "../activity/activityMath";
 import { PLUGIN_VERSION } from "../constants";
-import { inboxTasks, type ProductSection } from "../product/navigation";
+import { inboxTasks, PRODUCT_SECTIONS, type ProductSection } from "../product/navigation";
+import { type ProjectViewType } from "../product/sectionPolicy";
 import { heroPresentationFor } from "../product/heroPresentation";
 import { taskOverview, type TaskOverviewMetric } from "../product/progressOverview";
 import { isWidgetVisibleInSection } from "../product/widgetVisibility";
 import { AIPlanModal } from "../ui/AIPlanModal";
+import { FeatureHubModal } from "../ui/FeatureHubModal";
 import { GlobalSearchModal } from "../ui/GlobalSearchModal";
 import { HabitEditorModal } from "../ui/HabitEditorModal";
 import { ProjectDetailModal } from "../ui/ProjectDetailModal";
@@ -16,20 +18,11 @@ import { QuickAddModal } from "../ui/QuickAddModal";
 import { TaskEditorModal } from "../ui/TaskEditorModal";
 import { PersonalHomeService } from "./PersonalHomeService";
 
-const COMMAND_SECTIONS: Array<{ id: ProductSection; label: string; icon: string }> = [
-  { id: "today", label: "今日", icon: "home" },
-  { id: "work", label: "工作台", icon: "layout-dashboard" },
-  { id: "projects", label: "项目", icon: "folder-kanban" },
-  { id: "inbox", label: "收集箱", icon: "inbox" },
-  { id: "calendar", label: "日历", icon: "calendar-days" },
-  { id: "habits", label: "习惯", icon: "repeat-2" },
-  { id: "review", label: "复盘", icon: "bar-chart-3" },
-];
-
 export class ProductExperienceService {
   private unsubscribeRender: (() => void) | null = null;
   private unsubscribeActivity: (() => void) | null = null;
   private activeSection: ProductSection = "today";
+  private activeProjectView: ProjectViewType | null = null;
   private readonly personalHome: PersonalHomeService;
 
   constructor(private readonly plugin: DashFlowPlugin) {
@@ -56,6 +49,11 @@ export class ProductExperienceService {
 
   currentSection(): ProductSection {
     return this.activeSection;
+  }
+
+  openProjectView(type: ProjectViewType): void {
+    this.activeProjectView = type;
+    this.openSection("projects");
   }
 
   private refresh(force = false): void {
@@ -240,7 +238,7 @@ export class ProductExperienceService {
 
     const nav = document.createElement("nav");
     nav.className = "dashflow-command-nav";
-    for (const section of COMMAND_SECTIONS) {
+    for (const section of PRODUCT_SECTIONS) {
       const button = this.commandButton(section.icon, section.label);
       button.dataset.section = section.id;
       button.addEventListener("click", () => this.openSection(section.id));
@@ -262,7 +260,11 @@ export class ProductExperienceService {
     search.classList.add("is-icon-action");
     search.addEventListener("click", () => new GlobalSearchModal(this.plugin).open());
 
-    actions.append(add, project, habit, search);
+    const features = this.commandButton("blocks", "功能");
+    features.classList.add("is-icon-action", "dashflow-feature-action");
+    features.addEventListener("click", () => new FeatureHubModal(this.plugin).open());
+
+    actions.append(add, project, habit, features, search);
     if (this.plugin.data.settings.aiEnabled) {
       const ai = this.commandButton("sparkles", "AI 规划");
       ai.classList.add("is-secondary-action");

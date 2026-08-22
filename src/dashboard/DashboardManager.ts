@@ -181,10 +181,10 @@ export class DashboardManager {
     });
   }
 
-  async addWidget(dashboardId: string, type: string): Promise<void> {
+  async addWidget(dashboardId: string, type: string): Promise<WidgetInstance | null> {
     const dashboard = this.plugin.data.dashboards.find((item) => item.id === dashboardId);
     const definition = this.registry.get(type);
-    if (!dashboard || !definition) return;
+    if (!dashboard || !definition) return null;
 
     const layout = findFirstAvailableLayout(
       dashboard.widgets,
@@ -209,6 +209,7 @@ export class DashboardManager {
         order: [...state.order, widget.id],
       },
     });
+    return widget;
   }
 
   async moveMobileWidget(
