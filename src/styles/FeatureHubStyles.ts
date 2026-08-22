@@ -110,10 +110,40 @@ export const FEATURE_HUB_STYLES = `
 
 .dashflow-command-actions .dashflow-feature-action { display: flex!important; }
 
+.dashflow-section-assist {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  min-height: 150px;
+  padding: 24px;
+  border: 1px dashed color-mix(in srgb, var(--interactive-accent) 32%, var(--background-modifier-border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--background-primary-alt) 82%, transparent);
+}
+.dashflow-section-assist-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--interactive-accent) 12%, transparent);
+  color: var(--interactive-accent);
+}
+.dashflow-section-assist-icon svg { width: 20px; height: 20px; }
+.dashflow-section-assist strong { display: block; font-size: 15px; }
+.dashflow-section-assist p { margin: 5px 0 0; color: var(--text-muted); font-size: 12.5px; line-height: 1.55; }
+.dashflow-section-assist button { min-height: 34px; padding: 6px 13px; border-radius: 8px; }
+.dashflow-section-assist button:focus-visible { outline: 2px solid var(--interactive-accent); outline-offset: 2px; }
+
 @media (max-width: 760px) {
   .modal:has(.dashflow-feature-hub) { width: calc(100vw - 20px); }
   .dashflow-feature-hub-grid { grid-template-columns: 1fr; }
   .dashflow-feature-hub-item { grid-template-columns: 34px minmax(0, 1fr) auto 18px; }
   .dashflow-command-actions .dashflow-feature-action { display: flex!important; }
+  .dashflow-section-assist { grid-template-columns: 40px minmax(0, 1fr); padding: 18px; }
+  .dashflow-section-assist button { grid-column: 1 / -1; justify-self: stretch; }
 }
 `;

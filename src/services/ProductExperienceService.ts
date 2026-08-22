@@ -1,10 +1,15 @@
-import { normalizePath, setIcon } from "obsidian";
+import { normalizePath, Notice, setIcon } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { Task } from "../models";
 import { activityStreak } from "../activity/activityMath";
 import { PLUGIN_VERSION } from "../constants";
 import { inboxTasks, PRODUCT_SECTIONS, type ProductSection } from "../product/navigation";
-import { type ProjectViewType } from "../product/sectionPolicy";
+import {
+  recoveryForSection,
+  sectionCoverage,
+  type ProjectViewType,
+  type SectionRecovery,
+} from "../product/sectionPolicy";
 import { heroPresentationFor } from "../product/heroPresentation";
 import { taskOverview, type TaskOverviewMetric } from "../product/progressOverview";
 import { isWidgetVisibleInSection } from "../product/widgetVisibility";
@@ -499,6 +504,14 @@ export class ProductExperienceService {
 
     this.clearSyntheticPage(grid);
 
+    const coverage = sectionCoverage(section, dashboard.widgets);
+    const recovery = recoveryForSection(section);
+    if (coverage.missing && recovery) {
+      for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget")) this.setCardVisible(card, false);
+      grid.appendChild(this.renderSectionAssist(recovery));
+      return;
+    }
+
     for (const card of grid.querySelectorAll<HTMLElement>(":scope > .dashflow-widget[data-widget-id]")) {
       const id = card.dataset.widgetId ?? "";
       const widget = dashboard.widgets.find((item) => item.id === id);
@@ -571,7 +584,46 @@ export class ProductExperienceService {
   }
 
   private clearSyntheticPage(grid: HTMLElement): void {
-    for (const page of grid.querySelectorAll(":scope > .dashflow-command-page, :scope > .dashflow-personal-home")) page.remove();
+    for (const page of grid.querySelectorAll(":scope > .dashflow-command-page, :scope > .dashflow-personal-home, :scope > .dashflow-section-assist")) page.remove();
+  }
+
+  private renderSectionAssist(recovery: SectionRecovery): HTMLElement {
+    const assist = document.createElement("section");
+    assist.className = "dashflow-section-assist";
+    const icon = document.createElement("span");
+    icon.className = "dashflow-section-assist-icon";
+    setIcon(icon, "layout-template");
+    const copy = document.createElement("div");
+    copy.append(this.text("strong", recovery.title), this.text("p", recovery.description));
+    const action = this.text("button", recovery.actionLabel);
+    action.type = "button";
+    action.addEventListener("click", () => void this.addSectionWidget(recovery));
+    assist.append(icon, copy, action);
+    return assist;
+  }
+
+  private async addSectionWidget(recovery: SectionRecovery): Promise<void> {
+    const dashboard = this.plugin.dashboardManager.active();
+    const existing = dashboard.widgets.find((widget) => widget.type === recovery.widgetType);
+    try {
+      if (existing?.hidden) {
+        await this.plugin.dashboardManager.updateWidget(dashboard.id, existing.id, (widget) => ({
+          ...widget,
+          hidden: false,
+        }));
+      } else {
+        const added = await this.plugin.dashboardManager.addWidget(dashboard.id, recovery.widgetType);
+        if (!added) {
+          new Notice(`DashFlow: 无法加入「${recovery.actionLabel.replace(/^加入/, "")}」。`);
+          return;
+        }
+      }
+      this.plugin.refreshDashboardViews();
+      this.openSection(recovery.section);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      new Notice(`DashFlow: 补齐视图失败 · ${message}`);
+    }
   }
 
   private renderInboxPage(): HTMLElement {
