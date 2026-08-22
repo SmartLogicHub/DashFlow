@@ -9,6 +9,13 @@ DashFlow 是建立在 Obsidian Vault 之上的 Personal OS。Task、Project、Ha
 3. 首次打开时选择 Minimal、Daily Focus 或 Project Management 起始布局，也可以跳过；以后可在 DashFlow 设置 → 高级 → 首次引导重新打开。
 4. 在工作台中使用 Quick Add、Inbox、Today、Projects、Calendar、Habits 和 Review。所有内容仍写回 Vault Markdown。
 
+## 功能发现与页面切换
+
+- 工作台顶部的「功能」会列出 DashFlow 的全部组件、日常操作与可选集成，并分别显示“已添加 / 未添加”和“可用 / 已关闭 / 需要配置”。未添加的组件可以直接加入当前工作台；AI、晨间简报和微信读书未就绪时会带你前往对应设置，不会直接发起网络请求。
+- 「项目」页把项目列表、项目看板和项目时间轴合并为同一组视图。页面默认选择当前工作台已有的优先视图，并且一次只显示一个；选择尚未加入的视图时，可以在原位一键补齐。
+- 「日历」「习惯」「复盘」以及没有任何项目视图的「项目」页不再显示空白画布。DashFlow 会说明当前工作台缺少的组件，并提供一键加入或恢复隐藏组件的操作。
+- Dashboard 导入 / 导出、重新索引 Vault 等维护能力仍放在 Obsidian 命令面板或 DashFlow 设置 → 高级中，避免与日常操作混在一起。
+
 开发环境使用可复现命令：
 
 ```bash
