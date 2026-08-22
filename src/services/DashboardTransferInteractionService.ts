@@ -63,25 +63,25 @@ export class DashboardTransferInteractionService {
     const { container, content, close } = this.modalFrame(`导出工作台 · ${dashboard.name}`);
     const note = document.createElement("p");
     note.className = "dashflow-dashboard-transfer-note";
-    note.textContent = "导出内容只包含 Widget、配置、桌面布局和移动端 UI 状态，不包含 Task、Project、Habit、Activity 或 Vault 笔记内容。";
+    note.textContent = "导出内容只包含卡片、配置、桌面布局和移动端界面状态，不包含任务、项目、习惯、活跃度或知识库笔记内容。";
 
     const textarea = document.createElement("textarea");
     textarea.value = json;
     textarea.readOnly = true;
     textarea.spellcheck = false;
-    textarea.setAttribute("aria-label", "Dashboard JSON");
+    textarea.setAttribute("aria-label", "工作台 JSON");
 
     const actions = document.createElement("div");
     actions.className = "dashflow-dashboard-transfer-actions";
     const closeButton = this.button("关闭", "关闭导出窗口");
     closeButton.addEventListener("click", close);
-    const download = this.button("下载 .json", "下载 Dashboard JSON 文件");
+    const download = this.button("下载 .json", "下载工作台 JSON 文件");
     download.addEventListener("click", () => this.downloadJson(dashboard.name, json));
-    const copy = this.button("复制 JSON", "复制 Dashboard JSON");
+    const copy = this.button("复制 JSON", "复制工作台 JSON");
     copy.classList.add("mod-cta");
     copy.addEventListener("click", async () => {
       const ok = await this.copyText(json, textarea);
-      new Notice(ok ? "Dashboard JSON 已复制" : "复制失败，请手动复制文本框内容");
+      new Notice(ok ? "工作台 JSON 已复制" : "复制失败，请手动复制文本框内容");
     });
     actions.append(closeButton, download, copy);
     content.append(note, textarea, actions);
@@ -96,7 +96,7 @@ export class DashboardTransferInteractionService {
 
     const note = document.createElement("p");
     note.className = "dashflow-dashboard-transfer-note";
-    note.textContent = "粘贴 DashFlow Dashboard JSON，或读取之前导出的 .json 文件。导入会创建一个新的 Dashboard，不会覆盖现有工作台或修改 Vault 业务数据。";
+    note.textContent = "粘贴 DashFlow 工作台 JSON，或读取之前导出的 .json 文件。导入会创建一个新的工作台，不会覆盖现有工作台或修改知识库业务数据。";
 
     const fileRow = document.createElement("div");
     fileRow.className = "dashflow-dashboard-transfer-file";
@@ -108,9 +108,9 @@ export class DashboardTransferInteractionService {
     fileRow.append(fileLabel, fileInput);
 
     const textarea = document.createElement("textarea");
-    textarea.placeholder = "在这里粘贴 DashFlow Dashboard JSON…";
+    textarea.placeholder = "在这里粘贴 DashFlow 工作台 JSON…";
     textarea.spellcheck = false;
-    textarea.setAttribute("aria-label", "待导入 Dashboard JSON");
+    textarea.setAttribute("aria-label", "待导入工作台 JSON");
 
     const nameField = document.createElement("div");
     nameField.className = "dashflow-dashboard-transfer-field";
@@ -142,7 +142,7 @@ export class DashboardTransferInteractionService {
     actions.className = "dashflow-dashboard-transfer-actions";
     const cancel = this.button("取消", "取消导入");
     cancel.addEventListener("click", close);
-    const submit = this.button("导入为新工作台", "导入 Dashboard JSON");
+    const submit = this.button("导入为新工作台", "导入工作台 JSON");
     submit.classList.add("mod-cta");
     submit.addEventListener("click", () => void this.importJson(
       textarea.value,
@@ -169,7 +169,7 @@ export class DashboardTransferInteractionService {
         this.plugin.widgetRegistry.list().map((definition) => definition.type),
       );
       if (unsupported.length > 0) {
-        throw new DashboardTransferError(`当前 DashFlow 不支持这些 Widget：${unsupported.join(", ")}`);
+        throw new DashboardTransferError(`当前 DashFlow 不支持这些卡片：${unsupported.join(", ")}`);
       }
 
       const existing = this.plugin.dashboardManager.list();

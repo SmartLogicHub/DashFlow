@@ -49,4 +49,5 @@ import "./feature-hub.test";
 import "./section-recovery.test";
 import "./project-views.test";
 import "./product-presentation.test";
+import "./chinese-ui.test";
 import "./ui-smoke-contract.test";

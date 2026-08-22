@@ -12,7 +12,7 @@ export interface ProductSectionDefinition {
 
 export const PRODUCT_SECTIONS: ProductSectionDefinition[] = [
   { id: "today", label: "今日", icon: "home", title: "今日", description: "把今天、长期领域和个人成长放在同一个入口。" },
-  { id: "work", label: "工作台", icon: "layout-dashboard", title: "工作台", description: "高密度查看任务、项目、进度、提醒与 Activity。" },
+  { id: "work", label: "工作台", icon: "layout-dashboard", title: "工作台", description: "高密度查看任务、项目、进度、提醒与活跃度。" },
   { id: "inbox", label: "收集箱", icon: "inbox", title: "收集箱", description: "先记下来，再决定什么时候做、属于哪个项目。" },
   { id: "projects", label: "项目", icon: "folder-kanban", title: "项目", description: "看清长期目标、进度和下一步行动。" },
   { id: "calendar", label: "日历", icon: "calendar-days", title: "日历", description: "把计划、截止日期和习惯放回时间轴。" },

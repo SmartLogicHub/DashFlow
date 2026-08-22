@@ -112,12 +112,12 @@ function folderForMatch(match: DataFilterMatch): string {
 
 function noteMatch(note: NoteRecord): DataFilterMatch {
   const date = localDate(new Date(note.modifiedAt));
-  const tasks = note.taskTotal > 0 ? `${note.taskCompleted}/${note.taskTotal} tasks` : "无任务";
+  const tasks = note.taskTotal > 0 ? `${note.taskCompleted}/${note.taskTotal} 项任务` : "无任务";
   return {
     kind: "note",
     item: note,
     title: note.name,
-    meta: [note.folder || "Vault 根目录", tasks, `修改 ${date}`].join(" · "),
+    meta: [note.folder || "知识库根目录", tasks, `修改 ${date}`].join(" · "),
     date,
     tags: note.tags,
   };

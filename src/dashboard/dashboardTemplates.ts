@@ -40,13 +40,13 @@ export const DEFAULT_DASHBOARD_TEMPLATE_ID: DashboardTemplateId = "daily-focus";
 const TEMPLATE_SPECS: readonly DashboardTemplateSpec[] = [
   {
     id: "daily-focus",
-    name: "Daily Focus",
+    name: "今日专注",
     description: "把今天要做的事、近期安排和日历放在最前面。",
     icon: "⚡",
     widgets: [
       { type: "quick-capture", x: 0, y: 0, w: 4, h: 3 },
       { type: "tasks", x: 4, y: 0, w: 4, h: 5, config: { includeOverdue: true, limit: 8 } },
-      { type: "progress", x: 8, y: 0, w: 4, h: 3, config: { label: "TODAY" } },
+      { type: "progress", x: 8, y: 0, w: 4, h: 3, config: { label: "今日任务" } },
       { type: "upcoming", x: 8, y: 3, w: 4, h: 5, config: { days: 7, limit: 8 } },
       { type: "calendar", x: 0, y: 5, w: 8, h: 7, config: { agendaLimit: 8 } },
       { type: "countdown", x: 8, y: 8, w: 4, h: 3 },
@@ -55,7 +55,7 @@ const TEMPLATE_SPECS: readonly DashboardTemplateSpec[] = [
   },
   {
     id: "project-management",
-    name: "Project Management",
+    name: "项目管理",
     description: "围绕活动项目、执行任务、截止日和近期交付组织工作。",
     icon: "▣",
     widgets: [
@@ -64,14 +64,14 @@ const TEMPLATE_SPECS: readonly DashboardTemplateSpec[] = [
       { type: "tasks", x: 0, y: 3, w: 4, h: 5, config: { includeOverdue: true, limit: 10 } },
       { type: "upcoming", x: 0, y: 8, w: 4, h: 6, config: { days: 14, limit: 16 } },
       { type: "calendar", x: 4, y: 5, w: 8, h: 8, config: { showHabits: false, agendaLimit: 14 } },
-      { type: "countdown", x: 4, y: 13, w: 4, h: 3, title: "MILESTONE" },
+      { type: "countdown", x: 4, y: 13, w: 4, h: 3, title: "里程碑" },
       { type: "vault-stats", x: 8, y: 13, w: 4, h: 3 },
     ],
   },
   {
     id: "habit-tracker",
-    name: "Habit Tracker",
-    description: "把 Habit 打卡、习惯活跃度和节奏日历放在一个工作台。",
+    name: "习惯追踪",
+    description: "把习惯打卡、活跃度和节奏日历放在一个工作台。",
     icon: "◎",
     widgets: [
       { type: "habits", x: 0, y: 0, w: 7, h: 5, config: { historyDays: 14, limit: 8, showProgress: true } },
@@ -82,7 +82,7 @@ const TEMPLATE_SPECS: readonly DashboardTemplateSpec[] = [
   },
   {
     id: "weekly-review",
-    name: "Weekly Review",
+    name: "每周复盘",
     description: "面向复盘：本周总结、活跃度、项目推进和下周日程。",
     icon: "↻",
     widgets: [
@@ -95,13 +95,13 @@ const TEMPLATE_SPECS: readonly DashboardTemplateSpec[] = [
   },
   {
     id: "minimal",
-    name: "Minimal",
+    name: "极简模式",
     description: "只保留捕捉、今日任务和进度，适合极简专注。",
     icon: "◌",
     widgets: [
       { type: "quick-capture", x: 0, y: 0, w: 4, h: 3 },
       { type: "tasks", x: 4, y: 0, w: 5, h: 5, config: { includeOverdue: true, limit: 7 } },
-      { type: "progress", x: 9, y: 0, w: 3, h: 3, config: { label: "FOCUS" } },
+      { type: "progress", x: 9, y: 0, w: 3, h: 3, config: { label: "专注" } },
     ],
   },
 ];

@@ -154,7 +154,7 @@ export class DashboardSwitcherInteractionService {
 
     const description = document.createElement("p");
     description.className = "setting-item-description";
-    description.textContent = "选择内置模板或你自己保存的模板。模板只决定 Widget 与布局，不会复制或移动 Vault 里的 Task、Project、Habit。";
+    description.textContent = "选择内置模板或你自己保存的模板。模板只决定卡片与布局，不会复制或移动知识库里的任务、项目、习惯。";
     content.appendChild(description);
 
     const cards: HTMLButtonElement[] = [];
@@ -193,7 +193,7 @@ export class DashboardSwitcherInteractionService {
           key,
           template.icon || "✦",
           template.name,
-          template.description || "从你的 Dashboard 保存的自定义模板。",
+          template.description || "从你的工作台保存的自定义模板。",
           `自定义 · ${template.dashboard.widgets.length} 张卡片`,
           true,
           selectTemplate,
@@ -329,8 +329,8 @@ export class DashboardSwitcherInteractionService {
     const note = document.createElement("p");
     note.className = "dashflow-dashboard-modal-note";
     note.textContent = dashboards.length <= 1
-      ? "至少保留一个工作台，所以当前不能删除。保存为模板只会记录 Dashboard UI 编排。"
-      : "复制会产生独立工作台；保存为模板则把当前 Widget、布局和手机状态保存为可重复使用的起始布局。";
+      ? "至少保留一个工作台，所以当前不能删除。保存为模板只会记录工作台界面编排。"
+      : "复制会产生独立工作台；保存为模板则把当前卡片、布局和手机状态保存为可重复使用的起始布局。";
     content.appendChild(note);
 
     if (this.plugin.data.customTemplates.length > 0) {
@@ -353,7 +353,7 @@ export class DashboardSwitcherInteractionService {
     const { container, content, close } = this.modalFrame("保存为自定义模板");
     const note = document.createElement("p");
     note.className = "dashflow-dashboard-modal-note";
-    note.textContent = "会保存当前 Widget、配置、桌面布局和移动端状态。Task、Project、Habit、Activity 与 Vault 笔记内容不会进入模板。";
+    note.textContent = "会保存当前卡片、配置、桌面布局和移动端状态。任务、项目、习惯、活跃度与知识库笔记内容不会进入模板。";
 
     const nameField = document.createElement("div");
     nameField.className = "dashflow-dashboard-template-save-field";
@@ -362,7 +362,7 @@ export class DashboardSwitcherInteractionService {
     const nameInput = document.createElement("input");
     nameInput.type = "text";
     nameInput.maxLength = 48;
-    nameInput.value = `${dashboard.name} Template`;
+    nameInput.value = `${dashboard.name} 模板`;
     nameField.append(nameLabel, nameInput);
 
     const descriptionField = document.createElement("div");
@@ -466,10 +466,10 @@ export class DashboardSwitcherInteractionService {
   private templateNameForKey(key: string): string {
     if (key.startsWith(CUSTOM_PREFIX)) {
       return this.plugin.data.customTemplates.find((template) => template.id === key.slice(CUSTOM_PREFIX.length))?.name
-        ?? "Custom Dashboard";
+        ?? "自定义工作台";
     }
     return DASHBOARD_TEMPLATES.find((template) => template.id === key.slice(BUILTIN_PREFIX.length))?.name
-      ?? "Dashboard";
+      ?? "工作台";
   }
 
   private templateSection(title: string, meta: string): {

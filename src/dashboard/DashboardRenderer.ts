@@ -18,6 +18,8 @@ import { moveLayout, resizeLayout, resolveWidgetLayout } from "../layout/grid";
 import { createElement } from "../ui/dom";
 import { localDate } from "../utils/date";
 import { TimedConfirmation } from "../ui/timedConfirmation";
+import { chineseProductText } from "../product/chineseCopy";
+import { DASHFLOW_CONFIGURE_WIDGET_EVENT, widgetConfigRequestId } from "./widgetConfigRequest";
 
 export class DashboardRenderer {
   private editing = false;
@@ -30,6 +32,14 @@ export class DashboardRenderer {
   private destroyed = false;
   private readonly unsubscribeIndex: () => void;
   private readonly unsubscribeDashboard: () => void;
+  private readonly configureWidgetListener = (event: Event): void => {
+    const widgetId = widgetConfigRequestId((event as CustomEvent<unknown>).detail);
+    const dashboard = this.plugin.dashboardManager.active();
+    if (!widgetId || !dashboard.widgets.some((widget) => widget.id === widgetId)) return;
+    this.configuringWidgetId = widgetId;
+    this.modalDraft = null;
+    this.render();
+  };
 
   constructor(
     private readonly plugin: DashFlowPlugin,
@@ -37,6 +47,7 @@ export class DashboardRenderer {
   ) {
     this.unsubscribeIndex = this.plugin.vaultIndex.subscribe(() => this.render());
     this.unsubscribeDashboard = this.plugin.dashboardManager.subscribe(() => this.render());
+    this.container.addEventListener(DASHFLOW_CONFIGURE_WIDGET_EVENT, this.configureWidgetListener);
   }
 
   destroy(): void {
@@ -45,6 +56,7 @@ export class DashboardRenderer {
     this.pointerCleanup = null;
     this.unsubscribeIndex();
     this.unsubscribeDashboard();
+    this.container.removeEventListener(DASHFLOW_CONFIGURE_WIDGET_EVENT, this.configureWidgetListener);
     if (this.frameId !== null) window.cancelAnimationFrame(this.frameId);
     this.frameId = null;
     this.plugin.dashboardRender.unmount(this.container);
@@ -79,7 +91,7 @@ export class DashboardRenderer {
     shell.appendChild(this.renderPulse(snapshot));
 
     const sectionTitle = createElement("div", "dashflow-section-title");
-    sectionTitle.appendChild(createElement("span", "", "MY DASHBOARD"));
+    sectionTitle.appendChild(createElement("span", "", "我的工作台"));
     sectionTitle.appendChild(createElement(
       "small",
       "",
@@ -144,11 +156,11 @@ export class DashboardRenderer {
     const activeProjects = snapshot.projects.filter((project) => project.status === "active").length;
     const overdue = this.plugin.taskService.overdue(snapshot.tasks).length;
     const items: Array<[string, number | null]> = [
-      ["VAULT PULSE", null],
-      ["NOTES", snapshot.notes],
-      ["PENDING", pending],
-      ["PROJECTS", activeProjects],
-      ["OVERDUE", overdue],
+      ["知识库概览", null],
+      ["笔记", snapshot.notes],
+      ["待办", pending],
+      ["项目", activeProjects],
+      ["已逾期", overdue],
     ];
 
     items.forEach(([label, value], index) => {
@@ -174,7 +186,7 @@ export class DashboardRenderer {
     const header = createElement("div", "dashflow-widget-header");
     const title = createElement("div");
     title.appendChild(createElement("span", "dashflow-widget-icon", definition.icon));
-    title.appendChild(createElement("strong", "", widget.title ?? definition.name));
+    title.appendChild(createElement("strong", "", chineseProductText(widget.title ?? definition.name)));
     header.appendChild(title);
 
     if (this.editing) {
@@ -264,7 +276,7 @@ export class DashboardRenderer {
         this.renderVaultStats(body);
         break;
       default:
-        body.appendChild(createElement("div", "dashflow-empty", "未知 Widget"));
+        body.appendChild(createElement("div", "dashflow-empty", "未知卡片"));
         break;
     }
   }
@@ -343,8 +355,8 @@ export class DashboardRenderer {
     ].slice(0, config.limit ?? 10);
 
     const kicker = createElement("div", "dashflow-widget-kicker");
-    kicker.appendChild(document.createTextNode("TODAY"));
-    kicker.appendChild(createElement("span", "", `${tasks.filter((task) => !task.completed).length} pending`));
+    kicker.appendChild(document.createTextNode("今日任务"));
+    kicker.appendChild(createElement("span", "", `${tasks.filter((task) => !task.completed).length} 项待办`));
     body.appendChild(kicker);
     this.renderTaskList(body, tasks, "今天没有到期任务");
   }
@@ -360,12 +372,12 @@ export class DashboardRenderer {
     ring.style.setProperty("--dashflow-progress", `${progress * 3.6}deg`);
     const center = createElement("div");
     center.appendChild(createElement("strong", "", `${progress}%`));
-    center.appendChild(createElement("span", "", config.label ?? "TODAY"));
+    center.appendChild(createElement("span", "", chineseProductText(config.label ?? "今日任务")));
     ring.appendChild(center);
 
     wrap.append(
       ring,
-      createElement("div", "dashflow-progress-meta", `${completed} / ${today.length} completed`),
+      createElement("div", "dashflow-progress-meta", `${completed} / ${today.length} 已完成`),
     );
     body.appendChild(wrap);
   }
@@ -417,8 +429,8 @@ export class DashboardRenderer {
     const days = config.days ?? 7;
     const tasks = this.plugin.taskService.upcoming(days).slice(0, config.limit ?? 12);
     const kicker = createElement("div", "dashflow-widget-kicker");
-    kicker.appendChild(document.createTextNode(`NEXT ${days} DAYS`));
-    kicker.appendChild(createElement("span", "", `${tasks.length} tasks`));
+    kicker.appendChild(document.createTextNode(`未来 ${days} 天`));
+    kicker.appendChild(createElement("span", "", `${tasks.length} 项任务`));
     body.appendChild(kicker);
     this.renderTaskList(body, tasks, "未来几天没有到期任务");
   }
@@ -433,9 +445,9 @@ export class DashboardRenderer {
 
     const wrap = createElement("div", "dashflow-countdown");
     wrap.append(
-      createElement("span", "", config.title ?? "COUNTDOWN"),
+      createElement("span", "", chineseProductText(config.title ?? "倒计时")),
       createElement("strong", "", String(days)),
-      createElement("small", "", "DAYS"),
+      createElement("small", "", "天"),
     );
     body.appendChild(wrap);
   }
@@ -443,10 +455,10 @@ export class DashboardRenderer {
   private renderVaultStats(body: HTMLElement): void {
     const snapshot = this.plugin.vaultIndex.getSnapshot();
     const stats: Array<[string, number]> = [
-      ["NOTES", snapshot.notes],
-      ["PENDING", snapshot.tasks.filter((task) => !task.completed).length],
-      ["PROJECTS", snapshot.projects.filter((project) => project.status === "active").length],
-      ["DONE", snapshot.tasks.filter((task) => task.completed).length],
+      ["笔记", snapshot.notes],
+      ["待办", snapshot.tasks.filter((task) => !task.completed).length],
+      ["项目", snapshot.projects.filter((project) => project.status === "active").length],
+      ["已完成", snapshot.tasks.filter((task) => task.completed).length],
     ];
 
     const grid = createElement("div", "dashflow-stats-grid");
@@ -528,11 +540,11 @@ export class DashboardRenderer {
     });
     container.tabIndex = -1;
 
-    content.appendChild(createElement("h2", "", `配置 · ${widget.title ?? definition.name}`));
+    content.appendChild(createElement("h2", "", `配置 · ${chineseProductText(widget.title ?? definition.name)}`));
     content.appendChild(createElement(
       "p",
       "setting-item-description",
-      "设置只作用于当前这张卡片。同一种 Widget 的其他实例不会被修改。",
+      "设置只作用于当前这张卡片。同一种卡片的其他实例不会被修改。",
     ));
 
     const titleInput = createElement("input");
@@ -544,7 +556,7 @@ export class DashboardRenderer {
     });
     content.appendChild(this.renderSettingRow(
       "卡片标题",
-      "留空时使用 Widget 默认名称。",
+      "留空时使用卡片默认名称。",
       titleInput,
     ));
 
@@ -561,7 +573,7 @@ export class DashboardRenderer {
       content.appendChild(createElement(
         "p",
         "setting-item-description",
-        "这个 Widget 当前没有额外参数，但仍可以为该实例设置独立标题。",
+        "这张卡片当前没有额外参数，但仍可以设置独立标题。",
       ));
     }
 

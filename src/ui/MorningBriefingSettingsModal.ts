@@ -20,30 +20,30 @@ export class MorningBriefingSettingsModal extends Modal {
     contentEl.addClass("dashflow-morning-settings-modal");
     contentEl.createEl("h2", { text: "AI 晨间简报" });
     contentEl.createEl("p", {
-      text: "开启后，DashFlow 会在每天首次打开首页时读取昨日 Daily Note，并把笔记正文发送到你配置的 AI Base URL 生成摘要。关闭时不会读取或发送 Daily Note 正文。",
+      text: "开启后，DashFlow 会在每天首次打开首页时读取昨日每日笔记，并把笔记正文发送到你配置的 AI Base URL 生成摘要。关闭时不会读取或发送每日笔记正文。",
     });
     contentEl.createEl("p", {
-      text: "如果 Base URL 是 localhost / 127.0.0.1（例如 Ollama），请求只发送到本机；远程 Provider 请确认你接受其隐私政策。",
+      text: "如果 Base URL 是 localhost / 127.0.0.1（例如 Ollama），请求只发送到本机；使用远程服务时请确认你接受其隐私政策。",
       cls: "setting-item-description",
     });
 
     new Setting(contentEl)
-      .setName("允许读取昨日 Daily Note")
+      .setName("允许读取昨日每日笔记")
       .setDesc("这是独立授权。仅开启“AI 规划”不会自动获得读取笔记正文的权限。")
       .addToggle((toggle) => toggle
         .setValue(this.enabled)
         .onChange((value) => { this.enabled = value; }));
 
     new Setting(contentEl)
-      .setName("Daily Note 文件夹")
-      .setDesc("留空表示 Vault 根目录，例如：Daily Notes")
+      .setName("每日笔记文件夹")
+      .setDesc("留空表示知识库根目录，例如：每日笔记")
       .addText((text) => text
-        .setPlaceholder("Daily Notes")
+      .setPlaceholder("每日笔记")
         .setValue(this.folder)
         .onChange((value) => { this.folder = value.trim(); }));
 
     new Setting(contentEl)
-      .setName("Daily Note 日期格式")
+      .setName("每日笔记日期格式")
       .setDesc("支持 YYYY / MM / DD，例如 YYYY-MM-DD 或 YYYY/MM/DD。DashFlow 会自动补 .md。")
       .addText((text) => text
         .setPlaceholder("YYYY-MM-DD")

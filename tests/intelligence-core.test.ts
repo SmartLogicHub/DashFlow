@@ -40,7 +40,7 @@ test("Morning Briefing requires separate opt-in before reading note bodies", () 
   assert.ok(morning.includes("aiMorningBriefingEnabled"));
   assert.ok(morning.includes("this.plugin.dailyNotes.read"));
   assert.ok(dailyNotes.includes("this.app.vault.read(file)"));
-  assert.ok(morningSettings.includes("允许读取昨日 Daily Note"));
+  assert.ok(morningSettings.includes("允许读取昨日每日笔记"));
   assert.ok(morningSettings.includes("笔记正文发送到你配置的 AI Base URL"));
   assert.ok(home.includes("this.plugin.morningBriefing.isEnabled()"));
 });

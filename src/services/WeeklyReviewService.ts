@@ -156,13 +156,13 @@ export class WeeklyReviewService {
     const projectLimit = this.safeLimit(config.projectLimit, 6, 30);
     const nextLimit = this.safeLimit(config.nextWeekLimit, 8, 50);
     const lines = [
-      `## Weekly Review · ${review.week.start} → ${review.week.end}`,
+      `## 每周复盘 · ${review.week.start} → ${review.week.end}`,
       "",
       `- 完成任务：${review.activity.tasksCompleted}`,
       `- 活跃天数：${review.activity.activeDays}/7`,
-      `- Activity Score：${review.activity.score}`,
-      `- Habit：${review.habitCompleted}/${review.habitScheduled}（${review.habitRate}%）`,
-      `- Daily Progress：${review.dailyProgressCompleted}/${review.dailyProgressScheduled}（${review.dailyProgressRate}%）`,
+      `- 活跃度得分：${review.activity.score}`,
+      `- 习惯：${review.habitCompleted}/${review.habitScheduled}（${review.habitRate}%）`,
+      `- 每日推进：${review.dailyProgressCompleted}/${review.dailyProgressScheduled}（${review.dailyProgressRate}%）`,
       `- 日更备注：${review.dailyProgressNoteCount}`,
       `- 笔记活动：${review.activity.notesTouched}`,
       "",
@@ -177,14 +177,14 @@ export class WeeklyReviewService {
     lines.push("", "### 项目", ...this.projectMarkdown(review.projects.slice(0, projectLimit)));
 
     if (config.showHabits !== false) {
-      lines.push("", "### Habit");
+      lines.push("", "### 习惯");
       if (review.habits.length === 0) lines.push("- 无");
       else for (const item of review.habits) {
         lines.push(`- ${item.habit.name}：${item.stats.completed}/${item.stats.scheduled}（${item.stats.rate}%）`);
       }
     }
 
-    lines.push("", "### Daily Progress");
+    lines.push("", "### 每日推进");
     if (review.dailyProgress.length === 0) lines.push("- 无长期日更任务");
     else for (const item of review.dailyProgress) {
       lines.push(`- ${item.habit.name}：${item.stats.completed}/${item.stats.scheduled}（${item.stats.rate}%）`);
@@ -198,7 +198,7 @@ export class WeeklyReviewService {
     }
 
     if (review.activityPartial) {
-      lines.push("", "> Activity 数据从本周中途开始累计，本周统计为部分数据。");
+      lines.push("", "> 活跃度数据从本周中途开始累计，本周统计为部分数据。");
     }
     return lines.join("\n");
   }
@@ -206,13 +206,13 @@ export class WeeklyReviewService {
   private projectMarkdown(items: WeeklyReviewProject[]): string[] {
     if (items.length === 0) return ["- 无活动项目"];
     return items.map(({ project, progress }) =>
-      `- ${project.name}：${progress}%${project.deadline ? ` · deadline ${project.deadline}` : ""}`);
+      `- ${project.name}：${progress}%${project.deadline ? ` · 截止 ${project.deadline}` : ""}`);
   }
 
   private eventMarkdownLabel(event: CalendarEvent): string {
-    if (event.kind === "project-deadline") return "Project";
-    if (event.kind === "task-scheduled") return "Scheduled";
-    return "Due";
+    if (event.kind === "project-deadline") return "项目";
+    if (event.kind === "task-scheduled") return "计划";
+    return "截止";
   }
 
   private taskAttentionOrder(a: Task, b: Task, anchor: string): number {

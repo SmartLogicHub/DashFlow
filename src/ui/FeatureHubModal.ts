@@ -59,7 +59,7 @@ export class FeatureHubModal extends Modal {
 
     const head = contentEl.createDiv("dashflow-feature-hub-head");
     const heading = head.createDiv();
-    heading.createDiv({ cls: "dashflow-modal-eyebrow", text: "FEATURE HUB" });
+    heading.createDiv({ cls: "dashflow-modal-eyebrow", text: "功能中心" });
     heading.createEl("h2", { text: "所有功能，都在这里" });
     const close = head.createEl("button", {
       cls: "dashflow-feature-hub-close",

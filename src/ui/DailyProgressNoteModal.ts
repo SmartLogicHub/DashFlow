@@ -19,11 +19,11 @@ export class DailyProgressNoteModal extends Modal {
     const existing = this.habit.dailyNotes?.[this.date] ?? "";
     let draft = existing;
 
-    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: `DAILY PROGRESS · ${this.date}` });
+    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: `每日推进 · ${this.date}` });
     contentEl.createEl("h2", { text: this.habit.name });
     contentEl.createEl("p", {
       cls: "setting-item-description dashflow-modal-lead",
-      text: "记录今天实际推进了什么。备注保存在长期任务 Markdown frontmatter 的 daily_notes 中。",
+      text: "记录今天实际推进了什么。备注保存在长期任务 Markdown 文档属性（frontmatter）的 daily_notes 中。",
     });
 
     new Setting(contentEl)

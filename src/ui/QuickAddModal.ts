@@ -16,11 +16,11 @@ export class QuickAddModal extends Modal {
     contentEl.addClass("dashflow-quick-add-modal", "dashflow-editor-modal");
 
     const eyebrow = contentEl.createDiv("dashflow-modal-eyebrow dashflow-quick-add-eyebrow");
-    eyebrow.setText("QUICK CAPTURE");
+    eyebrow.setText("快速捕捉");
     contentEl.createEl("h2", { text: "快速记录" });
     contentEl.createEl("p", {
       cls: "dashflow-modal-lead dashflow-quick-add-lead",
-      text: "先记下来，再整理。输入一句话按 Enter 会按捕捉设置保存；写入 Daily Note 时 #标签 与 [[双链]] 会原样保留。",
+      text: "先记下来，再整理。输入一句话按回车键会按捕捉设置保存；写入每日笔记时 #标签 与 [[双链]] 会原样保留。",
     });
 
     const composer = contentEl.createDiv("dashflow-quick-add-composer");
@@ -31,7 +31,7 @@ export class QuickAddModal extends Modal {
       placeholder: "例如：研究 #AI [[DashFlow 0.5]]…",
     });
     const hint = composer.createSpan("dashflow-quick-add-hint");
-    hint.setText("ENTER");
+    hint.setText("回车");
 
     const target = contentEl.createDiv("dashflow-quick-add-target");
     const targetLabel = target.createSpan();
@@ -82,9 +82,9 @@ export class QuickAddModal extends Modal {
 
   private captureTargetLabel(): string {
     const target = this.plugin.data.settings.quickCaptureTarget;
-    if (target === "daily-note") return "目标：今天的 Daily Note";
+    if (target === "daily-note") return "目标：今天的每日笔记";
     if (target === "ask") return "目标：每次询问";
-    return "目标：DashFlow Inbox";
+    return "目标：DashFlow 收集箱";
   }
 
   private actionButton(iconName: string, title: string, description: string, action: () => void): HTMLButtonElement {

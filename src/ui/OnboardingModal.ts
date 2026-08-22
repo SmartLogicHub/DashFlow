@@ -23,8 +23,8 @@ export class OnboardingModal extends Modal {
     contentEl.empty();
     contentEl.addClass("dashflow-onboarding-modal", "dashflow-editor-modal");
 
-    const eyebrow = contentEl.createEl("div", { cls: "dashflow-onboarding-eyebrow", text: "DASHFLOW · FIRST RUN" });
-    eyebrow.setAttr("aria-label", "DashFlow first run");
+    const eyebrow = contentEl.createEl("div", { cls: "dashflow-onboarding-eyebrow", text: "DASHFLOW · 初次使用" });
+    eyebrow.setAttr("aria-label", "DashFlow 初次使用");
     contentEl.createEl("h2", { text: "先把工作台调成你的节奏" });
     contentEl.createEl("p", {
       cls: "dashflow-onboarding-lead",

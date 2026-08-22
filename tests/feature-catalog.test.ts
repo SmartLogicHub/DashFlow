@@ -92,7 +92,7 @@ test("feature discovery searches normalized names and descriptions", () => {
   assert.ok(projectMatches.every((feature) => `${feature.name} ${feature.description}`.includes("项目")));
 
   assert.deepEqual(
-    filterFeatures(FEATURE_CATALOG, statuses, { query: "FoCuS", mode: "all" }).map((feature) => feature.id),
+    filterFeatures(FEATURE_CATALOG, statuses, { query: "专注", mode: "all" }).map((feature) => feature.id),
     ["widget-focus"],
   );
 });

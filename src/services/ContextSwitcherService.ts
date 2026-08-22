@@ -14,9 +14,9 @@ interface ContextDefinition {
 }
 
 const CONTEXTS: ContextDefinition[] = [
-  { mode: "morning", label: "Morning", icon: "sunrise", setting: "contextMorningDashboardId" },
-  { mode: "work", label: "Work", icon: "zap", setting: "contextWorkDashboardId" },
-  { mode: "review", label: "Review", icon: "refresh-cw", setting: "contextReviewDashboardId" },
+  { mode: "morning", label: "晨间", icon: "sunrise", setting: "contextMorningDashboardId" },
+  { mode: "work", label: "工作", icon: "zap", setting: "contextWorkDashboardId" },
+  { mode: "review", label: "复盘", icon: "refresh-cw", setting: "contextReviewDashboardId" },
 ];
 
 export class ContextSwitcherService {
@@ -50,15 +50,15 @@ export class ContextSwitcherService {
     if (!switcher) {
       switcher = document.createElement("nav");
       switcher.className = "dashflow-context-switcher";
-      switcher.setAttribute("aria-label", "DashFlow 情景模式");
+      switcher.setAttribute("aria-label", "DashFlow 情景切换");
       const tabs = document.createElement("div");
       tabs.className = "dashflow-context-tabs";
       for (const context of CONTEXTS) tabs.appendChild(this.contextButton(context));
       const configure = document.createElement("button");
       configure.type = "button";
       configure.className = "dashflow-context-configure";
-      configure.title = "配置情景模式与 Quick Capture";
-      configure.setAttribute("aria-label", "配置情景模式与 Quick Capture");
+      configure.title = "配置快速捕捉与情景模式";
+      configure.setAttribute("aria-label", "配置快速捕捉与情景模式");
       setIcon(configure, "settings-2");
       configure.addEventListener("click", () => new WorkflowSettingsModal(this.plugin).open());
       switcher.append(tabs, configure);
@@ -104,7 +104,7 @@ export class ContextSwitcherService {
       button.classList.toggle("is-configured", valid);
       button.classList.toggle("is-active", valid && dashboardId === activeId);
       button.setAttribute("aria-pressed", valid && dashboardId === activeId ? "true" : "false");
-      button.title = valid ? `切换到 ${context.label}` : `配置 ${context.label} Dashboard`;
+      button.title = valid ? `切换到${context.label}` : `配置${context.label}工作台`;
     }
   }
 

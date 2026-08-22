@@ -9,9 +9,9 @@ export const ONBOARDING_TEMPLATES: ReadonlyArray<{
   description: string;
   icon: string;
 }> = [
-  { id: "minimal", name: "Minimal", description: "捕捉、今日任务与进度，留出最大的专注空间。", icon: "◌" },
-  { id: "daily-focus", name: "Daily Focus", description: "把今天、近期安排和日历放在最前面。", icon: "⚡" },
-  { id: "project-management", name: "Project Management", description: "围绕项目、截止日和交付组织工作。", icon: "▣" },
+  { id: "minimal", name: "极简模式", description: "捕捉、今日任务与进度，留出最大的专注空间。", icon: "◌" },
+  { id: "daily-focus", name: "今日专注", description: "把今天、近期安排和日历放在最前面。", icon: "⚡" },
+  { id: "project-management", name: "项目管理", description: "围绕项目、截止日和交付组织工作。", icon: "▣" },
 ];
 
 export interface OnboardingSelection {

@@ -53,7 +53,7 @@ export class ProjectDetailModal extends Modal {
 
     const header = contentEl.createDiv("dashflow-project-detail-head");
     const copy = header.createDiv();
-    copy.createDiv({ cls: "dashflow-modal-eyebrow", text: "PROJECT" });
+    copy.createDiv({ cls: "dashflow-modal-eyebrow", text: "项目" });
     copy.createEl("h2", { text: project.name });
     if (project.description) copy.createEl("p", { text: project.description, cls: "dashflow-modal-lead" });
 

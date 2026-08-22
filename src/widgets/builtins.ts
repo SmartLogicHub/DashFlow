@@ -18,7 +18,7 @@ export function registerBuiltins(registry: WidgetRegistry): void {
     {
       type: "quick-capture",
       name: "快速捕捉",
-      description: "把一条新任务快速写入 Inbox。",
+      description: "把一条新任务快速写入收集箱。",
       icon: "⚡",
       defaultSize: { w: 4, h: 3 },
       minSize: { w: 3, h: 3 },
@@ -47,7 +47,7 @@ export function registerBuiltins(registry: WidgetRegistry): void {
       icon: "◔",
       defaultSize: { w: 4, h: 3 },
       minSize: { w: 3, h: 3 },
-      defaultConfig: (): ProgressWidgetConfig => ({ label: "TODAY" }),
+      defaultConfig: (): ProgressWidgetConfig => ({ label: "今日任务" }),
     },
     {
       type: "projects",
@@ -76,14 +76,14 @@ export function registerBuiltins(registry: WidgetRegistry): void {
     },
     {
       type: "weekly-review",
-      name: "Weekly Review",
-      description: "汇总本周任务、项目、Habit 与 Activity，并给出下周关注事项。",
+      name: "每周复盘",
+      description: "汇总本周任务、项目、习惯与活跃度，并给出下周关注事项。",
       icon: "↻",
       defaultSize: { w: 12, h: 7 },
       minSize: { w: 8, h: 6 },
       settings: [
         {
-          key: "weekStart", type: "select", label: "每周起始日", description: "决定 Weekly Review 的周区间。",
+          key: "weekStart", type: "select", label: "每周起始日", description: "决定每周复盘的周区间。",
           options: [
             { label: "周一", value: "monday" },
             { label: "周日", value: "sunday" },
@@ -92,8 +92,8 @@ export function registerBuiltins(registry: WidgetRegistry): void {
         { key: "carryoverLimit", type: "number", label: "待处理最多显示", description: "限制逾期与本周未完成任务的显示数量。", min: 1, max: 50, step: 1 },
         { key: "projectLimit", type: "number", label: "项目最多显示", description: "限制活动项目数量。", min: 1, max: 30, step: 1 },
         { key: "nextWeekLimit", type: "number", label: "下周最多显示", description: "限制下周任务与项目截止日数量。", min: 1, max: 50, step: 1 },
-        { key: "showHabits", type: "toggle", label: "显示 Habit", description: "显示本周 Habit 完成率和需要关注的习惯。" },
-        { key: "showActivityComparison", type: "toggle", label: "对比上周 Activity", description: "显示本周 Activity Score 相比上周的变化。" },
+        { key: "showHabits", type: "toggle", label: "显示习惯", description: "显示本周习惯完成率和需要关注的习惯。" },
+        { key: "showActivityComparison", type: "toggle", label: "对比上周活跃度", description: "显示本周活跃度得分相比上周的变化。" },
       ],
       defaultConfig: (): WeeklyReviewWidgetConfig => ({
         weekStart: "monday",
@@ -107,7 +107,7 @@ export function registerBuiltins(registry: WidgetRegistry): void {
     {
       type: "calendar",
       name: "日历",
-      description: "把任务日期、项目截止日和习惯节奏统一放进月历与 Agenda。",
+      description: "把任务日期、项目截止日和习惯节奏统一放进月历与日程。",
       icon: "□",
       defaultSize: { w: 12, h: 8 },
       minSize: { w: 7, h: 6 },
@@ -119,11 +119,11 @@ export function registerBuiltins(registry: WidgetRegistry): void {
             { label: "周日", value: "sunday" },
           ],
         },
-        { key: "showTasks", type: "toggle", label: "显示任务", description: "显示 due 与 scheduled 日期。" },
+        { key: "showTasks", type: "toggle", label: "显示任务", description: "显示截止日期与计划日期。" },
         { key: "showCompletedTasks", type: "toggle", label: "显示已完成任务", description: "把已完成任务保留在历史日期中。" },
-        { key: "showProjects", type: "toggle", label: "显示项目截止日", description: "显示 Project deadline。" },
-        { key: "showHabits", type: "toggle", label: "显示习惯", description: "按 daily / weekdays 节奏生成习惯日程。" },
-        { key: "agendaLimit", type: "number", label: "Agenda 最多显示", description: "限制右侧当日 Agenda 的项目数量。", min: 1, max: 50, step: 1 },
+        { key: "showProjects", type: "toggle", label: "显示项目截止日", description: "显示项目截止日期。" },
+        { key: "showHabits", type: "toggle", label: "显示习惯", description: "按每日或工作日节奏生成习惯日程。" },
+        { key: "agendaLimit", type: "number", label: "日程最多显示", description: "限制右侧当日日程的项目数量。", min: 1, max: 50, step: 1 },
       ],
       defaultConfig: (): CalendarWidgetConfig => ({
         weekStart: "monday",
@@ -145,19 +145,19 @@ export function registerBuiltins(registry: WidgetRegistry): void {
         { key: "historyDays", type: "number", label: "历史天数", description: "每个习惯显示最近多少天的打卡轨迹。", min: 7, max: 30, step: 1 },
         { key: "limit", type: "number", label: "最多显示", description: "限制卡片中显示的习惯数量。", min: 1, max: 20, step: 1 },
         { key: "showProgress", type: "toggle", label: "显示进度", description: "显示目标天数进度；未设置目标时显示最近 30 天完成率。" },
-        { key: "includePaused", type: "toggle", label: "显示暂停习惯", description: "把 paused 状态的习惯也显示在 Widget 中。" },
+        { key: "includePaused", type: "toggle", label: "显示暂停习惯", description: "把暂停状态的习惯也显示在卡片中。" },
       ],
       defaultConfig: (): HabitsWidgetConfig => ({ historyDays: 7, limit: 6, showProgress: true, includePaused: false }),
     },
     {
       type: "heatmap",
       name: "活跃度",
-      description: "基于任务、习惯与笔记活动生成的每日 Heatmap。",
+      description: "基于任务、习惯与笔记活动生成的每日热力图。",
       icon: "▦",
       defaultSize: { w: 8, h: 4 },
       minSize: { w: 5, h: 3 },
       settings: [
-        { key: "days", type: "number", label: "显示天数", description: "Heatmap 展示最近多少天的活动，最多 365 天。", min: 28, max: 365, step: 7 },
+        { key: "days", type: "number", label: "显示天数", description: "热力图展示最近多少天的活动，最多 365 天。", min: 28, max: 365, step: 7 },
         {
           key: "metric", type: "select", label: "统计维度", description: "综合活跃度会对完成任务、新建笔记和习惯打卡给予权重。",
           options: [
@@ -179,14 +179,14 @@ export function registerBuiltins(registry: WidgetRegistry): void {
       defaultSize: { w: 4, h: 3 },
       minSize: { w: 3, h: 3 },
       settings: [
-        { key: "title", type: "text", label: "倒计时标签", description: "显示在天数上方的标题。", placeholder: "YEAR END" },
+        { key: "title", type: "text", label: "倒计时标签", description: "显示在天数上方的标题。", placeholder: "今年结束" },
         { key: "targetDate", type: "date", label: "目标日期", description: "倒计时使用的目标日期。" },
       ],
-      defaultConfig: (): CountdownWidgetConfig => ({ title: "YEAR END", targetDate: `${new Date().getFullYear()}-12-31` }),
+      defaultConfig: (): CountdownWidgetConfig => ({ title: "今年结束", targetDate: `${new Date().getFullYear()}-12-31` }),
     },
     {
       type: "vault-stats",
-      name: "Vault Pulse",
+      name: "知识库概览",
       description: "笔记、待办和项目的快速统计。",
       icon: "⌁",
       defaultSize: { w: 8, h: 3 },

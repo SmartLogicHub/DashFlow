@@ -235,7 +235,7 @@ export class HabitWidgetInteractionService {
     } else {
       const frequency = document.createElement("span");
       frequency.className = "dashflow-habit-progress-label";
-      frequency.textContent = isProgress ? "DAILY PROGRESS" : habit.frequency === "weekdays" ? "WEEKDAYS" : "DAILY";
+    frequency.textContent = isProgress ? "每日推进" : habit.frequency === "weekdays" ? "工作日" : "每天";
       progressWrap.appendChild(frequency);
     }
 

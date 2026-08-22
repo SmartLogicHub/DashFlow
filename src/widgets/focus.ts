@@ -5,8 +5,8 @@ import type { WidgetRegistry } from "./WidgetRegistry";
 export function registerFocusWidgets(registry: WidgetRegistry): void {
   const definition: WidgetDefinition<FocusWidgetConfig> = {
     type: "focus",
-    name: "Focus",
-    description: "时间戳驱动的专注 / 休息计时器，支持暂停、恢复与 Activity 统计。",
+    name: "专注计时",
+    description: "时间戳驱动的专注与休息计时器，支持暂停、恢复与活跃度统计。",
     icon: "◎",
     defaultSize: { w: 4, h: 5 },
     minSize: { w: 3, h: 4 },

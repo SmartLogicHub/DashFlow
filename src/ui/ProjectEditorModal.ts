@@ -40,11 +40,11 @@ export class ProjectEditorModal extends Modal {
       manualProgress: this.project?.manualProgress ?? this.initial.manualProgress,
     };
 
-    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: this.project ? "PROJECT · EDIT" : "PROJECT · NEW" });
+    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: this.project ? "项目 · 编辑" : "项目 · 新建" });
     contentEl.createEl("h2", { text: this.project ? "编辑项目" : "新建项目" });
     contentEl.createEl("p", {
       cls: "setting-item-description dashflow-modal-lead",
-      text: "项目负责长期方向；真正的执行动作继续放在 Task 里。",
+      text: "项目负责长期方向；真正的执行动作继续放在任务里。",
     });
 
     new Setting(contentEl)
@@ -58,7 +58,7 @@ export class ProjectEditorModal extends Modal {
       });
 
     new Setting(contentEl)
-      .setName("Project ID")
+      .setName("项目 ID")
       .setDesc(this.project ? "已有项目的 ID 保持不变，避免任务关联失效。" : "用于任务与项目之间的稳定关联；留空时按项目名生成。")
       .addText((component) => {
         component.setPlaceholder("dashflow-launch");

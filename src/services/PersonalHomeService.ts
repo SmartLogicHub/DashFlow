@@ -244,7 +244,7 @@ export class PersonalHomeService {
     card.className = "dashflow-home-card dashflow-home-status";
     const head = document.createElement("div");
     head.className = "dashflow-home-card-head";
-    head.append(this.text("strong", "今日状态"), this.text("span", "LIVE"));
+    head.append(this.text("strong", "今日状态"), this.text("span", "实时"));
     card.appendChild(head);
 
     const progress = totalTasks === 0 ? 0 : Math.round((completedTasks / totalTasks) * 100);
@@ -282,7 +282,7 @@ export class PersonalHomeService {
 
     const head = document.createElement("div");
     head.className = "dashflow-home-card-head";
-    head.append(this.text("strong", "长期任务 · 今日推进"), this.text("span", `${completed}/${habits.length} DONE`));
+    head.append(this.text("strong", "长期任务 · 今日推进"), this.text("span", `${completed}/${habits.length} 已完成`));
     card.appendChild(head);
 
     const list = document.createElement("div");
@@ -335,7 +335,7 @@ export class PersonalHomeService {
     card.className = "dashflow-home-weread";
     const head = document.createElement("div");
     head.className = "dashflow-home-weread-head";
-    head.append(this.text("strong", this.plugin.weRead.isConfigured() ? "微信读书 · 我的划线" : "阅读摘录"), this.text("span", "WEREAD"));
+    head.append(this.text("strong", this.plugin.weRead.isConfigured() ? "微信读书 · 我的划线" : "阅读摘录"), this.text("span", "微信读书"));
     const body = document.createElement("div");
     body.className = "dashflow-home-weread-body";
     card.append(head, body);
@@ -473,7 +473,7 @@ export class PersonalHomeService {
     card.className = "dashflow-home-card dashflow-home-activity";
     const head = document.createElement("div");
     head.className = "dashflow-home-card-head";
-    head.append(this.text("strong", "最近 30 天"), this.text("span", `${activityStreak(this.plugin.data.activity)} DAY STREAK`));
+    head.append(this.text("strong", "最近 30 天"), this.text("span", `连续活跃 ${activityStreak(this.plugin.data.activity)} 天`));
     card.appendChild(head);
 
     const points = activityRange(this.plugin.data.activity, 30, "score");
@@ -496,7 +496,7 @@ export class PersonalHomeService {
     card.className = "dashflow-home-card dashflow-home-recent";
     const head = document.createElement("div");
     head.className = "dashflow-home-card-head";
-    head.append(this.text("strong", "最近记录"), this.text("span", "VAULT"));
+    head.append(this.text("strong", "最近记录"), this.text("span", "知识库"));
     card.appendChild(head);
 
     const files = [...this.plugin.app.vault.getMarkdownFiles()]

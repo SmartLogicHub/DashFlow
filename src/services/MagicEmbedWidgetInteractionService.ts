@@ -2,6 +2,7 @@ import { setIcon } from "obsidian";
 import type DashFlowPlugin from "../main";
 import type { MagicEmbedWidgetConfig, WidgetInstance } from "../models";
 import { magicEmbedSandbox, parseSafeEmbedUrl } from "../embed/safeEmbed";
+import { DASHFLOW_CONFIGURE_WIDGET_EVENT } from "../dashboard/widgetConfigRequest";
 
 export class MagicEmbedWidgetInteractionService {
   private unsubscribeRender: (() => void) | null = null;
@@ -47,9 +48,7 @@ export class MagicEmbedWidgetInteractionService {
     root.className = "dashflow-magic-embed";
 
     if (!parsed) {
-      root.appendChild(this.message(
-        "配置一个 HTTPS URL。HTTP 只允许 localhost / 127.0.0.1；javascript:、data:、file: 等协议不会加载。",
-      ));
+      root.appendChild(this.emptyState(widget.id, String(config.url ?? "").trim()));
       body.appendChild(root);
       return;
     }
@@ -66,7 +65,7 @@ export class MagicEmbedWidgetInteractionService {
       const title = document.createElement("strong");
       title.textContent = parsed.hostname;
       const text = document.createElement("p");
-      text.textContent = "嵌入内容尚未联网加载。点击后仅在本次 Obsidian 会话中授权这个 Widget URL。";
+      text.textContent = "嵌入内容尚未联网加载。点击后仅在本次 Obsidian 会话中授权这张卡片；网站可能禁止被嵌入。";
       copy.append(title, text);
       const load = document.createElement("button");
       load.type = "button";
@@ -95,6 +94,12 @@ export class MagicEmbedWidgetInteractionService {
     toolbar.className = "dashflow-magic-embed-toolbar";
     const origin = document.createElement("span");
     origin.textContent = parsed.origin;
+    const external = document.createElement("a");
+    external.className = "dashflow-magic-embed-external is-toolbar";
+    external.href = parsed.url;
+    external.target = "_blank";
+    external.rel = "noopener noreferrer";
+    external.textContent = "在浏览器打开";
     const unload = document.createElement("button");
     unload.type = "button";
     unload.textContent = "卸载";
@@ -103,15 +108,20 @@ export class MagicEmbedWidgetInteractionService {
       body.dataset.dashflowMagicEmbed = "";
       this.render(body, widget);
     });
-    toolbar.append(origin, unload);
+    toolbar.append(origin, external, unload);
 
     const iframe = document.createElement("iframe");
     iframe.className = "dashflow-magic-embed-frame";
-    iframe.title = `DashFlow Magic Embed · ${parsed.hostname}`;
+    iframe.title = `DashFlow 网页嵌入 · ${parsed.hostname}`;
     iframe.loading = "lazy";
     iframe.referrerPolicy = "no-referrer";
     iframe.setAttribute("sandbox", magicEmbedSandbox(config.allowForms === true));
     iframe.setAttribute("aria-label", `嵌入页面 ${parsed.hostname}`);
+    iframe.addEventListener("error", () => {
+      const error = this.message("网页加载失败。网站可能禁止被嵌入，请改为在浏览器打开。");
+      error.classList.add("is-error");
+      iframe.replaceWith(error);
+    });
     iframe.src = parsed.url;
     frameWrap.append(toolbar, iframe);
     root.appendChild(frameWrap);
@@ -122,6 +132,32 @@ export class MagicEmbedWidgetInteractionService {
     const node = document.createElement("div");
     node.className = "dashflow-magic-embed-message";
     node.textContent = text;
+    return node;
+  }
+
+  private emptyState(widgetId: string, rawUrl: string): HTMLElement {
+    const node = document.createElement("div");
+    node.className = "dashflow-magic-embed-message dashflow-magic-embed-empty";
+    const icon = document.createElement("span");
+    icon.className = "dashflow-magic-embed-icon";
+    setIcon(icon, rawUrl ? "shield-alert" : "panels-top-left");
+    const title = document.createElement("strong");
+    title.textContent = rawUrl ? "嵌入地址不受支持" : "尚未配置嵌入地址";
+    const description = document.createElement("p");
+    description.textContent = rawUrl
+      ? "远程网页必须使用 HTTPS；本地网页可使用 localhost 或 127.0.0.1 的 HTTP。"
+      : "添加一个 HTTPS 网页地址；本地服务也可以使用 localhost 或 127.0.0.1。";
+    const configure = document.createElement("button");
+    configure.type = "button";
+    configure.className = "dashflow-magic-embed-configure";
+    configure.textContent = "配置嵌入地址";
+    configure.addEventListener("click", () => {
+      configure.dispatchEvent(new CustomEvent(DASHFLOW_CONFIGURE_WIDGET_EVENT, {
+        bubbles: true,
+        detail: { widgetId },
+      }));
+    });
+    node.append(icon, title, description, configure);
     return node;
   }
 

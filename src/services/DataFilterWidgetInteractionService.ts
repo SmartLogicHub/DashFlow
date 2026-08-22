@@ -103,8 +103,8 @@ export class DataFilterWidgetInteractionService {
 
     const advanced = document.createElement("div");
     advanced.className = "dashflow-data-filter-advanced";
-    const folder = this.input("text", config.folder, "文件夹，例如 Projects", "筛选文件夹");
-    const frontmatter = this.input("text", config.frontmatter, "属性，例如 status=active", "筛选 frontmatter");
+    const folder = this.input("text", config.folder, "文件夹，例如 项目", "筛选文件夹");
+    const frontmatter = this.input("text", config.frontmatter, "属性，例如 status=active", "筛选文档属性");
     const noteTaskStatus = this.select(NOTE_TASK_OPTIONS, config.noteTaskStatus, "笔记任务状态");
     noteTaskStatus.addEventListener("change", () => void this.persist(dashboardId, widget.id, { noteTaskStatus: noteTaskStatus.value as DataFilterTaskStatus }));
     advanced.append(folder, frontmatter, noteTaskStatus);
@@ -234,7 +234,7 @@ export class DataFilterWidgetInteractionService {
     copy.append(title, meta);
     const kind = document.createElement("span");
     kind.className = "dashflow-data-filter-result-kind";
-    kind.textContent = match.kind.toUpperCase();
+    kind.textContent = match.kind === "note" ? "笔记" : match.kind === "task" ? "任务" : match.kind === "project" ? "项目" : "习惯";
     row.append(icon, copy, kind);
     row.addEventListener("click", () => {
       if (match.kind === "note") void this.plugin.app.workspace.openLinkText(match.item.path, "", false);

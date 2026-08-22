@@ -149,7 +149,7 @@ export class FocusWidgetInteractionService {
     const cycle = document.createElement("span");
     cycle.textContent = `周期完成 ${state.completedFocusSessions}`;
     const activity = document.createElement("span");
-    activity.textContent = `今日 ${today?.focusSessions ?? 0} 次 · ${today?.focusMinutes ?? 0} min`;
+    activity.textContent = `今日 ${today?.focusSessions ?? 0} 次 · ${today?.focusMinutes ?? 0} 分钟`;
     meta.append(cycle, activity);
 
     root.append(modeRow, clock, progress, actions, meta);

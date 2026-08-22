@@ -30,7 +30,7 @@ export class CaptureService {
 
     if (resolved === "daily-note") {
       const path = await this.dailyNotes.appendCapture(localDate(), trimmed, this.getDailyCaptureHeading());
-      new Notice(`已捕捉到今日 Daily Note · ${path}`);
+      new Notice(`已捕捉到今天的每日笔记 · ${path}`);
       return true;
     }
 
@@ -49,7 +49,7 @@ export class CaptureService {
     }
 
     this.activity.recordTaskCreated(trimmed, path);
-    new Notice("已捕捉到 DashFlow Inbox");
+    new Notice("已捕捉到 DashFlow 收集箱");
     return true;
   }
 

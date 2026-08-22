@@ -213,8 +213,8 @@ export function serializeDashboardTransfer(
 
 export function parseDashboardTransferJson(text: string): DashboardDefinition {
   const trimmed = text.trim();
-  if (!trimmed) fail("请粘贴 DashFlow Dashboard JSON");
-  if (trimmed.length > MAX_TRANSFER_LENGTH) fail("Dashboard JSON 过大");
+  if (!trimmed) fail("请粘贴 DashFlow 工作台 JSON");
+  if (trimmed.length > MAX_TRANSFER_LENGTH) fail("工作台 JSON 过大");
 
   let parsed: unknown;
   try {
@@ -223,9 +223,9 @@ export function parseDashboardTransferJson(text: string): DashboardDefinition {
     fail("JSON 格式无效");
   }
   if (!isRecord(parsed)) fail("导入内容必须是 JSON 对象");
-  if (parsed.kind !== DASHBOARD_TRANSFER_KIND) fail("这不是 DashFlow Dashboard 导出文件");
+  if (parsed.kind !== DASHBOARD_TRANSFER_KIND) fail("这不是 DashFlow 工作台导出文件");
   if (parsed.formatVersion !== DASHBOARD_TRANSFER_VERSION) {
-    fail(`不支持的 Dashboard 导出格式版本：${String(parsed.formatVersion)}`);
+    fail(`不支持的工作台导出格式版本：${String(parsed.formatVersion)}`);
   }
   if (!isRecord(parsed.dashboard)) fail("导出文件缺少 dashboard 数据");
 
@@ -238,7 +238,7 @@ export function parseDashboardTransferJson(text: string): DashboardDefinition {
 
   return {
     id: "imported",
-    name: name || "Imported Dashboard",
+    name: name || "导入的工作台",
     ...(icon ? { icon } : {}),
     settings,
     widgets,

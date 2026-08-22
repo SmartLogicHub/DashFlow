@@ -3,6 +3,7 @@ import type DashFlowPlugin from "../main";
 import type { DashboardDefinition, Task, WidgetInstance } from "../models";
 import { activityStreak } from "../activity/activityMath";
 import { PLUGIN_VERSION } from "../constants";
+import { chineseProductText } from "../product/chineseCopy";
 import { inboxTasks, PRODUCT_SECTIONS, type ProductSection } from "../product/navigation";
 import {
   initialProjectView,
@@ -181,11 +182,11 @@ export class ProductExperienceService {
     const today = this.plugin.taskService.today().filter((task) => !task.completed).length;
     const streak = activityStreak(this.plugin.data.activity);
     const items: Array<[string, number | null]> = [
-      ["VAULT PULSE", null],
-      ["NOTES", snapshot.notes],
-      ["PENDING", pending],
-      ["TODAY", today],
-      ["STREAK", streak],
+      ["知识库概览", null],
+      ["笔记", snapshot.notes],
+      ["待办", pending],
+      ["今日任务", today],
+      ["连续活跃", streak],
     ];
 
     pulse.replaceChildren();
@@ -205,7 +206,7 @@ export class ProductExperienceService {
     copy.className = "dashflow-command-title-copy";
     const eyebrow = this.text("span", this.activeSection === "work" ? "工作节奏" : "DashFlow");
     eyebrow.className = "dashflow-command-eyebrow";
-    const heading = this.text("strong", dashboard.name === "Home" ? "默认工作台" : dashboard.name);
+    const heading = this.text("strong", chineseProductText(dashboard.name));
     heading.className = "dashflow-command-title";
     const meta = this.text("small", `DashFlow · v${PLUGIN_VERSION}`);
     meta.className = "dashflow-command-meta";
@@ -234,7 +235,7 @@ export class ProductExperienceService {
 
     if (editButton) {
       editButton.textContent = editing ? "完成" : "布局";
-      editButton.title = editing ? "完成布局编辑" : "编辑 Dashboard 布局";
+      editButton.title = editing ? "完成布局编辑" : "编辑工作台布局";
       editButton.classList.add("dashflow-command-layout-button");
       right.appendChild(editButton);
     }
@@ -711,7 +712,7 @@ export class ProductExperienceService {
     const header = document.createElement("div");
     header.className = "dashflow-command-page-head";
     const copy = document.createElement("div");
-    copy.append(this.text("small", "INBOX · PROCESS QUEUE"), this.text("h2", "待整理"));
+    copy.append(this.text("small", "收集箱 · 待整理队列"), this.text("h2", "待整理"));
     const open = document.createElement("button");
     open.type = "button";
     open.textContent = "打开 Inbox.md";
@@ -724,7 +725,7 @@ export class ProductExperienceService {
     setIcon(icon, "plus");
     const input = document.createElement("input");
     input.type = "text";
-    input.placeholder = "先记录下来，按 Enter 收集…";
+    input.placeholder = "先记录下来，按回车键收集…";
     input.addEventListener("keydown", async (event) => {
       if (event.key !== "Enter" || !input.value.trim()) return;
       event.preventDefault();
@@ -734,7 +735,7 @@ export class ProductExperienceService {
         this.refresh(true);
       }
     });
-    const hint = this.text("span", "ENTER");
+    const hint = this.text("span", "回车");
     composer.append(icon, input, hint);
 
     const tasks = inboxTasks(
@@ -748,7 +749,7 @@ export class ProductExperienceService {
       empty.className = "dashflow-command-empty";
       const mark = document.createElement("span");
       setIcon(mark, "inbox");
-      empty.append(mark, this.text("strong", "🍃 收集箱已归零"), this.text("p", "所有思绪与灵感已妥善安放 · 有新的想法随时按 Enter 快速收集。"));
+      empty.append(mark, this.text("strong", "🍃 收集箱已归零"), this.text("p", "所有思绪与灵感已妥善安放 · 有新的想法随时按回车键快速收集。"));
       list.appendChild(empty);
     } else {
       for (const task of tasks) list.appendChild(this.renderInboxTask(task));

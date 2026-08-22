@@ -27,7 +27,7 @@ export function nextDashboardId(name: string, existingIds: Iterable<string>): st
 
 export function nextDuplicateDashboardName(sourceName: string, existingNames: Iterable<string>): string {
   const used = new Set([...existingNames].map((name) => normalizeDashboardName(name).toLocaleLowerCase()));
-  const base = `${normalizeDashboardName(sourceName) || "Dashboard"} 副本`;
+  const base = `${normalizeDashboardName(sourceName) || "工作台"} 副本`;
   if (!used.has(base.toLocaleLowerCase())) return base;
   let suffix = 2;
   while (used.has(`${base} ${suffix}`.toLocaleLowerCase())) suffix += 1;
@@ -75,7 +75,7 @@ export function cloneDashboardDefinition(
   return {
     ...source,
     id,
-    name: normalizeDashboardName(name) || "Dashboard",
+    name: normalizeDashboardName(name) || "工作台",
     settings: { ...source.settings },
     widgets,
     mobile: {

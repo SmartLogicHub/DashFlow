@@ -131,6 +131,18 @@ export const FOCUS_EMBED_STYLES = `
   line-height: 1.55;
   padding: 18px;
 }
+.dashflow-magic-embed-empty {
+  flex-direction: column;
+  gap: 8px;
+}
+.dashflow-magic-embed-empty strong {
+  color: var(--text-normal);
+  font-size: var(--df-type-title, 14px);
+}
+.dashflow-magic-embed-empty p {
+  max-width: 46ch;
+  margin: 0;
+}
 .dashflow-magic-embed-gate {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr) auto;
@@ -159,6 +171,7 @@ export const FOCUS_EMBED_STYLES = `
 }
 .dashflow-magic-embed-copy p { margin: 4px 0 0; font-size: var(--df-font-xs, 11px); }
 .dashflow-magic-embed-load,
+.dashflow-magic-embed-configure,
 .dashflow-magic-embed-toolbar button {
   appearance: none;
   min-height: 30px;
@@ -177,6 +190,11 @@ export const FOCUS_EMBED_STYLES = `
   text-decoration: none;
 }
 .dashflow-magic-embed-external:hover { text-decoration: underline; }
+.dashflow-magic-embed-external.is-toolbar {
+  grid-column: auto;
+  margin-left: auto;
+  white-space: nowrap;
+}
 
 .dashflow-magic-embed-frame-wrap {
   flex: 1;

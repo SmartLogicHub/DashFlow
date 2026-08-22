@@ -34,7 +34,7 @@ export class TaskEditorModal extends Modal {
       projectId: this.task?.projectId ?? this.initial.projectId,
     };
 
-    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: this.task ? "TASK · EDIT" : "TASK · NEW" });
+    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: this.task ? "任务 · 编辑" : "任务 · 新建" });
     contentEl.createEl("h2", { text: this.task ? "编辑任务" : "新建任务" });
     contentEl.createEl("p", {
       cls: "setting-item-description dashflow-modal-lead",

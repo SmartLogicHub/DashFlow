@@ -27,7 +27,7 @@ test("working Hero uses compact Chinese product copy", () => {
   assert.deepEqual(heroPresentationFor("work"), {
     eyebrow: "DASHFLOW · 工作节奏",
     title: "工作台",
-    description: "高密度查看任务、项目、进度、提醒与 Activity。",
+    description: "高密度查看任务、项目、进度、提醒与活跃度。",
     compact: true,
   });
   assert.equal(heroPresentationFor("today").compact, false);

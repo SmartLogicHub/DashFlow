@@ -23,7 +23,7 @@ export class OpportunityEditModal extends Modal {
       starred: this.item.starred,
     };
 
-    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: "OPPORTUNITY · EDIT" });
+    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: "灵感 · 编辑" });
     contentEl.createEl("h2", { text: "编辑灵感" });
     contentEl.createEl("p", {
       cls: "setting-item-description dashflow-modal-lead",

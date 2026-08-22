@@ -48,7 +48,7 @@ test("countdown remains independently configurable per widget instance", () => {
   assert.ok(builtins.includes('{ key: "targetDate", type: "date"'));
   assert.ok(renderer.includes("const config = widget.config as CountdownWidgetConfig"));
   assert.ok(renderer.includes("config.targetDate"));
-  assert.ok(renderer.includes("config.title ?? \"COUNTDOWN\""));
+  assert.ok(renderer.includes("chineseProductText(config.title ?? \"倒计时\")"));
 });
 
 test("desktop drag and resize keep using persisted grid layout algorithms", () => {

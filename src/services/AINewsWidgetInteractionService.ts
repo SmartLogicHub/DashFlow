@@ -44,7 +44,7 @@ export class AINewsWidgetInteractionService {
     const kicker = document.createElement("div");
     kicker.className = "dashflow-ai-news-kicker";
     const label = document.createElement("span");
-    label.textContent = `AI CURATED · ${Math.max(1, Number(config.refreshHours) || 4)}H CACHE`;
+    label.textContent = `AI 精选 · ${Math.max(1, Number(config.refreshHours) || 4)} 小时缓存`;
     kicker.appendChild(label);
     const refresh = document.createElement("button");
     refresh.type = "button";

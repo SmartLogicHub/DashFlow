@@ -24,12 +24,12 @@ export class AIPlanModal extends Modal {
     contentEl.empty();
     contentEl.addClass("dashflow-ai-plan", "dashflow-editor-modal");
 
-    const eyebrow = contentEl.createDiv({ cls: "dashflow-modal-eyebrow", text: "AI · DAILY PLAN" });
+    const eyebrow = contentEl.createDiv({ cls: "dashflow-modal-eyebrow", text: "AI · 每日规划" });
     eyebrow.setAttr("aria-hidden", "true");
     contentEl.createEl("h2", { text: "今天怎么推进？" });
     contentEl.createEl("p", {
       cls: "setting-item-description dashflow-modal-lead",
-      text: "只会发送当前任务、活动项目和习惯的摘要；不会发送笔记正文。AI 建议不会自动修改 Vault。",
+      text: "只会发送当前任务、活动项目和习惯的摘要；不会发送笔记正文。AI 建议不会自动修改知识库。",
     });
 
     const state = contentEl.createDiv("dashflow-ai-plan-state");

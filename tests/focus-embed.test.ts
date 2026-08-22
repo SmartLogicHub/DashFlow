@@ -20,6 +20,7 @@ const focusInteraction = readFileSync("src/services/FocusWidgetInteractionServic
 const embedInteraction = readFileSync("src/services/MagicEmbedWidgetInteractionService.ts", "utf8");
 const focusWidget = readFileSync("src/widgets/focus.ts", "utf8");
 const embedWidget = readFileSync("src/widgets/embed.ts", "utf8");
+const dashboardRenderer = readFileSync("src/dashboard/DashboardRenderer.ts", "utf8");
 const activityService = readFileSync("src/services/ActivityService.ts", "utf8");
 const design = readFileSync("src/services/DesignSystemService.ts", "utf8");
 const styles = readFileSync("src/styles/FocusEmbedStyles.ts", "utf8");
@@ -126,6 +127,22 @@ test("Magic Embed is click-to-load and does not auto-network imported Dashboard 
   assert.ok(embedInteraction.includes('iframe.loading = "lazy"'));
   assert.ok(embedInteraction.includes('external.rel = "noopener noreferrer"'));
   assert.equal(embedInteraction.includes("new MutationObserver"), false);
+});
+
+test("unconfigured webpage embeds open their own card configuration directly", () => {
+  assert.ok(embedInteraction.includes("配置嵌入地址"));
+  assert.ok(embedInteraction.includes("DASHFLOW_CONFIGURE_WIDGET_EVENT"));
+  assert.ok(embedInteraction.includes("new CustomEvent"));
+  assert.ok(dashboardRenderer.includes("DASHFLOW_CONFIGURE_WIDGET_EVENT"));
+  assert.ok(dashboardRenderer.includes("dashboard.widgets.some"));
+  assert.ok(dashboardRenderer.includes("this.configuringWidgetId = widgetId"));
+  assert.ok(styles.includes("dashflow-magic-embed-configure"));
+});
+
+test("webpage embeds explain iframe restrictions and offer external recovery", () => {
+  assert.ok(embedInteraction.includes("网站可能禁止被嵌入"));
+  assert.ok(embedInteraction.includes('iframe.addEventListener("error"'));
+  assert.ok(embedInteraction.includes("在浏览器打开"));
 });
 
 test("Focus and Magic Embed expose no arbitrary JavaScript execution primitive", () => {

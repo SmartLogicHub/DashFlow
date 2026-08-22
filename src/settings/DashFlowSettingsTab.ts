@@ -118,7 +118,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
   }
 
   private renderAppearance(parent: HTMLElement): void {
-    const appearance = this.panel(parent, "外观与首页", "默认场景经过低饱和与文字安全区筛选；也可以用 Vault 本地图片完全替换。");
+    const appearance = this.panel(parent, "外观与首页", "默认场景经过低饱和与文字安全区筛选；也可以用知识库本地图片完全替换。");
     const preview = appearance.createDiv("dashflow-home-theme-preview");
     preview.createEl("strong", { text: this.dashFlow.data.settings.homeHeroTitle || "我的成长" });
     preview.createEl("span", { text: this.dashFlow.data.settings.homeHeroSubtitle || "把输入变成理解，把理解变成行动。" });
@@ -126,8 +126,8 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     this.renderThemePicker(appearance);
 
     new Setting(appearance)
-      .setName("自己的 Hero 图片")
-      .setDesc("从 Vault 选择 JPG / PNG / WebP / AVIF / GIF。选择后优先使用本地图片；清除后恢复当前主题场景。")
+      .setName("自己的头图")
+      .setDesc("从知识库选择 JPG / PNG / WebP / AVIF / GIF。选择后优先使用本地图片；清除后恢复当前主题场景。")
       .addText((text) => text
         .setPlaceholder("Assets/hero/mountain.jpg")
         .setValue(this.dashFlow.data.settings.homeHeroImagePath)
@@ -157,8 +157,8 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         }));
 
     new Setting(appearance)
-      .setName("Hero 标题")
-      .setDesc("个人主页的主标题。建议短一些，例如“我的成长”或“Build My System”。")
+      .setName("头图标题")
+      .setDesc("个人主页的主标题。建议短一些，例如“我的成长”或“建立我的系统”。")
       .addText((text) => text
         .setPlaceholder("我的成长")
         .setValue(this.dashFlow.data.settings.homeHeroTitle)
@@ -169,7 +169,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
         }));
 
     new Setting(appearance)
-      .setName("Hero 副标题")
+      .setName("头图副标题")
       .setDesc("一句简短的个人原则或当下阶段主题。")
       .addText((text) => text
         .setPlaceholder("把输入变成理解，把理解变成行动。")
@@ -280,7 +280,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     const recognition = this.panel(parent, "识别规则", "只有你已经有自己的 Markdown 约定时才需要修改。");
     new Setting(recognition)
       .setName("项目类型")
-      .setDesc("frontmatter 中用于识别项目的 type 值。")
+      .setDesc("文档属性（frontmatter）中用于识别项目的 type 值。")
       .addText((text) => text
         .setValue(this.dashFlow.data.settings.projectTypeValue)
         .onChange((value) => {
@@ -291,7 +291,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
 
     new Setting(recognition)
       .setName("习惯类型")
-      .setDesc("frontmatter 中用于识别习惯的 type 值。")
+      .setDesc("文档属性（frontmatter）中用于识别习惯的 type 值。")
       .addText((text) => text
         .setValue(this.dashFlow.data.settings.habitTypeValue)
         .onChange((value) => {
@@ -302,7 +302,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
   }
 
   private renderIntegration(parent: HTMLElement): void {
-    const ai = this.panel(parent, "AI 日计划 · 可选", "只在你主动点击“AI 规划”时发送任务、项目和习惯摘要；不会发送笔记正文，也不会自动修改 Vault。");
+    const ai = this.panel(parent, "AI 日计划 · 可选", "只在你主动点击“AI 规划”时发送任务、项目和习惯摘要；不会发送笔记正文，也不会自动修改知识库。");
     new Setting(ai)
       .setName("启用 AI 规划")
       .setDesc("关闭时 DashFlow 完全不会发起 AI 请求。")
@@ -435,7 +435,7 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     const onboarding = this.panel(parent, "首次引导", "重新查看起始布局和工作流路径；已有自定义工作台不会被删除。");
     new Setting(onboarding)
       .setName("重新打开首次引导")
-      .setDesc("用于重新确认收集箱、项目和习惯文件夹；手动打开不会覆盖已有 Dashboard。")
+      .setDesc("用于重新确认收集箱、项目和习惯文件夹；手动打开不会覆盖已有工作台。")
       .addButton((button) => button
         .setButtonText("打开引导")
         .onClick(() => this.dashFlow.openOnboarding(true)));
@@ -478,18 +478,18 @@ export class DashFlowSettingsTab extends PluginSettingTab {
     const grid = advanced.createDiv("dashflow-settings-guide-grid");
 
     const projectCard = grid.createDiv("dashflow-settings-code-card");
-    projectCard.createEl("h3", { text: "Project" });
+    projectCard.createEl("h3", { text: "项目" });
     projectCard.createEl("pre", {
       text: "---\ntype: project\nproject_id: dashflow\nname: DashFlow\nstatus: active\ndeadline: 2026-09-30\nprogress_mode: tasks\n---",
     });
     projectCard.createEl("p", { text: "任务通过 #project/dashflow 关联；通常不需要手工编辑这些字段。" });
 
     const habitCard = grid.createDiv("dashflow-settings-code-card");
-    habitCard.createEl("h3", { text: "Habit" });
+    habitCard.createEl("h3", { text: "习惯" });
     habitCard.createEl("pre", {
       text: "---\ntype: habit\nhabit_id: workout\nname: 每天运动\nstatus: active\nfrequency: daily\ntarget_days: 30\nhabit_log:\n  - 2026-08-15\n---",
     });
-    habitCard.createEl("p", { text: "习惯定义与打卡日期都保存在 Markdown；Activity 只是派生统计。" });
+    habitCard.createEl("p", { text: "习惯定义与打卡日期都保存在 Markdown；活跃度只是派生统计。" });
   }
 
   private exportRecoveryBackup(): void {

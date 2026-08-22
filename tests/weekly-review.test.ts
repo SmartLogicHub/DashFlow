@@ -108,7 +108,7 @@ test("Daily Progress reuses schedule math but is reported separately from Habit"
   assert.ok(weeklyService.includes('habit.kind !== "daily-progress"'));
   assert.ok(weeklyService.includes('habit.kind === "daily-progress"'));
   assert.ok(weeklyService.includes("dailyProgressNoteCount"));
-  assert.ok(weeklyService.includes('"### Daily Progress"'));
+  assert.ok(weeklyService.includes('"### 每日推进"'));
   assert.ok(weeklyWidget.includes("dailyProgressSection"));
   assert.ok(weeklyWidget.includes("dailyProgressRow"));
   assert.ok(weeklyWidget.includes("is-progress"));

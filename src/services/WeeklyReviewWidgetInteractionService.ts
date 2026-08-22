@@ -133,7 +133,7 @@ export class WeeklyReviewWidgetInteractionService {
     copy.addEventListener("click", () => {
       const markdown = this.plugin.weeklyReviewService.toMarkdown(review, config);
       void navigator.clipboard.writeText(markdown)
-        .then(() => new Notice("DashFlow: Weekly Review 已复制"))
+        .then(() => new Notice("DashFlow: 每周复盘已复制"))
         .catch(() => new Notice("DashFlow: 无法访问剪贴板"));
     });
     const route = document.createElement("button");
@@ -159,7 +159,7 @@ export class WeeklyReviewWidgetInteractionService {
 
     if (config.showActivityComparison !== false) {
       const change = review.activityChange;
-      const value = change === null ? "NEW" : `${change >= 0 ? "+" : ""}${change}%`;
+    const value = change === null ? "本周新增" : `${change >= 0 ? "+" : ""}${change}%`;
       wrap.append(this.kpi(value, "较上周活跃度", `${review.activity.score} 活跃分`));
     } else {
       wrap.append(this.kpi(String(review.activity.score), "活跃度", `${review.activity.notesTouched} 次笔记活动`));
@@ -194,7 +194,7 @@ export class WeeklyReviewWidgetInteractionService {
     const section = this.section("习惯", `${review.habitCompleted}/${review.habitScheduled}`);
     const list = this.list();
     const visible = review.habits.slice(0, 5);
-    if (visible.length === 0) list.append(this.empty("本周没有需要执行的 Habit。"));
+    if (visible.length === 0) list.append(this.empty("本周没有需要执行的习惯。"));
     else for (const item of visible) list.append(this.habitRow(item));
     section.appendChild(list);
     return section;

@@ -231,7 +231,7 @@ test("Visual Data Filter is a persisted Dashboard widget without a second data s
   assert.ok(interaction.includes("this.plugin.vaultIndex.getSnapshot()"));
   assert.ok(interaction.includes("dashboardManager.updateWidget"));
   assert.ok(interaction.includes("筛选文件夹"));
-  assert.ok(interaction.includes("筛选 frontmatter"));
+  assert.ok(interaction.includes("筛选文档属性"));
   assert.ok(interaction.includes("笔记任务状态"));
   assert.equal(interaction.includes("saveData("), false);
   assert.equal(interaction.includes("new MutationObserver"), false);

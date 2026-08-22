@@ -70,10 +70,10 @@ export const FEATURE_CATALOG: readonly FeatureDefinition[] = [
   { id: "widget-habits", group: "review", kind: "widget", name: "长期习惯", description: "打卡并跟踪长期节奏。", icon: "repeat-2", section: "habits", widgetType: "habits" },
   { id: "widget-heatmap", group: "review", kind: "widget", name: "活跃度", description: "查看任务、习惯和笔记活动。", icon: "grid-3x3", section: "review", widgetType: "heatmap" },
   { id: "widget-countdown", group: "execution", kind: "widget", name: "倒计时", description: "跟踪一个重要目标日期。", icon: "timer", section: "work", widgetType: "countdown" },
-  { id: "widget-vault-stats", group: "review", kind: "widget", name: "Vault Pulse", description: "查看笔记、任务和项目统计。", icon: "activity", section: "review", widgetType: "vault-stats" },
-  { id: "widget-data-filter", group: "execution", kind: "widget", name: "Visual Data Filter", description: "按条件筛选 Vault 中的数据。", icon: "list-filter", section: "work", widgetType: "data-filter" },
-  { id: "widget-magic-embed", group: "intelligence", kind: "widget", name: "Magic Embed", description: "按需嵌入受限网页。", icon: "panels-top-left", section: "work", widgetType: "magic-embed" },
-  { id: "widget-focus", group: "execution", kind: "widget", name: "Focus", description: "运行专注与休息计时。", icon: "timer-reset", section: "work", widgetType: "focus" },
+  { id: "widget-vault-stats", group: "review", kind: "widget", name: "知识库概览", description: "查看笔记、任务和项目统计。", icon: "activity", section: "review", widgetType: "vault-stats" },
+  { id: "widget-data-filter", group: "execution", kind: "widget", name: "数据筛选", description: "按条件筛选知识库中的数据。", icon: "list-filter", section: "work", widgetType: "data-filter" },
+  { id: "widget-magic-embed", group: "intelligence", kind: "widget", name: "网页嵌入", description: "按需安全嵌入网页。", icon: "panels-top-left", section: "work", widgetType: "magic-embed" },
+  { id: "widget-focus", group: "execution", kind: "widget", name: "专注计时", description: "运行专注与休息计时。", icon: "timer-reset", section: "work", widgetType: "focus" },
   { id: "widget-project-gantt", group: "projects", kind: "widget", name: "项目时间轴", description: "查看项目起止、截止与重叠。", icon: "gantt-chart", section: "projects", widgetType: "project-gantt" },
   { id: "widget-ai-news", group: "intelligence", kind: "widget", name: "AI 早报", description: "从信息源筛选值得阅读的内容。", icon: "newspaper", section: "work", widgetType: "ai-news", availability: "ai" },
   { id: "widget-project-kanban", group: "projects", kind: "widget", name: "项目看板", description: "按状态拖动和管理项目。", icon: "columns-3", section: "projects", widgetType: "project-kanban" },
@@ -84,10 +84,10 @@ export const FEATURE_CATALOG: readonly FeatureDefinition[] = [
   { id: "new-habit", group: "review", kind: "action", name: "新建习惯", description: "创建一个长期节奏。", icon: "circle-plus", section: "habits", action: "new-habit" },
   { id: "search", group: "execution", kind: "action", name: "全局搜索", description: "搜索任务、项目与习惯。", icon: "search", section: "work", action: "search" },
   { id: "ai-plan", group: "intelligence", kind: "action", name: "AI 规划", description: "根据当前状态规划今天。", icon: "sparkles", section: "today", action: "ai-plan", availability: "ai" },
-  { id: "morning-briefing", group: "intelligence", kind: "integration", name: "AI 晨间简报", description: "从昨日 Daily Note 生成今日建议。", icon: "sunrise", section: "today", action: "morning-briefing", availability: "morning-briefing" },
+  { id: "morning-briefing", group: "intelligence", kind: "integration", name: "AI 晨间简报", description: "从昨日每日笔记生成今日建议。", icon: "sunrise", section: "today", action: "morning-briefing", availability: "morning-briefing" },
   { id: "weread", group: "intelligence", kind: "integration", name: "微信读书", description: "在首页重新发现真实个人划线。", icon: "book-open-text", section: "settings", action: "weread", availability: "weread" },
   { id: "manage-dashboards", group: "execution", kind: "action", name: "管理工作台", description: "创建、切换、复制和管理工作台。", icon: "layout-dashboard", section: "work", action: "manage-dashboards" },
-  { id: "workflow-settings", group: "execution", kind: "action", name: "配置情景模式", description: "设置捕捉目标与 Morning、Work、Review 映射。", icon: "sliders-horizontal", section: "settings", action: "workflow-settings" },
+  { id: "workflow-settings", group: "execution", kind: "action", name: "配置情景模式", description: "设置捕捉目标与晨间、工作、复盘映射。", icon: "sliders-horizontal", section: "settings", action: "workflow-settings" },
 ];
 
 export function featureStatus(feature: FeatureDefinition, context: FeatureStatusContext): FeatureStatus {

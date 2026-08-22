@@ -11,7 +11,7 @@ export class HeroImagePickerModal extends SuggestModal<TFile> {
     private readonly onPick: (path: string) => void | Promise<void>,
   ) {
     super(plugin.app);
-    this.setPlaceholder("搜索 Vault 中的 Hero 图片…");
+    this.setPlaceholder("搜索知识库中的头图…");
     this.setInstructions([
       { command: "↵", purpose: "选择" },
       { command: "↑↓", purpose: "移动" },

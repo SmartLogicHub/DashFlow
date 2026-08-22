@@ -87,10 +87,10 @@ export class ActivityWidgetInteractionService {
     const summaryMain = document.createElement("div");
     summaryMain.className = "dashflow-heatmap-summary-main";
     summaryMain.append(
-      this.stat(String(activeCount), "active days"),
-      this.stat(String(taskDone), "tasks done"),
-      this.stat(String(habitDone), "habit checks"),
-      this.stat(String(streak), "day streak"),
+      this.stat(String(activeCount), "活跃天数"),
+      this.stat(String(taskDone), "任务完成"),
+      this.stat(String(habitDone), "习惯打卡"),
+      this.stat(String(streak), "连续天数"),
     );
     const range = document.createElement("div");
     range.className = "dashflow-heatmap-range";
@@ -127,7 +127,7 @@ export class ActivityWidgetInteractionService {
     const footer = document.createElement("div");
     footer.className = "dashflow-heatmap-footer";
     const started = document.createElement("span");
-    started.textContent = `tracking since ${store.startedAt}`;
+    started.textContent = `自 ${store.startedAt} 开始记录`;
     footer.appendChild(started);
     if (config.showLegend !== false) footer.appendChild(this.legend());
 
@@ -149,14 +149,14 @@ export class ActivityWidgetInteractionService {
   private legend(): HTMLElement {
     const legend = document.createElement("div");
     legend.className = "dashflow-heatmap-legend";
-    legend.append(document.createTextNode("LESS"));
+    legend.append(document.createTextNode("较少"));
     for (let level = 0; level <= 4; level += 1) {
       const cell = document.createElement("span");
       cell.className = "dashflow-heatmap-cell";
       cell.dataset.level = String(level);
       legend.appendChild(cell);
     }
-    legend.append(document.createTextNode("MORE"));
+    legend.append(document.createTextNode("较多"));
     return legend;
   }
 
@@ -165,10 +165,10 @@ export class ActivityWidgetInteractionService {
   }
 
   private metricLabel(metric: ActivityMetric): string {
-    if (metric === "tasks") return "TASKS";
-    if (metric === "notes") return "NOTES";
-    if (metric === "habits") return "HABITS";
-    return "ACTIVITY";
+    if (metric === "tasks") return "任务";
+    if (metric === "notes") return "笔记";
+    if (metric === "habits") return "习惯";
+    return "活跃度";
   }
 
   private ensureStyles(): void {

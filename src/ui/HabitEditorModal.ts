@@ -49,7 +49,7 @@ export class HabitEditorModal extends Modal {
     let frequencySelect: HTMLSelectElement | null = null;
     let projectSelect: HTMLSelectElement | null = null;
 
-    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: this.habit ? "LONG TERM · EDIT" : "LONG TERM · NEW" });
+    contentEl.createEl("div", { cls: "dashflow-modal-eyebrow", text: this.habit ? "长期任务 · 编辑" : "长期任务 · 新建" });
     contentEl.createEl("h2", { text: this.habit ? "编辑长期节奏" : "新建长期节奏" });
     contentEl.createEl("p", {
       cls: "setting-item-description dashflow-modal-lead",
@@ -136,7 +136,7 @@ export class HabitEditorModal extends Modal {
 
     new Setting(contentEl)
       .setName("目标天数")
-      .setDesc("设置后 Widget 会显示完成天数 / 目标天数和百分比。")
+        .setDesc("设置后卡片会显示完成天数 / 目标天数和百分比。")
       .addText((component) => {
         component.inputEl.type = "number";
         component.inputEl.min = "1";
@@ -154,7 +154,7 @@ export class HabitEditorModal extends Modal {
 
     new Setting(contentEl)
       .setName("关联项目")
-      .setDesc("仅长期任务使用。关联后可以看出这段日更属于哪个 Project，不复制项目数据。")
+        .setDesc("仅长期任务使用。关联后可以看出这段日更属于哪个项目，不复制项目数据。")
       .addDropdown((component) => {
         component.addOption("", "不关联项目");
         const options = new Set<string>();
