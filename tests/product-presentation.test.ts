@@ -63,7 +63,7 @@ test("narrow panes split navigation and primary actions into two visible rows", 
   assert.ok(presentation.includes(".dashflow-command-shell.is-mobile .dashflow-command-nav"));
   assert.ok(presentation.includes("overflow-x: auto"));
   assert.ok(presentation.includes(".dashflow-command-shell.is-mobile .dashflow-command-actions"));
-  assert.ok(presentation.includes("grid-template-columns: var(--df-control-touch) minmax(82px, 1fr) var(--df-control-touch)"));
+  assert.ok(presentation.includes("grid-template-columns: var(--df-control-touch) minmax(76px, 1fr) minmax(72px, .8fr) var(--df-control-touch)"));
 });
 
 test("narrow action row keeps Add Feature and Search addressable", () => {
@@ -74,6 +74,15 @@ test("narrow action row keeps Add Feature and Search addressable", () => {
   assert.ok(presentation.includes('[data-command-action="features"] .dashflow-command-label'));
   assert.ok(presentation.includes("display: inline"));
   assert.ok(productExperience.includes('button.setAttribute("aria-label", label)'));
+});
+
+test("layout editing stays visible in the persistent command bar", () => {
+  assert.ok(productExperience.includes('dataset.commandAction = "layout"'));
+  assert.ok(productExperience.includes("mountLayoutAction"));
+  assert.ok(productExperience.includes('setAttribute("aria-pressed", String(editing))'));
+  assert.equal(productExperience.includes("right.appendChild(editButton)"), false);
+  const presentation = readFileSync(presentationPath, "utf8");
+  assert.ok(presentation.includes('[data-command-action="layout"]'));
 });
 
 test("active narrow navigation is centered after section sync", () => {

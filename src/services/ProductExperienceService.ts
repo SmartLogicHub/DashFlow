@@ -103,11 +103,12 @@ export class ProductExperienceService {
     shell.classList.toggle("is-personal-home", personalHome);
     this.applyTheme(shell, personalHome);
 
-    const editButton = hero.querySelector<HTMLButtonElement>(".dashflow-edit-button");
+    const editButton = shell.querySelector<HTMLButtonElement>(".dashflow-edit-button");
     this.decorateHero(hero, personalHome);
     this.decoratePulse(pulse);
-    this.decorateTitle(title, editing, editButton);
+    this.decorateTitle(title);
     const commandBar = this.ensureCommandBar(shell, title);
+    this.mountLayoutAction(commandBar, editButton, editing);
     this.moveDashboardSwitcher(shell, commandBar);
     this.syncCommandBar(commandBar, editing ? null : this.activeSection);
     this.annotateWidgets(grid);
@@ -199,7 +200,7 @@ export class ProductExperienceService {
     });
   }
 
-  private decorateTitle(title: HTMLElement, editing: boolean, editButton: HTMLButtonElement | null): void {
+  private decorateTitle(title: HTMLElement): void {
     const dashboard = this.plugin.dashboardManager.active();
 
     const copy = document.createElement("div");
@@ -232,13 +233,6 @@ export class ProductExperienceService {
     dateWrap.className = "dashflow-command-date";
     dateWrap.append(date, weekday);
     right.appendChild(dateWrap);
-
-    if (editButton) {
-      editButton.textContent = editing ? "完成" : "布局";
-      editButton.title = editing ? "完成布局编辑" : "编辑工作台布局";
-      editButton.classList.add("dashflow-command-layout-button");
-      right.appendChild(editButton);
-    }
 
     title.replaceChildren(copy, right);
   }
@@ -294,6 +288,33 @@ export class ProductExperienceService {
     bar.append(nav, workspace, actions);
     title.insertAdjacentElement("afterend", bar);
     return bar;
+  }
+
+  private mountLayoutAction(
+    bar: HTMLElement,
+    editButton: HTMLButtonElement | null,
+    editing: boolean,
+  ): void {
+    if (!editButton) return;
+    const actions = bar.querySelector<HTMLElement>(".dashflow-command-actions");
+    if (!actions) return;
+
+    editButton.classList.add("dashflow-command-button", "dashflow-command-layout-button");
+    editButton.classList.toggle("is-active", editing);
+    editButton.dataset.commandAction = "layout";
+    editButton.title = editing ? "完成布局编辑" : "编辑工作台布局";
+    editButton.setAttribute("aria-label", editButton.title);
+    editButton.setAttribute("aria-pressed", String(editing));
+
+    const icon = document.createElement("span");
+    icon.className = "dashflow-command-icon";
+    setIcon(icon, editing ? "check" : "layout-dashboard");
+    const label = this.text("span", editing ? "完成" : "布局");
+    label.className = "dashflow-command-label";
+    editButton.replaceChildren(icon, label);
+
+    const features = actions.querySelector<HTMLElement>('[data-command-action="features"]');
+    actions.insertBefore(editButton, features);
   }
 
   private moveDashboardSwitcher(shell: HTMLElement, bar: HTMLElement): void {

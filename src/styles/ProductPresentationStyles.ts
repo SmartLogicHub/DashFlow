@@ -111,6 +111,16 @@ export const PRODUCT_PRESENTATION_STYLES = `
   display: none !important;
 }
 
+.dashflow-command-actions [data-command-action="layout"] {
+  display: inline-flex !important;
+}
+
+.dashflow-command-actions [data-command-action="layout"].is-active {
+  color: var(--df-cmd-text) !important;
+  border-color: var(--df-cmd-border) !important;
+  background: var(--df-cmd-soft) !important;
+}
+
 .dashflow-command-shell.is-layout-editing .dashflow-command-workspace {
   display: flex !important;
   align-items: center;
@@ -821,7 +831,7 @@ export const PRODUCT_PRESENTATION_STYLES = `
   margin-left: 0;
   padding-top: 6px;
   display: grid !important;
-  grid-template-columns: var(--df-control-touch) minmax(82px, 1fr) var(--df-control-touch);
+  grid-template-columns: var(--df-control-touch) minmax(76px, 1fr) minmax(72px, .8fr) var(--df-control-touch);
   gap: 6px;
   border-top: 1px solid var(--df-cmd-border);
 }
@@ -832,6 +842,7 @@ export const PRODUCT_PRESENTATION_STYLES = `
 
 .dashflow-command-shell.is-mobile .dashflow-command-actions [data-command-action="add"],
 .dashflow-command-shell.is-mobile .dashflow-command-actions [data-command-action="features"],
+.dashflow-command-shell.is-mobile .dashflow-command-actions [data-command-action="layout"],
 .dashflow-command-shell.is-mobile .dashflow-command-actions [data-command-action="search"] {
   display: inline-flex !important;
   min-width: 0;
@@ -845,7 +856,8 @@ export const PRODUCT_PRESENTATION_STYLES = `
   display: none !important;
 }
 
-.dashflow-command-shell.is-mobile .dashflow-command-actions [data-command-action="features"] .dashflow-command-label {
+.dashflow-command-shell.is-mobile .dashflow-command-actions [data-command-action="features"] .dashflow-command-label,
+.dashflow-command-shell.is-mobile .dashflow-command-actions [data-command-action="layout"] .dashflow-command-label {
   display: inline !important;
 }
 
