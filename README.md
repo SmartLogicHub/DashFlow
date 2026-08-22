@@ -24,6 +24,25 @@ npm test
 npm run build
 ```
 
+### 真实 Obsidian 冒烟测试
+
+冒烟测试只操作界面，不调用 Vault 写入、插件保存或 frontmatter 修改 API。先完全退出 Obsidian，再以调试端口打开要验证的 Vault，例如 Windows：
+
+```powershell
+& "<Obsidian.exe>" --remote-debugging-port=9222 --remote-allow-origins=* "obsidian://open?vault=<URL 编码的 Vault 名称>"
+npm run test:ui
+```
+
+如需使用其他端口，可设置 `DASHFLOW_OBSIDIAN_CDP_URL`。截图和 JSON 报告写入被 Git 忽略的 `output/playwright/release-smoke/`；命令结束时会恢复原视口、侧栏和 DashFlow 页面。
+
+### 发布流程
+
+1. 更新 `manifest.json`、`package.json`、锁文件、`versions.json` 和 `CHANGELOG.md` 中的版本。
+2. 执行 `npm ci`、`npm test`、`npm run build` 和 `npm run test:ui`。
+3. 由仓库所有者选择并提交 `LICENSE`；没有 `LICENSE` 时会阻止公开发布。
+4. 推送提交后创建版本标签；标签名必须与 `manifest.json` 中的版本完全一致，例如 `0.7.1`。
+5. 推送该标签，由 GitHub Actions 构建并创建 Release。普通 `main` 推送不会发布版本。
+
 ## 0.7.0 重点
 
 - 窄面板导航改为双行结构，「添加 / 功能 / 搜索」始终可见，当前页面会自动滚动到导航可视区域。
@@ -80,6 +99,6 @@ assets/heroes/midnight.webp
 
 ## 许可证说明
 
-本工作区未替用户做出仓库许可证或版权归属决定。发布前请由仓库所有者明确选择并补充许可证；本文不复制历史仓库中的版权声明。
+本工作区未替用户做出仓库许可证或版权归属决定。发布前请由仓库所有者明确选择并补充许可证；本文不复制历史仓库中的版权声明。Release 工作流在 `LICENSE` 缺失时会停止，避免无意中公开发布权利边界不明确的仓库。
 
 历史 v0.5.5 文档归档在 [`docs/README-v0.5.5.md`](docs/README-v0.5.5.md)。

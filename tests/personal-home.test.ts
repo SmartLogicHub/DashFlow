@@ -52,6 +52,10 @@ test("Personal Home uses real Task, Project, Habit, Activity, WeRead and recent 
   assert.ok(home.includes("getMarkdownFiles"));
 });
 
+test("Personal Home names its icon-only task action for assistive technology", () => {
+  assert.ok(home.includes('add.setAttribute("aria-label", "添加任务")'));
+});
+
 test("Personal Home promotes Daily Progress without mixing it into Habit metrics", () => {
   assert.ok(home.includes('habit.kind !== "daily-progress"'));
   assert.ok(home.includes('habit.kind === "daily-progress"'));

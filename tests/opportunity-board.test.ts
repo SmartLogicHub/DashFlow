@@ -28,3 +28,11 @@ test("opportunity board keeps data in Markdown frontmatter, not a second store",
   assert.equal(service.includes("localStorage"), false);
   assert.equal(service.includes("indexedDB"), false);
 });
+
+test("opportunity board offers an accessible non-drag stage control", () => {
+  assert.ok(interaction.includes('move.className = "dashflow-opportunity-card-move"'));
+  assert.ok(interaction.includes('move.setAttribute("aria-label", `移动机会「${item.title}」`)'));
+  assert.ok(interaction.includes("if (next === item.status) return"));
+  assert.ok(interaction.includes("this.service.move(file, item.id, next)"));
+  assert.ok(interaction.includes('move.addEventListener("pointerdown", stopCardEvent)'));
+});

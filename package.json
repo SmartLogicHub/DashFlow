@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "node esbuild.config.mjs",
     "test": "node tests/run-layout-tests.mjs",
+    "test:ui": "node scripts/obsidian-ui-smoke.mjs",
     "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production"
   },
   "keywords": [
@@ -44,6 +45,7 @@
     "@types/node": "^22.15.17",
     "esbuild": "0.25.5",
     "obsidian": "latest",
+    "playwright-core": "1.62.1",
     "typescript": "^5.8.3"
   }
 }

@@ -53,3 +53,22 @@ test("duplicate releases fail loudly instead of silently succeeding", () => {
   assert.match(release, /if gh release view "\$VERSION"[\s\S]*?exit 1/);
   assert.equal(release.includes("already exists; skipping"), false);
 });
+
+test("release publishing requires a matching version tag and an owner-selected license", () => {
+  assert.match(release, /push:[\s\S]*?tags:/);
+  assert.equal(release.includes("branches: [main]"), false);
+  assert.ok(release.includes("manifest.json"));
+  assert.match(release, /if \[ "\$GITHUB_REF_NAME" != "\$VERSION" \][\s\S]*?exit 1/);
+  assert.match(release, /test -f LICENSE[\s\S]*?exit 1/);
+});
+
+test("0.7 architecture and release-readiness instructions stay synchronized", () => {
+  assert.match(architecture, /^# DashFlow 0\.7 Architecture/m);
+  for (const phrase of [
+    "npm run test:ui",
+    "--remote-debugging-port=9222",
+    "标签名必须与 `manifest.json`",
+    "没有 `LICENSE` 时会阻止公开发布",
+  ]) assert.ok(readme.includes(phrase), phrase);
+  assert.match(changelog, /## Unreleased[\s\S]*?触屏[\s\S]*?冒烟测试/);
+});

@@ -183,6 +183,7 @@ export class PersonalHomeService {
     const add = document.createElement("button");
     add.type = "button";
     add.title = "添加任务";
+    add.setAttribute("aria-label", "添加任务");
     setIcon(add, "plus");
     add.addEventListener("click", () => new TaskEditorModal(this.plugin).open());
     actions.appendChild(add);
