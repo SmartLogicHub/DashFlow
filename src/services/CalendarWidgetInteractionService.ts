@@ -12,34 +12,34 @@ const CALENDAR_STYLES = `
 .dashflow-calendar-main,.dashflow-calendar-agenda{min-width:0;display:flex;flex-direction:column;gap:8px}
 .dashflow-calendar-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .dashflow-calendar-nav{display:flex;align-items:center;gap:5px}
-.dashflow-calendar-nav button,.dashflow-calendar-today,.dashflow-calendar-add{font-size:10px;border-radius:7px;padding:4px 8px}
-.dashflow-calendar-month{font-size:12px;font-weight:650;letter-spacing:.02em;min-width:86px;text-align:center}
+.dashflow-calendar-nav button,.dashflow-calendar-today,.dashflow-calendar-add{min-height:32px;font-size:12px;border-radius:7px;padding:5px 9px}
+.dashflow-calendar-month{font-size:14px;font-weight:650;letter-spacing:.01em;min-width:92px;text-align:center}
 .dashflow-calendar-weekdays,.dashflow-calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
-.dashflow-calendar-weekday{text-align:center;font-size:8px;color:var(--text-faint);padding:1px 0;text-transform:uppercase}
-.dashflow-calendar-day{appearance:none;min-height:42px;border:1px solid var(--background-modifier-border);border-radius:8px;background:var(--background-primary);padding:5px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;color:var(--text-normal);cursor:pointer;overflow:hidden}
+.dashflow-calendar-weekday{text-align:center;font-size:11px;color:var(--text-muted);padding:2px 0}
+.dashflow-calendar-day{appearance:none;width:100%;min-height:var(--df-control-touch);box-sizing:border-box;border:1px solid var(--background-modifier-border);border-radius:8px;background:var(--background-primary);padding:5px;display:flex;flex-direction:column;align-items:flex-start;justify-content:space-between;gap:4px;color:var(--text-normal);cursor:pointer;overflow:hidden}
 .dashflow-calendar-day:hover{border-color:var(--text-muted)}
 .dashflow-calendar-day.is-outside{opacity:.38;background:var(--background-secondary)}
 .dashflow-calendar-day.is-selected{border-color:var(--interactive-accent);box-shadow:inset 0 0 0 1px var(--interactive-accent)}
 .dashflow-calendar-day.is-today .dashflow-calendar-day-number{background:var(--interactive-accent);color:var(--text-on-accent);border-radius:999px;min-width:18px;height:18px;display:grid;place-items:center;margin:-2px}
-.dashflow-calendar-day-number{font-size:10px;line-height:18px}
+.dashflow-calendar-day-number{font-size:12px;line-height:18px;font-variant-numeric:tabular-nums}
 .dashflow-calendar-dots{display:flex;gap:3px;align-items:center;min-height:5px;max-width:100%}
 .dashflow-calendar-dot{width:5px;height:5px;border-radius:999px;background:var(--text-faint);flex:none}
 .dashflow-calendar-dot.is-task-due{background:var(--interactive-accent)}
 .dashflow-calendar-dot.is-task-scheduled{background:var(--text-accent)}
 .dashflow-calendar-dot.is-project-deadline{background:var(--text-warning)}
 .dashflow-calendar-dot.is-habit{background:var(--text-success)}
-.dashflow-calendar-more{font-size:7px;color:var(--text-faint);white-space:nowrap}
+.dashflow-calendar-more{font-size:11px;color:var(--text-muted);white-space:nowrap}
 .dashflow-calendar-agenda{border-left:1px solid var(--background-modifier-border);padding-left:12px;min-height:0}
 .dashflow-calendar-agenda-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.dashflow-calendar-agenda-date{display:flex;flex-direction:column;gap:1px}.dashflow-calendar-agenda-date strong{font-size:12px}.dashflow-calendar-agenda-date span{font-size:8px;color:var(--text-faint);text-transform:uppercase;letter-spacing:.05em}
+.dashflow-calendar-agenda-date{display:flex;flex-direction:column;gap:2px}.dashflow-calendar-agenda-date strong{font-size:14px}.dashflow-calendar-agenda-date span{font-size:11px;color:var(--text-muted);font-variant-numeric:tabular-nums}
 .dashflow-calendar-agenda-list{display:flex;flex-direction:column;gap:6px;overflow:auto;min-height:0;padding-right:2px}
 .dashflow-calendar-event{display:flex;align-items:center;gap:7px;border:1px solid var(--background-modifier-border);border-radius:8px;padding:7px;background:color-mix(in srgb,var(--background-primary) 94%,var(--background-secondary));min-width:0}
-.dashflow-calendar-event-main{appearance:none;border:0;background:transparent;padding:0;display:flex;align-items:center;gap:7px;flex:1;min-width:0;text-align:left;color:var(--text-normal);cursor:pointer}
+.dashflow-calendar-event-main{appearance:none;min-height:32px;border:0;background:transparent;padding:0;display:flex;align-items:center;gap:7px;flex:1;min-width:0;text-align:left;color:var(--text-normal);cursor:pointer}
 .dashflow-calendar-event-main:hover .dashflow-calendar-event-title{color:var(--interactive-accent)}
-.dashflow-calendar-event-kind{font-size:7px;color:var(--text-faint);border:1px solid var(--background-modifier-border);border-radius:5px;padding:2px 4px;white-space:nowrap;text-transform:uppercase}
-.dashflow-calendar-event-title{font-size:10px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dashflow-calendar-event.is-completed .dashflow-calendar-event-title{text-decoration:line-through;color:var(--text-muted)}
-.dashflow-calendar-event-check{font-size:9px;padding:3px 6px;border-radius:6px;white-space:nowrap}
-@media(max-width:900px){.dashflow-calendar{grid-template-columns:1fr}.dashflow-calendar-agenda{border-left:0;border-top:1px solid var(--background-modifier-border);padding-left:0;padding-top:10px}.dashflow-calendar-day{min-height:38px;padding:4px}}
+.dashflow-calendar-event-kind{font-size:11px;color:var(--text-muted);border:1px solid var(--background-modifier-border);border-radius:5px;padding:2px 5px;white-space:nowrap}
+.dashflow-calendar-event-title{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dashflow-calendar-event.is-completed .dashflow-calendar-event-title{text-decoration:line-through;color:var(--text-muted)}
+.dashflow-calendar-event-check{min-height:32px;font-size:11px;padding:4px 7px;border-radius:6px;white-space:nowrap}
+@media(max-width:900px){.dashflow-calendar{grid-template-columns:1fr}.dashflow-calendar-agenda{border-left:0;border-top:1px solid var(--background-modifier-border);padding-left:0;padding-top:10px}.dashflow-calendar-day{padding:4px}}
 `;
 
 export class CalendarWidgetInteractionService {
@@ -196,7 +196,7 @@ export class CalendarWidgetInteractionService {
     const strong = document.createElement("strong");
     strong.textContent = new Intl.DateTimeFormat("zh-CN", { month: "long", day: "numeric", weekday: "short" }).format(new Date(`${selected}T12:00:00`));
     const count = document.createElement("span");
-    count.textContent = `${events.length} ITEMS`;
+    count.textContent = `${events.length} 项`;
     date.append(strong, count);
     const add = this.button("＋任务", "在这一天新建任务");
     add.classList.add("dashflow-calendar-add");
@@ -290,10 +290,10 @@ export class CalendarWidgetInteractionService {
   }
 
   private kindLabel(kind: CalendarEvent["kind"]): string {
-    if (kind === "task-due") return "DUE";
-    if (kind === "task-scheduled") return "PLAN";
-    if (kind === "project-deadline") return "PROJECT";
-    return "HABIT";
+    if (kind === "task-due") return "截止";
+    if (kind === "task-scheduled") return "计划";
+    if (kind === "project-deadline") return "项目";
+    return "习惯";
   }
 
   private button(text: string, title: string): HTMLButtonElement {

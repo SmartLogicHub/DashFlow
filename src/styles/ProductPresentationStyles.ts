@@ -6,10 +6,31 @@ export const PRODUCT_PRESENTATION_STYLES = `
   --df-type-title: 14px;
   --df-control-compact: 32px;
   --df-control-touch: 36px;
+  font-variant-numeric: tabular-nums;
 }
 
 .dashflow-command-shell {
   container: dashflow-shell / inline-size;
+}
+
+.dashflow-command-shell .dashflow-command-button {
+  min-height: var(--df-control-compact);
+  height: var(--df-control-compact);
+  font-size: var(--df-type-secondary);
+}
+
+.dashflow-command-shell .dashflow-widget-header strong {
+  font-size: var(--df-type-title) !important;
+}
+
+.dashflow-command-shell .dashflow-widget-body {
+  font-size: var(--df-type-body);
+  line-height: 1.5;
+}
+
+.dashflow-command-shell .dashflow-kicker,
+.dashflow-command-shell .dashflow-empty {
+  font-size: var(--df-type-secondary) !important;
 }
 
 .dashflow-command-shell.is-mobile .dashflow-command-bar {

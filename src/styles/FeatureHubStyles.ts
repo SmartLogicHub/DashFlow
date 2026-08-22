@@ -27,8 +27,8 @@ export const FEATURE_HUB_STYLES = `
 .dashflow-feature-hub-close {
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border-radius: 50%;
   color: var(--text-muted);
@@ -81,7 +81,7 @@ export const FEATURE_HUB_STYLES = `
   background: var(--background-secondary);
 }
 .dashflow-feature-hub-filters button {
-  min-height: 28px;
+  min-height: 32px;
   padding: 4px 10px;
   border: 0;
   border-radius: 6px;
@@ -188,7 +188,7 @@ export const FEATURE_HUB_STYLES = `
   border-radius: 999px;
   background: var(--background-secondary);
   color: var(--text-muted);
-  font-size: 10px;
+  font-size: 11px;
   font-weight: 650;
   white-space: nowrap;
 }

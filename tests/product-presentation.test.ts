@@ -5,6 +5,8 @@ import { existsSync, readFileSync } from "node:fs";
 const presentationPath = "src/styles/ProductPresentationStyles.ts";
 const productDesign = readFileSync("src/services/ProductDesignService.ts", "utf8");
 const productExperience = readFileSync("src/services/ProductExperienceService.ts", "utf8");
+const weeklyReview = readFileSync("src/services/WeeklyReviewWidgetInteractionService.ts", "utf8");
+const calendar = readFileSync("src/services/CalendarWidgetInteractionService.ts", "utf8");
 
 test("the product has one canonical presentation entry point", () => {
   assert.ok(existsSync(presentationPath), "ProductPresentationStyles.ts should exist");
@@ -60,4 +62,28 @@ test("active narrow navigation is centered after section sync", () => {
   assert.ok(productExperience.includes("centerActiveCommand(button)"));
   assert.ok(productExperience.includes("private centerActiveCommand"));
   assert.ok(productExperience.includes('scrollIntoView({ inline: "center", block: "nearest" })'));
+});
+
+test("canonical presentation applies readable widget typography and numeric alignment", () => {
+  const presentation = readFileSync(presentationPath, "utf8");
+  assert.ok(presentation.includes("font-variant-numeric: tabular-nums"));
+  assert.ok(presentation.includes("font-size: var(--df-type-title) !important"));
+  assert.ok(presentation.includes("font-size: var(--df-type-body)"));
+  assert.ok(presentation.includes("min-height: var(--df-control-compact)"));
+});
+
+test("weekly review no longer renders business labels below 11px", () => {
+  assert.equal(/font-size:\s*(?:[7-9](?:\.\d+)?|10(?:\.0+)?)px/.test(weeklyReview), false);
+  for (const label of ["已完成任务", "习惯完成率", "较上周活跃度", "活跃度"]) {
+    assert.ok(weeklyReview.includes(label), label);
+  }
+  assert.ok(weeklyReview.includes("font-variant-numeric:tabular-nums"));
+});
+
+test("calendar uses readable labels and cell-filling touch targets", () => {
+  assert.equal(/font-size:\s*(?:[7-9](?:\.\d+)?|10(?:\.0+)?)px/.test(calendar), false);
+  assert.ok(calendar.includes(".dashflow-calendar-day{appearance:none;width:100%"));
+  assert.ok(calendar.includes("min-height:var(--df-control-touch)"));
+  assert.ok(calendar.includes('return "项目"'));
+  assert.ok(calendar.includes('return "习惯"'));
 });
