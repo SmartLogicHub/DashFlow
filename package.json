@@ -1,7 +1,7 @@
 {
   "name": "dashflow",
-  "version": "0.6.1",
-  "description": "A Personal OS for Obsidian with optimized runtime rendering, revision-aware queries, responsive dashboard interactions, DeepSeek-inspired UX polish and configurable workflows.",
+  "version": "0.7.0",
+  "description": "A Personal OS for Obsidian with optimized runtime rendering, revision-aware queries, a unified responsive interface and configurable workflows.",
   "main": "main.js",
   "type": "module",
   "scripts": {

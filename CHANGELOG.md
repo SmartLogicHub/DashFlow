@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.7.0 — 2026-08-22
+
+- Rebuilds product-wide presentation ownership around one canonical responsive layer while preserving schema-8 data and Markdown truth.
+- Keeps Add, Feature Hub, and Search visible in narrow Obsidian panes and centers the active navigation item.
+- Adds Feature Hub search, status filters, and a clear empty-result recovery path.
+- Establishes readable typography and touch targets across Work, Weekly Review, Calendar, Habits, Settings, and feature discovery.
+- Replaces nested Work/Review scrolling with routed summaries and natural-height focused pages.
+- Retires four legacy global polish modules and reduces measured `!important` usage from 911 to 261.
+- Makes CI source archive naming derive from `manifest.json` and fails duplicate GitHub releases explicitly.
+
 ## 0.6.1 — 2026-08-20
 
 - Validates schema-8 settings before use and preserves malformed data through the non-destructive recovery flow.
