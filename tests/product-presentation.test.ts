@@ -203,3 +203,17 @@ test("theme cards allow two-line titles and unclipped descriptions", () => {
   assert.ok(settingsStyles.includes("overflow: visible"));
   assert.equal(settingsStyles.includes("-webkit-line-clamp"), false);
 });
+
+test("Quick Add keeps its target and actions aligned at desktop and narrow widths", () => {
+  const presentation = readFileSync(presentationPath, "utf8");
+  const target = presentation.match(/\.dashflow-quick-add-target\s*\{([^}]*)\}/)?.[1] ?? "";
+  const action = presentation.match(/\.dashflow-quick-add-action\s*\{([^}]*)\}/)?.[1] ?? "";
+  assert.match(target, /display:\s*flex/);
+  assert.match(target, /justify-content:\s*space-between/);
+  assert.match(target, /align-items:\s*center/);
+  assert.match(action, /display:\s*grid/);
+  assert.match(action, /grid-template-columns:\s*22px minmax\(0, 1fr\)/);
+  assert.ok(presentation.includes(".dashflow-quick-add-submit"));
+  assert.ok(presentation.includes(".dashflow-quick-add-section-label"));
+  assert.ok(presentation.includes(".dashflow-quick-add-actions { grid-template-columns: 1fr; }"));
+});

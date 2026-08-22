@@ -40,6 +40,18 @@ test("Daily Note capture uses safe process writes and preserves raw Markdown tex
   assert.ok(quickAdd.includes("#标签 与 [[双链]] 会原样保留"));
 });
 
+test("Quick Add exposes one shared keyboard and pointer capture action", () => {
+  assert.ok(quickAdd.includes("dashflow-quick-add-submit"));
+  assert.ok(quickAdd.includes("submit.disabled = true"));
+  assert.ok(quickAdd.includes('input.addEventListener("input"'));
+  assert.ok(quickAdd.includes('submit.addEventListener("click", () => void capture())'));
+  assert.ok(quickAdd.includes('event.key === "Enter"'));
+  assert.ok(quickAdd.includes("void capture()"));
+  assert.ok(quickAdd.includes('text: "更改目标"'));
+  assert.ok(quickAdd.includes("dashflow-quick-add-section-label"));
+  assert.ok(quickAdd.includes("更多创建方式"));
+});
+
 test("Morning Briefing and capture share the same Daily Note service", () => {
   const morning = readFileSync("src/services/MorningBriefingService.ts", "utf8");
   assert.ok(main.includes("this.dailyNotes = new DailyNoteService"));

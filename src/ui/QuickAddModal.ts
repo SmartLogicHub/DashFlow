@@ -16,11 +16,11 @@ export class QuickAddModal extends Modal {
     contentEl.addClass("dashflow-quick-add-modal", "dashflow-editor-modal");
 
     const eyebrow = contentEl.createDiv("dashflow-modal-eyebrow dashflow-quick-add-eyebrow");
-    eyebrow.setText("快速捕捉");
+    eyebrow.setText("捕捉");
     contentEl.createEl("h2", { text: "快速记录" });
     contentEl.createEl("p", {
       cls: "dashflow-modal-lead dashflow-quick-add-lead",
-      text: "先记下来，再整理。输入一句话按回车键会按捕捉设置保存；写入每日笔记时 #标签 与 [[双链]] 会原样保留。",
+      text: "输入一句话直接保存，按回车也可以；写入每日笔记时 #标签 与 [[双链]] 会原样保留。",
     });
 
     const composer = contentEl.createDiv("dashflow-quick-add-composer");
@@ -30,14 +30,25 @@ export class QuickAddModal extends Modal {
       type: "text",
       placeholder: "例如：研究 #AI [[DashFlow 0.5]]…",
     });
-    const hint = composer.createSpan("dashflow-quick-add-hint");
-    hint.setText("回车");
+    const submit = composer.createEl("button", {
+      cls: "dashflow-quick-add-submit mod-cta",
+      text: "保存",
+    });
+    submit.type = "button";
+    submit.disabled = true;
 
     const target = contentEl.createDiv("dashflow-quick-add-target");
-    const targetLabel = target.createSpan();
+    const targetLabel = target.createSpan("dashflow-quick-add-target-copy");
     targetLabel.textContent = this.captureTargetLabel();
-    const configure = target.createEl("button", { text: "配置" });
+    const configure = target.createEl("button", {
+      cls: "dashflow-quick-add-target-action",
+      text: "更改目标",
+    });
     configure.type = "button";
+    const configureIcon = document.createElement("span");
+    configureIcon.className = "dashflow-quick-add-target-icon";
+    setIcon(configureIcon, "settings-2");
+    configure.prepend(configureIcon);
     configure.addEventListener("click", () => {
       this.close();
       new WorkflowSettingsModal(this.plugin).open();
@@ -49,6 +60,10 @@ export class QuickAddModal extends Modal {
       const ok = await this.plugin.captureService.capture(text);
       if (ok) this.close();
     };
+    input.addEventListener("input", () => {
+      submit.disabled = !input.value.trim();
+    });
+    submit.addEventListener("click", () => void capture());
     input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") {
         event.preventDefault();
@@ -56,6 +71,7 @@ export class QuickAddModal extends Modal {
       }
     });
 
+    contentEl.createDiv({ cls: "dashflow-quick-add-section-label", text: "更多创建方式" });
     const actions = contentEl.createDiv("dashflow-quick-add-actions");
     actions.append(
       this.actionButton("circle-check-big", "详细任务", "日期、优先级与项目", () => {
