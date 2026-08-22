@@ -3,7 +3,7 @@ export const FEATURE_HUB_STYLES = `
   width: min(920px, calc(100vw - 32px));
   max-width: 920px;
 }
-.modal:has(.dashflow-feature-hub) > .modal-close-button { display: none; }
+.modal:has(.dashflow-feature-hub) > .modal-header-button { display: none; }
 
 .dashflow-feature-hub {
   --df-hub-border: var(--background-modifier-border);

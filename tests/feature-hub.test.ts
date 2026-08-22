@@ -67,7 +67,7 @@ test("feature hub styles are consolidated, responsive, and keyboard visible", ()
 test("feature discovery keeps its text label and only one close control", () => {
   assert.ok(styles.includes(".dashflow-feature-action .dashflow-command-label"));
   assert.ok(styles.includes("display: inline!important"));
-  assert.ok(styles.includes(".modal-close-button"));
+  assert.ok(styles.includes(".modal-header-button"));
 });
 
 test("configured state remains meaningful while integrations are disabled", () => {
